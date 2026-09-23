@@ -1,0 +1,194 @@
+.model-details{
+	position: relative;
+	display: inline-block;
+}
+.model-form{
+    padding: 20px;
+    background: transparent;
+	position: relative;
+	text-align: left;
+	display: inline-block;
+	width: 100%;
+}
+.dark .model-form{
+}
+.model-detail{
+    margin-bottom: 10px;
+    padding: 8px 0;
+    border-radius: 5px;
+    width: calc(100% - 10px);
+	margin: 10px 0;
+}
+.model-detail label{
+	padding: 2px 5px; 
+}
+.model-detail label,
+.model-detail input,
+.model-detail textarea{
+	width: 100%;
+	display: inline-block;
+}
+.model-detail img{
+	max-width: 100px;
+}
+.model-form .svg-contain{
+	width: 100px;
+	display: inline-block;
+	height: 100px;
+}
+
+.model-detail label{
+    display: block;
+}
+.model-detail.checkbox label{
+	display: inline-block;
+	width: initial;
+} 
+.model-detail input{
+    width: 100%;
+}
+
+.required.model-detail label{
+    width: calc(100% - 35px);
+    display: inline-block;
+}
+.model-detail textarea{
+    width: 100%
+}
+.model-detail select{
+    display: inline-block;
+}
+
+.req-star{
+    /* position: absolute; */
+    top: 0;
+    right: 10px;
+    color: var(--alert-red);
+    font-size: 2rem;
+    text-shadow: 0px 0px 5px black;
+    display: inline-block;
+    width: 20px;
+    vertical-align: middle;
+}
+.dark .req-star{
+    color: var(--alert-red-dark);
+}
+
+.save-wrap{
+    display: inline-block;
+}
+
+.model-summary{
+    padding: 2px 4px;
+    /* border: 1px solid #717171; */
+    /* border-radius: 5px; */
+    /* background: white; */
+    /* margin: 4px 0; */
+	display: inline-block;
+	width: 100%;
+	position: relative;
+}
+.dark .model-summary{
+    /* border: 2px solid #161616; */
+    /* background: rgba(255, 255,255, .1); */
+        /* var(--dark-content); */
+	
+}
+
+a.model-summary{
+	text-decoration: none;
+}
+a.model-summary:hover{
+	background: rgba(0, 0, 0, .1);
+}
+.model-form-company{
+    background: var(--company-color);
+}
+.model-detail-pub{
+    margin: 10px 0;
+}
+
+.public-label{
+    font-weight: bold;
+}
+
+.upload-actions{
+    /* border: 2px solid red; */
+}
+.upload-wrap{
+    display: inline-block;
+    width: 200px;
+}
+
+.extant-upload{
+    margin: 5px 0;
+}
+
+.model-listing{
+	margin: 2px 0;
+	padding: 5px;
+	border-bottom: 1px solid grey;
+}
+.model-listing:hover{
+	background: rgba(0, 0, 0, .2);
+}
+a.model-listing{
+	display: inline-block;
+	width: 100%;
+	text-decoration: none;
+}
+.listing-name{
+	margin-bottom: 5px;
+}
+.listing-created{
+	font-size: .8rem;
+}
+
+
+.button.rm{
+	position: absolute;
+	z-index: 9;
+	top: 0px;
+	right: 0px;
+    margin-top: 0px;
+	border: 1px solid maroon;
+}
+
+.icon-select .modal-content .icon-wrap{
+	display: inline-block;
+	border: 1px solid;
+	overflow: hidden;
+	margin: 5px;
+}
+
+.icon-wrap .icon-svg{
+	height: 120px;
+	width: 120px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+.icon-category{
+	padding-left: 10px;
+	font-size: .9rem;
+	color: var(--env-local)
+}
+
+.model-grid{
+	display: inline-block;
+	padding: 20px;
+	border: 1px solid;
+	border-radius: 4px;
+}
+
+.edit-form-liner .button.help{
+	position: absolute;
+	top: 0px;
+	right: 0px;
+}
+
+@media screen and (max-width: 800px){
+	.modal-content .model-form{
+		padding: 10px 0;
+	}
+}

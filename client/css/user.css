@@ -1,0 +1,81 @@
+/*asdf*/
+
+#content{
+    /* max-width: 1000px; */
+    /* border: 1px solid; */
+    border-radius: 10px;
+    margin-bottom: 100px;
+}
+
+#content h3{
+    text-align: left;
+}
+
+.user-wrap{
+    text-align: left;
+}
+
+#user-posts{
+    text-align: left;
+    margin-top: 40px;
+}
+
+.user-post{
+    margin: 10px 0;
+    display: inline-block;
+    width: 100%;
+}
+
+.user-post:hover{
+/*     background: lightgrey; */
+}
+
+.user-post .text-title{
+    font-weight: bold;
+}
+
+.text-created{
+    font-size: .8rem;
+}
+.text-created a{
+    text-decoration: none;
+}
+
+.model-listing-Review{
+    display: inline-block;
+    width: 100%;
+    margin: 10px;
+    text-decoration: none;
+    border: 1px solid;
+    padding: 5px;
+    border-radius: 5px;
+}
+.model-listing-Review .listing-name{
+    font-weight: initial;
+}
+.model-listing-Review .review-text{
+    font-weight: bold;
+}
+
+#review-area{
+    margin-top: 60px;
+    /* border: 1px solid; */
+    /* display: inline-block; */
+    padding-right: calc( 100% - 400px )
+}
+
+.user-wrap .action-area{
+    position: absolute;
+    bottom: 0px;
+    left: calc(100% + 10px);
+    width: 140px;
+}
+
+.user-shelves{
+    font-size: .8rem;
+}
+
+.user-wrap .button.help{
+    position: absolute;
+    right: 3;
+}

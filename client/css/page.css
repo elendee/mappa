@@ -1,0 +1,49 @@
+
+
+#content{
+    /* padding: 10px; */
+	/* padding-top: 80px; */
+}
+
+#content .row{
+    padding: 10px;
+    margin: 10px 0;
+}
+
+/* buttons */
+#content>div{
+    margin-bottom: 20px;
+}
+
+#content .row.info-row{
+	box-shadow: 3px 3px 0px #c7c7c7;
+	background: white;
+}
+#content .row.info-row:hover{
+/*     border: 1px solid grey; */
+}
+
+#content .button:hover .remove-button{
+	display: initial;
+}
+
+.button.remove-button{
+	position: absolute;
+	bottom: 100%;
+	right: 0;
+	background: rgba(255, 100, 100, .9);
+	display: none;
+}
+
+.button.remove-button:hover{
+	background: rgba(255, 50, 50, 1);
+}
+
+#mouse-tooltip{
+	position:fixed;
+	background: white;
+	padding: 10px;
+	box-shadow: 0px 0px 5px rgba(0,0,0,.5);
+/* 	border: 20px solid red; */
+}
+

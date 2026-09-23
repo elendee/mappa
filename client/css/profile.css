@@ -1,0 +1,225 @@
+#content{
+	text-align: center;
+}
+
+#content .page-title-wrap{
+	text-align: left;
+}
+
+#user-sections{
+	/* width: 800px; */
+	max-width: 100% !important;
+	text-align: left;
+	padding-left: 100px;
+}
+#user-sections .row{
+	margin-bottom: 50px;
+}
+
+#media-library{
+	display: none;
+}
+
+.env-local #media-library{
+	/* display: inline-block; */
+	color: var(--env-local);
+	/* border: 1px solid var(--env-local); */
+}
+
+input[type=color]{
+	padding: 0px !important;
+	display: inline-block;
+    vertical-align: middle;
+    border: 0px;
+}
+
+form{
+	margin: 10px 0;
+/* 	background: rgba(0, 0, 0, .1); */
+	padding: 5px;
+}
+
+form label{
+	font-weight: bold;
+	display: block;
+}
+
+form input[type=text],
+form input[type=email],
+form input[type=password]{
+	color: #4b4949;
+}
+.dark form input[type=text],
+.dark form input[type=email],
+.dark form input[type=password]{
+	/* color: #e1e1e1; */
+}
+form input[type=submit]{
+	float: right;
+	/* transform: translate(0, -15px); */
+}
+form input::placeholder{
+	color: #7e7d7d;
+}
+
+form input:disabled{
+	border: 0px;
+}
+
+
+#hosting-wrap h3{
+	text-align: center;
+}
+
+#hosting-wrap button[type=submit]{
+/* 	padding: 10px; */
+	background: #535ccd;
+	border: 0px;
+	letter-spacing: 2px;
+	text-transform: uppercase;
+	position: absolute;
+	right: 5px;;
+	bottom: 0px;
+}
+.book-item{
+	margin: 30px 0;
+	background: #def7ff;
+	padding: 10px;
+	box-shadow: 0px 0px 20px rgba(0, 0, 0, .3)
+}
+#logo-wrap{
+	text-align: center;
+}
+#active-wrap .book-item button{
+	opacity: 0;
+	pointer-events: none;
+}
+
+
+#user-wrap .button{
+	opacity: 0;
+/* 	background: lightgrey; */
+}
+#user-wrap form:hover .button{
+	opacity: 1;
+}
+#user-wrap form:hover{
+	background: #e4e3e3;
+/* 	background: #dcdcdc; */
+}
+.dark #user-wrap form:hover{
+	background: #323232;;
+}
+#user-wrap label{
+	color: #7d7b7b;
+}
+#user-wrap input[type=text],
+#user-wrap input[type=password]{
+	font-size: 1.2rem;
+	padding: 3px;
+}
+
+#stripe-email{
+	text-align: center;
+	color: rgb(50, 10, 50);
+	margin-top: 10px;
+}
+
+#billing-expl{
+	text-align: center
+}
+
+#user-actions{
+	margin-bottom: 30px;
+	width: 100%;
+}
+
+#user-actions .button{
+	font-size: 1rem;
+}
+
+#notifications-wrap{
+	font-size: .9rem;
+}
+#notifications{
+	max-width: 500px;
+	display: inline-block;
+	margin: 30px 0;
+}
+#notifications input{
+	margin-left: 0;
+}
+#notifications *{
+	vertical-align: middle;
+}
+.notify-wrap{
+	margin-bottom: 8px;
+}
+
+
+.import-icon{
+	max-width: 30px;
+	position: absolute;
+	bottom: 15;
+	right: 5px;
+	display: none;
+}
+.is-imported .import-icon{
+	display: inline-block;
+}
+
+.is-imported .button.do-import{
+    opacity: .2;
+	pointer-events: none;
+}
+
+
+.user-section h3{
+	color: maroon
+}
+.dark .user-section h3{
+	color: #b3ebff
+}
+
+#allow-push label{
+	font-weight: bold;
+}
+
+@media screen and (max-width: 800px){
+	form {
+		margin: 30px 0;
+	}
+	form input[type=submit]{
+		position: absolute;
+		right: 0;
+	}
+	.goodreads .modal-content,
+	.find-and-import .modal-content{
+		overflow-y: auto !important;
+		max-height: 100vh;
+		margin-top: 0;
+	}
+	.find-and-import .modal-close,
+	.goodreads .modal-close{
+		position: sticky;
+		transform: translate(80vw, -30px) 
+	}
+	.find-and-import .modal-content{
+		margin-left: 0px !important;
+		max-width: 94vw;
+		/* width: 100%; */
+		left: 0;
+	}
+	.find-and-import .right-panel,
+	.find-and-import .left-panel,
+	.goodreads .left-panel,
+	.goodreads .right-panel{
+		max-width: 100%;
+	}
+	.goodreads .text-model-summary{
+		width: 45%;
+	}
+	#user-sections{
+		padding-left: 0px;
+	}
+}

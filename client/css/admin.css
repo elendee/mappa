@@ -1,0 +1,222 @@
+/*asdf*/
+#section-user .button{
+    background: #2a2aa2;
+}
+#section-user .button:hover{
+    background: #14145e;
+}
+#section-maint .button{
+    background: #336133;
+}
+#section-maint .button:hover{
+    background: #093409;
+}
+#section-mod .button{
+    background: #6a4500;
+}
+#section-boards .button{
+    background: #041742;
+}
+
+.admin-section{
+    margin: 5px 0;
+    display: inline-block;
+}
+#admin-views,
+#admin-content{
+    display: inline-block;
+    vertical-align: top;
+}
+#admin-views{
+    width: 150px;
+    border-right: 1px solid rgba(0, 0, 0, .5);
+}
+#admin-views .button{
+    margin: 2px;
+    font-size: .9rem;
+}
+#admin-content{
+    text-align: left;
+    border: 1px solid #c7c7c7;
+    padding: 10px;
+    margin-top: 10px;
+    width: calc( 100% - 160px );
+}
+.dark #admin-content{
+    border: 1px solid #3d3d3d;
+}
+
+.user-row{
+    padding: 5px 0;
+    cursor: pointer;
+}
+.user-row:hover,
+.user-row.blocked:hover{
+    background: lightgrey;
+}
+.dark .user-row:hover,
+.dark .user-row.blocked:hover{
+    background: #373737;
+}
+.user-row.blocked{
+    background: rgba(0, 0, 0, .1);
+    opacity: .7;
+}
+.dark .user-row.blocked{
+    background: rgba(0, 0, 0, .4);
+    opacity: .7;
+}
+
+.modal .modal-content{
+    max-height: 90vh;
+}
+
+
+
+.name-box{
+    display: inline-block;
+    padding: 2px 5px;
+}
+
+
+.admin-guide p{
+    color: brown;
+    font-size: .9rem;
+    line-height: 12px;
+}
+.dark .admin-guide p{
+    color: #f49f9f;
+}
+
+.flag-notes{
+	cursor: pointer;
+}
+.flag-notes:hover{
+    opacity: .8;
+}
+.flag-row{
+    background: black;
+    position: relative;
+    margin: 2px 0;
+    display: inline-block;
+    width: 100%;
+}
+.flag-row.is-header{
+    background: none;
+}
+.flag-row.is-header .button.danger{
+    display: none;
+}
+.flag-row *{
+    color: lightgrey;
+}
+.flag-row.violent *{
+    color: maroon;
+}
+.flag-row.sexual *{
+    color: #80007d;
+}
+.flag-row.duplicate *{
+    color: yellow;
+}
+.flag-row.series *{
+    color: lightblue;
+}
+.flag-row.other *{
+    color: #eacb91;
+}
+.flag-row .column:nth-of-type(1){
+    max-width: 100px;
+}
+.flag-row .column:nth-of-type(3){
+    max-width: calc( 40% - 101px);
+}
+.flag-row:hover{
+    opacity: .8;
+}
+.flag-row .button.danger{
+    position: absolute;
+    top: 0; 
+    right: 0;
+    background: maroon;
+    color: black;
+    padding: 0px 3px;
+}
+
+.bot-wrapper{
+    margin: 10px;
+}
+
+#admin-content .svg-wrap{
+    display: inline-block;
+    max-width: 100px;
+    vertical-align: top;
+    /* max-height: 150px; */
+    position: relative;
+    padding: 10px;
+}
+#admin-content .svg-wrap svg{
+    height: 100px;
+    max-height: 100px;
+}
+
+.svg-wrap span{
+    color: grey;
+}
+
+.reddit-post{
+    margin: 10px 0 30px 0;
+    position: relative;
+    background: rgba(0, 0,0, .1);
+    padding: 3px;
+}
+.post-author{
+    opacity: .6;
+}
+.post-created{
+    position: absolute;
+    top: 0;
+    right: 0;
+    opacity: .6;
+}
+.bsky-text{
+    display: inline-block;
+}
+.bsky-post{
+    padding: 5px;
+    margin: 3px 0;
+    border: 1px solid;
+    border-radius: 5px;
+}
+.bsky-author img{
+	max-width: 40px;
+    display: inline-block;
+}
+.bsky-author div{
+    display: inline-block;
+    vertical-align: top;
+}
+
+.suggestion{
+    margin: 2px;
+}
+
+.dark #admin-views .button{
+    font-weight: bold;
+}
+
+.session-result.anon{
+    opacity: .5;
+}
+.session-email{
+    
+}
+
+@media screen and (max-width: 800px){
+    .modal .modal-close{
+        right: 5%;
+    }
+    .modal .modal-content{
+        max-width: 94vw;
+    }
+}

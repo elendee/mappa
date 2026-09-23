@@ -1,0 +1,236 @@
+/* 
+    MESSAGES 
+*/
+
+.message-history{
+    background: rgba(0, 0, 0, .1);
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 25px;
+    min-height: 100px;
+    max-height: 58vh;
+    overflow-y: scroll;
+}
+
+.send-expl{
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.message-row{
+    margin: 2px 0;
+    width: 95%;
+    display: inline-block;
+    border: 1px solid rgba(0, 0, 0,.2);
+    padding: 5px;
+    margin-left: 4%;
+    border-radius: 5px;
+    position: relative;
+}
+.dark .message-row{
+    border: 1px solid rgba(255, 255, 255,.2);
+}
+.message-created{
+    position: absolute;
+    top: 5;
+    right: 30;
+    font-size: .8rem;
+}
+.message-row.is-user{
+    margin-left: 0;
+    background: rgba(0, 0, 0, .2);
+}
+.dark .message-row.is-user{
+    margin-left: 0;
+    background: rgba(255, 255, 255, .2);
+}
+.dark .message-row.is-user *{
+    color: #070707;
+    
+}
+.message-row .button.rm{
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: var(--alert-red);
+    padding: 0px 3px;
+}
+.dark .message-row .button.rm{
+    background: var(--alert-red-dark);
+    color: black;
+}
+
+.modal.contact .button.help{
+    position: absolute;
+    top: 10px;
+    left: 20px;
+}
+
+
+
+
+
+
+
+
+.full-review{
+    padding: 10px;
+    margin: 20px 0;
+    position: relative;
+    width:100%;
+    background: rgba(0, 0, 0, .1);
+    padding: 5px;
+    border-radius: 5px;
+}
+.full-review.is-user{
+    background: transparent;
+    border: 2px solid rgba(100, 250, 100, .4);
+    background: rgba(150, 255, 150, .2);
+}
+.full-review .expl-private{
+    left: 100px;
+    font-style: italic;
+    color: maroon;
+}
+.full-review.is-user .edit{
+    position: absolute;
+    top: -28px;
+    right: -5;
+}
+.dark .full-review .expl-private{
+    color: black;
+}
+
+
+.dark .full-review.is-user{
+    /* background: rgba(200, 200, 200, .1); */
+    background: rgba(150, 255, 150, .1);
+}
+.dark .full-review.is-user *{
+    /* color: black; */
+}
+
+.text-link i{
+    font-size: .8rem;
+}
+.text-link{
+    margin-bottom: 10px;
+    display: inline-block;
+}
+
+.full-review .share{
+    position: absolute;
+    right: 5;
+    bottom: 5;
+    cursor: pointer;
+}
+.review-created{
+    position: absolute;
+    top: 10;
+    right: 10;
+    font-size: .8rem;
+    color: grey;
+}
+.review-poster{
+    padding-left: 10px;
+    margin-bottom: 10px;
+}
+.review-title{
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.add_review textarea{
+    height: 200px;
+}
+
+.full-review .img-wrap{
+    display: inline-block;
+}
+.full-review .img-wrap img{
+    max-height: 100px;
+}
+.full-review.has-image .review-content-column{
+    width: calc( 100% - 120px);
+    display: inline-block;
+    padding-left: 10px;
+    vertical-align: top;
+    /* border: 1px solid; */
+}
+
+
+
+/* NOTEPAD */
+.notes .modal-content{
+    max-width: 90vw;
+    width: 1200px;
+}
+
+.notes .modal-content textarea{
+    height: 50vh;
+}
+.index-wrap{
+    width: 180px;
+    height: 50vh;
+    padding: 10px 0;
+    overflow: hidden;
+    /* border: 1px solid; */
+}
+.note-index{
+    max-height: calc(50vh - 60px);
+    overflow-y: auto;
+}
+.note-index .button{
+    margin: 2px 0;
+    font-size: .8rem;
+    width: 95%;
+}
+.note-index .button .edited{
+    color: rgba(0, 0, 0, .7);
+    position: absolute;
+    top: 5;
+    right: 5;
+}
+.index-wrap,
+textarea.notepad{
+    display: inline-block;
+    vertical-align: top;
+}
+textarea.notepad{
+    /* width: calc(100% - 150px); */
+}
+.dark .notes .add-new{
+    background: #1d551d;
+}
+.notes .add-new{
+    margin-top: 20px;
+    background: #3ca73c;
+}
+.notes input.note-title{
+}
+.content-wrap{
+    width: calc(100% - 180px);
+    display: inline-block;
+    vertical-align: top;
+}
+
+
+
+@media screen and (max-width: 800px){
+    .full-review.has-image .review-content{
+        width: 
+    }
+    .index-wrap{
+        width: 90px;
+    }
+    .content-wrap{
+        width: calc(100% - 90px);
+        padding-left: 10px;
+    }
+    .note-index .button .created{
+        display: none;
+    }
+}

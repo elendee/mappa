@@ -1,0 +1,84 @@
+body{   
+    text-align: center;
+}
+
+body.await_confirm p{
+	color: grey;
+}
+body.await_confirm .user-exists{
+	color: #393939;
+}
+
+body.await_confirm.dark .user-exists{
+	/* color: #aefdae; */
+	color: white;
+}
+
+
+
+#auth-wrap{
+	/* border: 2px solid;
+	max-width: 400px;
+    text-align: center; */
+	/* max-width: 400px; */
+}
+
+.auth-form{
+    display: none;
+    max-width: 250px;
+}
+.auth-form.selected{
+    display: inline-block;
+}
+.await_confirm .auth-form{
+    display: inline-block;
+}
+
+.auth-selector{
+    display: inline-block;
+    padding: 10px;
+    color: grey;
+    cursor: pointer;
+    user-select: none;
+    border-radius: 5px;
+}
+.auth-selector.active{
+    background: #f2b64991;
+    background: #f0dbb4;
+    color: black;
+}
+
+.auth-form input{
+    margin: 20px 0;
+}
+
+#oauth-providers{
+    margin-top: 20px;
+    border-top: 1px solid;
+}
+
+#oauth-providers .button{
+    margin-top: 20px;
+}
+
+#github{
+    background: rgb(80, 90, 150);
+}
+#github:hover{
+    background: rgb(60, 70, 130);
+}
+#google{
+    background: rgb(180, 50, 50);
+}
+#google:hover{
+    background: rgb(140, 30, 30);
+}
+
+form#await{
+    text-align: left;
+/*     color: grey; */
+}
+
+form#await input{
+    width: 100%;
+}
