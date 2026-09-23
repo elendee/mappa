@@ -1,0 +1,11 @@
+.*
+!.gitignore
+node_modules/
+_storage/*
+resource/*
+package-lock.json
+client/js/env.js
+fs/*
+scripter/*
+undefined
+undefined/*
