@@ -1,11 +1,11 @@
-import env from '../env.js?v=78'
-import ui from '../ui.js?v=78'
-import * as lib from '../lib.js?v=78'
-import hal from '../hal.js?v=78'
-import fetch_wrap from '../fetch_wrap.js?v=78'
-import GLOBAL from '../GLOBAL.js?v=78'
-import { Modal } from '../Modal.js?v=78'
-// import Bot from '../classes/Bot.js?v=78'
+import env from '../env.js'
+import ui from '../ui.js'
+import * as lib from '../lib.js'
+import hal from '../hal.js'
+import fetch_wrap from '../fetch_wrap.js'
+import GLOBAL from '../GLOBAL.js'
+import { Modal } from '../Modal.js'
+// import Bot from '../classes/Bot.js'
 
 
 

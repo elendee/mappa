@@ -1,10 +1,10 @@
-import env from './env.js?v=78'
-import hal from './hal.js?v=78'
-import fetch_wrap from './fetch_wrap.js?v=78'
-import ui from './ui.js?v=78'
-import * as lib from './lib.js?v=78'
-import GLOBAL from './GLOBAL.js?v=78'
-import USER from './USER.js?v=78'
+import env from './env.js'
+import hal from './hal.js'
+import fetch_wrap from './fetch_wrap.js'
+import ui from './ui.js'
+import * as lib from './lib.js'
+import GLOBAL from './GLOBAL.js'
+import USER from './USER.js'
 
 
 

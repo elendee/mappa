@@ -1,6 +1,6 @@
-import env from './env.js?v=78'
-import BROKER from './EventBroker.js?v=78'
-import hal from './hal.js?v=78'
+import env from './env.js'
+import BROKER from './EventBroker.js'
+import hal from './hal.js'
 
 
 const route = ( packet ) => {

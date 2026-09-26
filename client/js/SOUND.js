@@ -1,9 +1,9 @@
-import env from './env.js?v=78'
-import hal from './hal.js?v=78'
+import env from './env.js'
+import hal from './hal.js'
 
-import BROKER from './EventBroker.js?v=78'
+import BROKER from './EventBroker.js'
 
-import gen_audio_toggle from './gen_audio_toggle.js?v=78'
+import gen_audio_toggle from './gen_audio_toggle.js'
 
 
 

@@ -1,7 +1,7 @@
-import env from './env.js?v=78'
-import hal from './hal.js?v=78'
-import BROKER from './EventBroker.js?v=78'
-import GLOBAL from './GLOBAL.js?v=78'
+import env from './env.js'
+import hal from './hal.js'
+import BROKER from './EventBroker.js'
+import GLOBAL from './GLOBAL.js'
 
 
 

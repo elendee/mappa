@@ -1,5 +1,5 @@
-import * as lib from './lib.js?v=78'
-import env from './env.js?v=78'
+import * as lib from './lib.js'
+import env from './env.js'
 
 
 

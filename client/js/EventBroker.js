@@ -1,5 +1,5 @@
-import env from './env.js?v=78'
-import hal from './hal.js?v=78'
+import env from './env.js'
+import hal from './hal.js'
 
 
 

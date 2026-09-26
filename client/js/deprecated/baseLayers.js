@@ -66,14 +66,21 @@ export const BASE_LAYER_GROUPS = [
 		match: /^(park$|park_|landuse_|landcover_|aeroway_)/,
 		defaultVisible: true,
 	},
-	{
-		id: 'boundaries',
-		label: 'Boundaries',
-		desc: 'Admin & disputed boundaries',
-		match: /^boundary/,
-		defaultVisible: true,
-	},
 ]
+
+// layers that must never render — hidden unconditionally, no toggle UI
+export const HIDDEN_LAYER_MATCHERS = [/^boundary/]
+
+export function hideHiddenLayers(map){
+	if( !map?.getStyle ) return
+	const layers = map.getStyle()?.layers || []
+	for( const l of layers ){
+		if( !l?.id || !map.getLayer( l.id ) ) continue
+		if( HIDDEN_LAYER_MATCHERS.some( re => re.test( l.id ) ) ){
+			try{ map.setLayoutProperty( l.id, 'visibility', 'none' ) }catch(_){}
+		}
+	}
+}
 
 // fallback for styles that use source-layer rather than id (e.g. custom style)
 // not needed for liberty but keeps mapping portable
@@ -103,6 +110,39 @@ export function resolveGroups(map){
 	}).filter(g => g.layerIds.length > 0)
 }
 
+export function getBaseLayerState(map){
+	return resolveGroups(map).map(g => ({
+		...g,
+		visible: getStoredVisibility(g.id, g.defaultVisible ?? true),
+	}))
+}
+
+export function setBaseLayerVisible(map, groupOrId, visible){
+	const id = typeof groupOrId === 'string' ? groupOrId : groupOrId?.id
+	if( !id || !map?.getLayer ) return false
+	const groups = resolveGroups(map)
+	const g = groups.find(x => x.id === id)
+	if( !g ) return false
+	for( const lid of g.layerIds ){
+		if( !map.getLayer(lid) ) continue
+		try{ map.setLayoutProperty(lid, 'visibility', visible ? 'visible' : 'none') }catch(_){}
+	}
+	setStoredVisibility(id, visible)
+	return true
+}
+
+// applies stored visibility for all groups + hides never-show layers; returns state
+export function applyBaseLayerState(map){
+	hideHiddenLayers(map)
+	const state = getBaseLayerState(map)
+	for( const g of state ){
+		for( const lid of g.layerIds ){
+			if( !map.getLayer(lid) ) continue
+			try{ map.setLayoutProperty(lid, 'visibility', g.visible ? 'visible' : 'none') }catch(_){}
+		}
+	}
+	return state
+}
 export function getStoredVisibility(groupId, fallback){
 	try{
 		const v = localStorage.getItem(STORAGE_PREFIX + groupId)
@@ -118,4 +158,4 @@ export function setStoredVisibility(groupId, visible){
 	}catch(_){}
 }
 
-export default { BASE_LAYER_GROUPS, resolveGroups, getStoredVisibility, setStoredVisibility, STORAGE_PREFIX }
+export default { BASE_LAYER_GROUPS, HIDDEN_LAYER_MATCHERS, hideHiddenLayers, resolveGroups, getBaseLayerState, setBaseLayerVisible, applyBaseLayerState, getStoredVisibility, setStoredVisibility, STORAGE_PREFIX }

@@ -1,7 +1,7 @@
-import * as lib from '../lib.js?v=78'
-import { Modal } from '../Modal.js?v=78'
-import fetch_wrap from '../fetch_wrap.js?v=78'
-import hal from '../hal.js?v=78'
+import * as lib from '../lib.js'
+import { Modal } from '../Modal.js'
+import fetch_wrap from '../fetch_wrap.js'
+import hal from '../hal.js'
 
 
 // decl

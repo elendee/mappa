@@ -1,6 +1,6 @@
 import {
 	b,
-} from './lib.js?v=78'
+} from './lib.js'
 
 
 const spinner_data = document.getElementById('spinner-data')

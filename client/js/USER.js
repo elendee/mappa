@@ -1,5 +1,5 @@
-import env from './env.js?v=78'
-import User from './classes/User.js?v=78'
+import env from './env.js'
+import User from './classes/User.js'
 
 // const user = {}
 let user = new User()

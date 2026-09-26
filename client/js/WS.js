@@ -1,10 +1,10 @@
-import ui from './ui.js?v=78'
-import env from './env.js?v=78'
-import hal from './hal.js?v=78'
-import BROKER from './EventBroker.js?v=78'
-import USER from './USER.js?v=78'
-import WS_ROUTER from './WS_ROUTER.js?v=78'
-import Spinner from './Spinner.js?v=78'
+import ui from './ui.js'
+import env from './env.js'
+import hal from './hal.js'
+import BROKER from './EventBroker.js'
+import USER from './USER.js'
+import WS_ROUTER from './WS_ROUTER.js'
+import Spinner from './Spinner.js'
 
 
 

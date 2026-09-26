@@ -1,15 +1,15 @@
-import env from './env.js?v=78'
-import hal from './hal.js?v=78'
-import fetch_wrap from './fetch_wrap.js?v=78'
-import ui from './ui.js?v=78'
-import * as lib from './lib.js?v=78'
-import GLOBAL from './GLOBAL.js?v=78'
-import { Modal } from './Modal.js?v=78'
+import env from './env.js'
+import hal from './hal.js'
+import fetch_wrap from './fetch_wrap.js'
+import ui from './ui.js'
+import * as lib from './lib.js'
+import GLOBAL from './GLOBAL.js'
+import { Modal } from './Modal.js'
 import { 
 	xhr_piece 
-} from './file_handler.js?v=78'
-import MediaItem from './classes/MediaItem.js?v=78'
-import BROKER from './EventBroker.js?v=78'
+} from './file_handler.js'
+import MediaItem from './classes/MediaItem.js'
+import BROKER from './EventBroker.js'
 
 
 

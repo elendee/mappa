@@ -1,7 +1,7 @@
-import GLOBAL from './GLOBAL.js?v=78'
-import hal from './hal.js?v=78'
-import ui from './ui.js?v=78'
-import Spinner from './Spinner.js?v=78'
+import GLOBAL from './GLOBAL.js'
+import hal from './hal.js'
+import ui from './ui.js'
+import Spinner from './Spinner.js'
 
 
 

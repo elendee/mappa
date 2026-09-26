@@ -1,6 +1,6 @@
-import env from './env.js?v=78'
-import hal from './hal.js?v=78'
-import GLOBAL from './GLOBAL.js?v=78'
+import env from './env.js'
+import hal from './hal.js'
+import GLOBAL from './GLOBAL.js'
 import {
 	click_parent,
 	b,
@@ -8,10 +8,10 @@ import {
 	is_admin,
 	make_debounce,
 	random_range,
-} from './lib.js?v=78'
-import auth from './auth/auth.js?v=78'
-import BROKER from './EventBroker.js?v=78'
-// import popups from './shared_popups.js?v=78' // just to init
+} from './lib.js'
+import auth from './auth/auth.js'
+import BROKER from './EventBroker.js'
+// import popups from './shared_popups.js' // just to init
 
 
 

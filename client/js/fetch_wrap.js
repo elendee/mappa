@@ -1,5 +1,5 @@
-import ui from './ui.js?v=78'
-import Spinner from './Spinner.js?v=78'
+import ui from './ui.js'
+import Spinner from './Spinner.js'
 
 
 

@@ -1,7 +1,7 @@
-import hal from '../hal.js?v=78'
-import ui from '../ui.js?v=78'
-import fetch_wrap from '../fetch_wrap.js?v=78'
-import Spinner from './Spinner.js?v=78'
+import hal from '../hal.js'
+import ui from '../ui.js'
+import fetch_wrap from '../fetch_wrap.js'
+import Spinner from './Spinner.js'
 
 
 
