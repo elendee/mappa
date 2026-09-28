@@ -1,6 +1,7 @@
 import { Modal } from '../Modal.js'
 import Model from './Model.js'
 import * as lib from '../lib.js'
+import { build_base_layer_form } from '../baseLayers.js'
 
 
 
@@ -92,6 +93,7 @@ class Mappa extends Model {
 
 		const base_layers = lib.b('div', false, 'base-layer-wrap')
 		const base_ele = this._build_base_ele()
+		base_layers.append( base_ele )
 		modal.right_panel.append( base_layers )
 
 		const _map = new Layer()
@@ -103,12 +105,16 @@ class Mappa extends Model {
 
 	}
 
-	_build_base_ele(){
+	_build_base_ele( args ){
+		const {
+			selected,
+			onChange,
+		} = args || {}
 
-		// pull in the code from '../baseLayers.js' here, but keep the code abstracted in a separate module.
-		// forget localstorage - we only need to allow user to set the layers they want one time as they create the Layer.
-		// i will handle the model fields - you just do the clientside form here for now.
-
+		return build_base_layer_form({
+			selected,
+			onChange,
+		})
 	}
 
 	bind_nav( args ){

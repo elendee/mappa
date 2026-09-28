@@ -248,6 +248,9 @@ body.dashboard.menu-hidden #layer-panel{
 	color: #6c757d;
 	margin-bottom: 8px;
 }
+
+
+
 #global-layer-list .global-layer-row{
 	display: flex;
 	align-items: center;
@@ -387,87 +390,9 @@ body.dashboard.menu-hidden #layer-panel{
 .layer-settings-save{
 	font-weight: 600;
 }
-#layer-toolbox{
-	position: absolute;
-	bottom: 12px;
-	left: 12px;
-	background: white;
-	border: 1px solid #ccc;
-	border-radius: 8px;
-	padding: 10px 12px;
-	box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-	z-index: 10;
-	min-width: 160px;
-	max-width: 220px;
-}
-.toolbox-header{
-	font-weight: 700;
-	font-size: .85rem;
-	margin-bottom: 4px;
-}
-.toolbox-select{
-	width: 100%;
-	margin-top: 4px;
-}
-.toolbox-buttons{
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 8px;
-	margin-top: 6px;
-}
-.toolbox-tool{
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 4px;
-	padding: 8px 4px;
-	background: #f8f9fa;
-	border: 1px solid #ddd;
-	border-radius: 6px;
-	cursor: pointer;
-}
-.toolbox-tool:hover{
-	background: #eef0f2;
-}
-.toolbox-tool.active{
-	border-color: var(--darker, #333);
-	background: #e8f0ff;
-}
-.toolbox-tool-icon{
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 36px;
-	height: 36px;
-}
-.toolbox-tool-icon img{
-	width: 100%;
-	height: 100%;
-	object-fit: contain;
-}
-.toolbox-tool-label{
-	font-size: .7rem;
-	text-align: center;
-	line-height: 1.2;
-}
-.toolbox-hint{
-	font-size: .7rem;
-	color: #6c757d;
-}
-.toolbox-status{
-	font-size: .7rem;
-	opacity: .6;
-}
-.layer-login-prompt{
-	text-align: center;
-	padding: 20px 10px;
-	font-size: .9rem;
-	color: #666;
-}
-.layer-login-prompt a{
-	color: var(--darker);
-	font-weight: bold;
-}
+
+
+
 
 #panel-nav{
 	display: none;
@@ -495,35 +420,19 @@ body.dashboard.menu-hidden #layer-panel{
 	background: rgba(0, 0, 0, .1);
 }
 
-.nav-section{
-	height: auto;
+
+
+.base-layer-list label{
+	width: 100%;
 }
-.nav-section.toggled{
-	height: 60px;
-	overflow: hidden;
-}
-.toggled #global-layerr-list,
-.toggled #layer-list{
-	display: none;
+.base-layer-list input[type=checkbox]{
+	/* max-width: auto; */
+	width: 30px;
+	height: 30px;
 }
 
-.nav-section .button.prime{
-	display: inline-block;
-}
-.nav-section.toggled .button.prime{
-	display: none;
-}
-
-.menu-item.login-link{
-	font-weight: bold;
-	font-size: 1.1rem;
-}
-
-.maplibregl-ctrl-top-right{
-	right: 5px;
-}
-.menu-hidden .maplibregl-ctrl-top-right{
-	right: 50px;
+.edit-layer .model-form-Layer{
+	padding-top: 0;
 }
 
 
