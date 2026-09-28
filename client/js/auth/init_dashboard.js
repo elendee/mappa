@@ -1,8 +1,17 @@
-// init_dashboard.js — pseudocode (bare minimal, plan §5)
-// initMap(allUsers); if(user.loggedIn){ layers=fetchLayers(user); showLayerPanel(layers) } else { showBaseMapOnly() }
-// FUTURE: onCreateItem(activeLayer, newItem){ storeItem(activeLayer, undecidedType); renderItem(map, newItem) } // raster? vector? TBD
+import ui from '../ui.js'
+import Mappa from '../classes/Mappa.js'
+import Layer from '../classes/Layer.js'
 
-import Mappa from '../Mappa.js'
+
+
+
+
+// decl
+
+const content = document.getElementById('content')
+const map = document.getElementById('map')
+const panel = document.getElementById('layer-panel')
+
 
 
 // https://tiles.openfreemap.org/styles/liberty
@@ -14,7 +23,16 @@ import Mappa from '../Mappa.js'
 
 const mappa = new Mappa()
 
-
 mappa.init({
+	container: map,
 	style: 'positron',
-}) // pseudocode only — real bbox/panel logic deferred
+	// center
+	// zoom
+	// maxBounds
+	// attributionControl
+})
+
+mappa.bind_nav({
+	Layer,
+	nav: panel,
+})

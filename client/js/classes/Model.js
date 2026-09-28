@@ -4,7 +4,7 @@ import fetch_wrap from '../fetch_wrap.js'
 import hal from '../hal.js'
 import { xhr_piece } from '../file_handler.js'
 import GLOBAL from '../GLOBAL.js'
-import SVGS from '../SVGS.js'
+// import SVGS from '../SVGS.js'
 import { Modal } from '../Modal.js'
 import BROKER from '../EventBroker.js'
 
@@ -198,13 +198,13 @@ class Model {
 			}
 			break;
 
-		case 'svg':
-			const split = this.svg_slug.split('---')
+		// case 'svg':
+		// 	const split = this.svg_slug.split('---')
 
-			const svg = await SVGS.get_svg( ...split )
+		// 	const svg = await SVGS.get_svg( ...split )
 
-			return svg
-			break;
+		// 	return svg
+		// 	break;
 
 		default:
 			console.warn('unknown img ele type', args )

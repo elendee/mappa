@@ -89,37 +89,41 @@ const MODELS = {
 			char_limit: [0,255],
 			view: 'all',
 		},
-		visible: {
+		listed: {
 			type: 'boolean',
 			view: 'all',
 		},
-		index_layer: {
-			type: 'number',
+		locked: {
+			type: 'boolean',
 			view: 'all',
 		},
-		border_image: {
-			type: 'string',
-			char_limit: [0,500],
-			view: 'all',
-		},
-		primary_color: {
-			type: 'string',
-			char_limit: [0,32],
-			view: 'all',
-			default: '#ff3366',
-		},
-		secondary_color: {
-			type: 'string',
-			char_limit: [0,32],
-			view: 'all',
-			default: '#3388ff',
-		},
-		tertiary_color: {
-			type: 'string',
-			char_limit: [0,32],
-			view: 'all',
-			default: '#33cc99',
-		},
+		// index_layer: {
+		// 	type: 'number',
+		// 	view: 'all',
+		// },
+		// border_image: {
+		// 	type: 'string',
+		// 	char_limit: [0,500],
+		// 	view: 'all',
+		// },
+		// primary_color: {
+		// 	type: 'string',
+		// 	char_limit: [0,32],
+		// 	view: 'all',
+		// 	default: '#ff3366',
+		// },
+		// secondary_color: {
+		// 	type: 'string',
+		// 	char_limit: [0,32],
+		// 	view: 'all',
+		// 	default: '#3388ff',
+		// },
+		// tertiary_color: {
+		// 	type: 'string',
+		// 	char_limit: [0,32],
+		// 	view: 'all',
+		// 	default: '#33cc99',
+		// },
 	},
 
 	LayerElement: {
