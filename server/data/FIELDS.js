@@ -334,7 +334,7 @@ const FIELDS = {
 		'User': 8,
 		'Chat': 16,
 		'Layer': 8,
-		'LayerElement': 8,
+		'LayerElement': 16,
 	},
 
 	HAS_PUBLIC: [

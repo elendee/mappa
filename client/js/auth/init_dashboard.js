@@ -21,10 +21,10 @@ const panel = document.getElementById('layer-panel')
 // https://tiles.openfreemap.org/styles/fiord
 
 
-const mappa = new Mappa()
+const mappa = window.mappa = new Mappa()
 
-mappa.init({
-	container: map,
+await mappa.init({
+	container: content,
 	style: 'positron',
 	// center
 	// zoom
@@ -35,4 +35,12 @@ mappa.init({
 mappa.bind_nav({
 	Layer,
 	nav: panel,
+})
+
+await mappa.refresh_layers({
+	type: 'user',
+})
+
+await mappa.refresh_layers({
+	type: 'others',
 })

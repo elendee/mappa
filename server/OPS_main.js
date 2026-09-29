@@ -11,6 +11,7 @@ import {
 import User from './models/User.js'
 import MODELS from './MODELS.js'
 import MediaItem from './models/MediaItem.js'
+import Layer from './models/Layer.js'
 // import Alcove from './models/Alcove.js'
 // import CoveJoin from './models/CoveJoin.js'
 import Friendship from './models/Friendship.js'
@@ -54,65 +55,24 @@ const action = async( request ) => {
 
 	switch( action ){
 
-	case 'poll_translation':
+	case 'get_user_layers':
+		sql = `SELECT * FROM layers WHERE user_key=?`
+		res = await pool.queryPromise( sql, user.id )
+		if( res.error ) return lib.return_fail( res.error, `error getting user layers`)
 
-		value = await Chat.get_instance({
-			column: 'uuid',
-			value: request.body.chat_uuid,
-		})
-		if( !value ) return lib.return_fail(`chat not found for translate`, `chat not found`)
-
-		const _done_trans = await ChatTranslate.get_translation({
-			chat_key: value.id,
-			language: request.body.language,
-		})
-		if( _done_trans ){
-			return {
-				success: true,
-				translation: _done_trans.publish( _done_trans.get_view_allowed(0,0,0) )
-			}
+		for( const r of res.results ){
+			const layer = new Layer( r )
+			const pub =layer.publish( layer.get_request_allowed( request ))
+			results.push( pub )
 		}
 
 		return {
-			success: false,
+			success: true,
+			results,
 		}
 
-	case 'translate_text':
-		if( !lib.is_logged( request )) return lib.return_fail(`must be logged in`, `must be logged in`)
 
-		value = await Chat.get_instance({
-			column: 'uuid',
-			value: request.body.chat_uuid,
-		})
-		if( !value ) return lib.return_fail(`chat not found for translate`, `chat not found`)
-
-		if( value.value?.length > PUBLIC.LIMITS.CHAT.TRANSLATE_CHARS ){
-			return lib.return_fail(`block too long translate`, `translations limited to ${PUBLIC.LIMITS.CHAT.TRANSLATE_CHARS} for now`)
-		}
-
-		if( env.SPOOF?.TRANSLATE ){
-			return {
-				success: true,
-				translation: {
-					content: `Spoofslated to ${request.body.language}!`,
-				},
-				in_progress: false,
-				query_uuid: lib.random_hex(8),
-			}
-		}
-
-		if( !request.body.language?.trim() ){
-			return lib.return_fail(`no translation made`, `no translation made`)
-		}
-
-		res = await ChatTranslate.init_translation({
-			Chat,
-			chat_key: value.id,
-			user_key: user?.id,
-			language: request.body.language,
-		})
-
-		return res
+	case 'get_other_layers':
 
 
 
@@ -427,8 +387,11 @@ const action = async( request ) => {
 
 	case 'create_layer':
 		if( !lib.is_logged( request ) ) return lib.return_fail(`must be logged in`, `must be logged in`)
+
+		uuid = await lib.get_unique_uuid( DB, 'layers', FIELDS.PERSISTS_UUID.Layer )
+
 		value = new Layer({
-			uuid: request.body.layer?.id || lib.random_hex(8),
+			uuid,
 			user_key: user.id,
 			name: request.body.layer?.name || 'new layer',
 			visible: true,

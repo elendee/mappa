@@ -4,6 +4,8 @@ import Model from './Model.js'
 import * as lib from '../lib.js'
 import { build_base_layer_form } from '../baseLayers.js'
 import draggable from '../draggable.js'
+import fetch_wrap from '../fetch_wrap.js'
+import hal from '../hal.js'
 
 
 
@@ -50,9 +52,20 @@ class Mappa extends Model {
 
 		await this._load_script()
 
+		this.DOM = {
+			map: container.querySelector('#map'),
+			panel: container.querySelector('#layer-panel'),
+			user_layer: container.querySelector('#user-layers-section'),
+			other_layer: container.querySelector('#other-layers-section'),
+		}
+
+		for( const key in this.DOM ){
+			if( !this.DOM[key] ) console.warn('missing dom ele', key )
+		}
+
 		// init maplibre here
 		this.map = new maplibregl.Map({
-	    	container,
+	    	container: this.DOM.map,
 	    	style: `https://basemaps.cartocdn.com/gl/${style}-gl-style/style.json`,
 	    	center,
 	    	zoom,
@@ -146,6 +159,64 @@ class Mappa extends Model {
 		find_btn.addEventListener('click', e => {
 			console.log('find')
 		})
+
+	}
+
+
+	async refresh_layers( args ){
+		const {
+			type,
+		} = args
+
+		let res, action, container
+
+		switch( type ){
+
+		case 'user':
+			action = 'get_user_layers'
+			container = this.DOM.user_layer
+			break;
+
+		case 'others':
+			action = 'get_other_layers'
+			container = this.DOM.other_layer
+			break;
+
+		default:
+			return console.warn('unknown refresh type', type )
+		}
+
+		res = await fetch_wrap('/action_main', 'post', {
+			action,
+		}, true )
+
+		if( !res?.success ) return hal('error', res?.msg || 'error getting layers', 5000 )
+
+		for( const layer of res.results || [] ){
+			const extant = container.querySelector('.layer-row[data-layer-uuid="' + layer.uuid + '"]')
+			if( extant ) continue;
+			const _new = this.build_row({
+				data: layer,
+			})
+			container.append( _new )
+		}
+
+	} // refresh-layers
+
+
+	build_row( args ){
+		const {
+			data,
+		} = args
+
+		const wrap = lib.b('div', false, 'layer-row')
+
+		const name = lib.b('div', false, 'layer-name')
+		name.innerText = data.name || 'unnamed'
+		wrap.append( name )
+
+
+		return wrap
 
 	}
 
