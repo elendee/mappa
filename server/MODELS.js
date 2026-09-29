@@ -68,10 +68,8 @@ const create = async( request ) => {
 		new_model.id = res.id
 		new_model.created = res.created
 
-		if( type === 'Bot' ){
-			BROKER.publish('BOT_NEW', {
-				bot: new_model,
-			})
+		if( new_model._handle_post_save ){
+			await new_model._handle_post_save( request, pre_data, Classes )
 		}
 
 		return {

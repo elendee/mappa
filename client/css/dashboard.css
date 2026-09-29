@@ -424,6 +424,8 @@ body.dashboard.menu-hidden #layer-panel{
 
 .base-layer-list label{
 	width: 100%;
+	margin: 10px 0;
+	/* border: 2px solid; */
 }
 .base-layer-list input[type=checkbox]{
 	/* max-width: auto; */
@@ -449,12 +451,22 @@ body.dashboard.menu-hidden #layer-panel{
 	position: absolute;
 	top: 10px;
 	left: 10px;
-	max-width: 30px;
+	max-width: 25px;
 }
 
 .edit-layer .modal-content{
 	padding-top: 50px;
 }
+
+.global-layer-text{
+	display: inline-block;
+	vertical-align: middle;
+	padding-left: 10px;
+	max-width: calc( 100% - 50px );
+	/* border: 1px solid; */
+}
+
+
 
 @media screen and (max-width: 800px){
 	#view-main,

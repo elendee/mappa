@@ -97,6 +97,7 @@ const MODELS = {
 			type: 'boolean',
 			view: 'all',
 		},
+
 		// index_layer: {
 		// 	type: 'number',
 		// 	view: 'all',
@@ -124,6 +125,48 @@ const MODELS = {
 		// 	view: 'all',
 		// 	default: '#33cc99',
 		// },
+
+		layer_roads: {
+			type: 'boolean',
+			view: 'all',
+			no_edit: true,
+		},
+		layer_transit: {
+			type: 'boolean',
+			view: 'all',
+			no_edit: true,
+		},
+		layer_road_labels: {
+			type: 'boolean',
+			view: 'all',
+			no_edit: true,
+		},
+		layer_landmarks: {
+			type: 'boolean',
+			view: 'all',
+			no_edit: true,
+		},
+		layer_neighborhoods: {
+			type: 'boolean',
+			view: 'all',
+			no_edit: true,
+		},
+		layer_buildings: {
+			type: 'boolean',
+			view: 'all',
+			no_edit: true,
+		},
+		layer_water: {
+			type: 'boolean',
+			view: 'all',
+			no_edit: true,
+		},
+		layer_land: {
+			type: 'boolean',
+			view: 'all',
+			no_edit: true,
+		},
+
 	},
 
 	LayerElement: {

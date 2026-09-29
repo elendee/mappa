@@ -18,7 +18,7 @@ export const BASE_LAYER_GROUPS = [
 		defaultVisible: true,
 	},
 	{
-		id: 'road-labels',
+		id: 'road_labels',
 		label: 'Road labels',
 		desc: 'Street names & highway shields',
 		defaultVisible: true,

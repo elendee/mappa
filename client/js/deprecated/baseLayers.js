@@ -24,7 +24,7 @@ export const BASE_LAYER_GROUPS = [
 		defaultVisible: true,
 	},
 	{
-		id: 'road-labels',
+		id: 'road_labels',
 		label: 'Road labels',
 		desc: 'Street names & highway shields',
 		match: /^(highway-|road_shield|road_one_way)/,
@@ -86,7 +86,7 @@ export function hideHiddenLayers(map){
 // not needed for liberty but keeps mapping portable
 export const SOURCE_LAYER_FALLBACK = {
 	roads: ['transportation'],
-	'road-labels': ['transportation_name'],
+	'road_labels': ['transportation_name'],
 	landmarks: ['poi', 'aerodrome_label'],
 	neighborhoods: ['place'],
 	buildings: ['building'],

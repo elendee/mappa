@@ -1,4 +1,5 @@
 import Model from './Model.js'
+import * as lib from '../lib.js'
 
 
 class Layer extends Model {
