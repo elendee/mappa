@@ -297,7 +297,7 @@ const render = ( type, request, data ) => {
 									${ links_misc( request ) }
 								</div>
 
-								<div id='global-layers-section' class='nav-section'>
+								<!-- div id='global-layers-section' class='nav-section'>
 									<div id='global-layers-header'>
 										<button class='panel-toggle'>-</button>
 										<h4 class='section-title'>Base Layers</h4>
@@ -305,7 +305,7 @@ const render = ( type, request, data ) => {
 									</div>
 									<div id='global-layer-list'></div>
 								</div>
-								<hr>
+								<hr-->
 
 								<div id='user-layers-section' class='nav-section'>
 									<div id='layer-panel-header'>

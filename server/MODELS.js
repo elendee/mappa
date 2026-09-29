@@ -424,6 +424,15 @@ const pre_update = async( args ) => {
 
 		switch( request.body?.type ){
 
+		case 'Layer':
+
+			log('flag', 'PRE SAVE LAYER', request.body )
+
+
+			return {
+				success: true,
+			}
+
 		case 'Establishment':
 		case 'Item':
 

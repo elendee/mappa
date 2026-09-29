@@ -36,7 +36,6 @@ class Mappa extends Model {
 	constructor( init ){
 		super( init )
 		init = init || {}
-		this.bla = init.bla || 5
 	}
 
 	async init( args ){
@@ -89,13 +88,14 @@ class Mappa extends Model {
 
 		const modal = new Modal({
 			type: 'edit-layer',
+			expl: 'Basic settings for your layer. These can be edited anytime.',
 		})
 
 		modal.make_columns()
 
-		const expl = lib.b('div', false, 'layer-expl')
-		expl.innerText = 'Basic settings for your layer.  These can be edited anytime.'
-		modal.content.prepend( expl )
+		const drag = lib.b('div', false, 'drag-icon')
+		drag.innerHTML = `<img src='/resource/icons/drag.png'>`
+		modal.content.prepend( drag )
 
 		const base_layers = lib.b('div', false, 'base-layer-wrap')
 		const base_ele = this._build_base_ele()
@@ -148,6 +148,7 @@ class Mappa extends Model {
 		})
 
 	}
+
 
 
 } // Mappa

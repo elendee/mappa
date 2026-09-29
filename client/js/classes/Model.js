@@ -367,7 +367,6 @@ class Model {
 
 	build_edit_form( edit_args ){
 		log_mod('build-edit-form')
-
 		const {
 			show_public,
 			force_edit_label,
@@ -379,7 +378,7 @@ class Model {
 		MODEL_MAP.set( form, {
 			model: this,
 		})
-		
+
 		form.edit_args = edit_args
 
 		form.setAttribute('data-type', force_type || this.constructor.name )
@@ -824,7 +823,7 @@ const save_model = e => {
 	const model_data = ingest_form( form )
 	const is_new = !model_data.uuid
 
-	const action = is_new ? 'create_model' : 'update_model' 
+	const action = is_new ? 'create_model' : 'update_model'
 
 	let pre_data
 	if( model._pre_save_data ){

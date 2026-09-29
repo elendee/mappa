@@ -38,15 +38,18 @@ class Modal {
 		this.content = document.createElement('div')
 		this.content.classList.add('modal-content')
 
-		// this.liner = document.createElement('div')
-		// this.liner.classList.add('modal-liner')
-		// this.content.append( this.liner )
-
 		if( init.header ){
 			this.header = document.createElement('div')
 			this.header.classList.add('modal-header')
 			this.header.innerText = init.header
 			this.content.append( this.header )
+		}
+
+		if( init.expl ){
+			this.expl = document.createElement('div')
+			this.expl.classList.add('modal-expl')
+			this.expl.innerHTML = init.expl
+			this.content.append( this.expl )
 		}
 
 		if( init.use_inner ){
@@ -62,21 +65,17 @@ class Modal {
 		this.close.innerHTML = '&times;'
 		this.close.addEventListener('click', () => {
 			this.ele.remove()
-			// BROKER.publish('MODAL_CLOSE', { type: init.type })
 		})
 		this.ele.append( this.content )
-		// this.ele.append( this.close )
 		this.content.append( this.close )
 
 		if( init.restore ){
-			// needs to wait for modal to be initialized...
 			setTimeout(() => {
 				this.restore_and_bind_inputs( init )
 			}, 500)
-
 		}
 
-	}
+	} // constructor
 
 	restore_and_bind_inputs( init ){
 
@@ -136,7 +135,7 @@ class Modal {
 	}
 
 
-}
+} // Modal
 
 
 

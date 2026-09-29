@@ -445,6 +445,16 @@ body.dashboard.menu-hidden #layer-panel{
 	background: transparent;
 }
 
+.drag-icon{
+	position: absolute;
+	top: 10px;
+	left: 10px;
+	max-width: 30px;
+}
+
+.edit-layer .modal-content{
+	padding-top: 50px;
+}
 
 @media screen and (max-width: 800px){
 	#view-main,
