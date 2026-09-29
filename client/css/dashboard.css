@@ -434,6 +434,16 @@ body.dashboard.menu-hidden #layer-panel{
 .edit-layer .model-form-Layer{
 	padding-top: 0;
 }
+.edit-layer .model-form{
+	padding-left: 0;
+	/* padding-top: 0; */
+}
+.edit-layer .left-panel{
+	padding-left: 0;
+}
+.modal.edit-layer{
+	background: transparent;
+}
 
 
 @media screen and (max-width: 800px){

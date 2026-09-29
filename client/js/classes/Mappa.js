@@ -1,7 +1,9 @@
 import { Modal } from '../Modal.js'
+import BROKER from '../EventBroker.js'
 import Model from './Model.js'
 import * as lib from '../lib.js'
 import { build_base_layer_form } from '../baseLayers.js'
+import draggable from '../draggable.js'
 
 
 
@@ -91,6 +93,10 @@ class Mappa extends Model {
 
 		modal.make_columns()
 
+		const expl = lib.b('div', false, 'layer-expl')
+		expl.innerText = 'Basic settings for your layer.  These can be edited anytime.'
+		modal.content.prepend( expl )
+
 		const base_layers = lib.b('div', false, 'base-layer-wrap')
 		const base_ele = this._build_base_ele()
 		base_layers.append( base_ele )
@@ -102,6 +108,11 @@ class Mappa extends Model {
 		modal.left_panel.append( form )
 
 		document.body.append( modal.ele )
+
+		BROKER.publish('MAKE_DRAGGABLE', {
+			ele: modal.content,
+			storage_key: 'mappa-edit-layer',
+		})
 
 	}
 
