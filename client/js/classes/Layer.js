@@ -88,6 +88,8 @@ class Layer extends Model {
 		} = args
 
 		const wrap = lib.b('div', false, 'layer-row')
+		wrap.setAttribute('data-layer-uuid', this.uuid )
+		wrap.addEventListener('click', set_layer )
 
 		const name = lib.b('div', false, 'layer-name')
 		name.innerText = data.name || 'unnamed'
@@ -105,12 +107,50 @@ class Layer extends Model {
 			mappa
 		})
 
+		MAP.set( wrap, {
+			layer: this,
+			layer_data: data,
+			mappa
+		})
+
 		return wrap
 
 	}
 
 
-}
+} // Layer
+
+
+
+
+const set_layer = e => {
+	const btn = lib.click_parent( e.target, 'layer-edit', false, 4 )
+	if( btn ) return;
+
+	const wrap = lib.click_parent( e.target, 'layer-row', false, 5 )
+	if( !wrap ) return;
+
+	const nav = lib.click_parent( wrap, false, 'layer-panel', 10 )
+
+	const container = lib.click_parent( wrap, 'nav-section', false, 4 )
+
+	const rows = nav.querySelectorAll('.layer-row')
+	for( const row of rows ){
+		row.classList.remove('selected')
+	}
+	wrap.classList.add('selected')
+
+	const {
+		layer,
+		layer_data,
+		mappa,
+	} = MAP.get( wrap )
+
+	BROKER.publish('MAPPA_SET_LAYER', {
+		layer,
+	})
+
+} // set layer
 
 
 
@@ -131,7 +171,7 @@ const edit_layer = e => {
 		Layer,
 	})
 
-}
+} // edit layer
 
 
 

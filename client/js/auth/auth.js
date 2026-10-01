@@ -130,7 +130,8 @@ const openRegister = () => {
 }
 
 
-// bind — all matching triggers (nav + layer prompt etc.)
+// bind — all matching triggers (panel toggle + nav + layer prompt etc.)
+// #panel-auth #auth-toggle.login carries .menu-item.login so it is covered here.
 
 for( const el of document.querySelectorAll('.menu-item.login') ){
 	el.addEventListener('click', e => {
@@ -143,6 +144,14 @@ for( const el of document.querySelectorAll('.menu-item.register') ){
 	el.addEventListener('click', e => {
 		e.preventDefault()
 		openRegister()
+	})
+}
+
+// panel auth toggle — logout variant is a plain link to /logout;
+// ensure clicks on the wrapper (outside the anchor) still log out.
+for( const el of document.querySelectorAll('#auth-toggle.auth-logout') ){
+	el.addEventListener('click', e => {
+		if( e.target.tagName !== 'A' ) location.href = '/logout'
 	})
 }
 

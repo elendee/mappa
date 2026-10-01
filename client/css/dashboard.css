@@ -227,7 +227,7 @@ body.dashboard.menu-hidden #layer-panel{
 	border-radius: 8px;
 	padding: 10px 10px 8px;
 	margin-bottom: 10px;
-	margin-top: 60px;
+	margin-top: 30px;
 	box-shadow: 0 1px 3px rgba(0,0,0,0.09);
 	border: 1px solid #dee2e6;
 }
@@ -298,10 +298,11 @@ body.dashboard.menu-hidden #layer-panel{
 	position: relative;
 	background: #fbfbfb;
 }
-.layer-row.hidden-layer{
-	opacity: .55;
-	background: #b2b0b0;
+.layer-row.selected{
+	border: 1px solid black;
+	font-weight: bold;
 }
+
 .layer-row input[type=checkbox]{
 	width: 18px;
 	height: 18px;
@@ -395,10 +396,43 @@ body.dashboard.menu-hidden #layer-panel{
 
 
 #panel-nav{
+	display: block;
+	border-bottom: 1px solid #eee;
+	padding-bottom: 10px;
+}
+#panel-auth{
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex-wrap: wrap;
+	justify-content: right;
+}
+#panel-auth .menu-item{
+	padding: 6px 0;
+}
+#auth-toggle{
+	/* font-weight: 600; */
+	/* background: #7b7b7b; */
+	/* color: #fff; */
+	/* border-radius: 6px; */
+	/* padding: 6px 14px !important; */
+	/* line-height: 1.2; */
+}
+#auth-toggle a{
+	/* color: #fff; */
+	/* text-decoration: none; */
+	/* font-we */
+}
+#panel-auth .menu-item.register{
+	font-size: .85rem;
+	text-decoration: underline;
+}
+#auth-standalone{
 	display: none;
 }
 #dark-toggle{
 	max-width: 25px;
+	display: none;
 }
 
 #gear{
@@ -408,9 +442,12 @@ body.dashboard.menu-hidden #layer-panel{
 	position: fixed;
 	right: 0;
 	top: 10px;
-	width: 300px;
+	right: 250px;
+	/* width: 300px; */
 	z-index: 999;
 	/* border: 1px solid; */
+
+	display: none;
 }
 #gear img{
 	width: 30px;
@@ -463,12 +500,57 @@ body.dashboard.menu-hidden #layer-panel{
 	vertical-align: middle;
 	padding-left: 10px;
 	max-width: calc( 100% - 50px );
-	/* border: 1px solid; */
 }
 
 .layer-edit{
 	width: 30px;
 	cursor: pointer;
+}
+
+
+#toolbox{
+	position: fixed;
+	top: calc( 100vh - 50px );
+	left: 0;
+	z-index: 99;
+	transition: .3s;
+	background: white;
+	border: 1px solid grey;
+	height: 150px;
+}
+#toolbox.toggled{
+	top: calc( 100vh - 150px );
+}
+.toolbox-toggle{
+	position: absolute;
+	top: 0;
+	left: 0;
+	padding: 10px;
+	line-height: 30px;
+	background: white;
+	font-size: 3rem;
+	color: black;
+	cursor: pointer;
+	transform-origin: 50% 50%;
+	border: 1px solid blue;
+	width: 50px;
+	height: 50px;
+	user-select: none;
+}
+#toolbox.toggled .toolbox-toggle{
+	transform: rotate( 180deg );
+	transition: .3s;
+}
+.toolbox-name{
+	display: inline-block;
+	padding: 10px 10px 10px 70px;
+	border: 1px solid red;
+	font-weight: bold;
+	width: 100%;
+}
+.toolbox-content{
+	padding: 20px 10px 10px 10px;
+	border: 1px solid green;
 }
 
 

@@ -131,6 +131,41 @@ const auth_standalone = request => {
 
 } // auth standalone
 
+// auth controls for the top of the dashboard nav panel (#panel-nav).
+// unlogged: single #auth-toggle.login opens the auth modal (bound in auth.js).
+// logged: single #auth-toggle.logout plain-links to /logout. server-rendered state, no JS check needed.
+const panel_auth = request => {
+
+	const logged = !!lib.is_logged( request )
+	const admin = !!lib.is_admin( request )
+
+	return `
+	<div id='panel-auth' data-auth='${ logged }' data-admin='${ admin }' class='nav-section'>
+		${ logged ? `
+		<div class='menu-item auth-profile'>
+			<a href='/profile'>profile</a>
+		</div>
+		<div class='menu-item auth-logout' id='auth-toggle'>
+			<a href='/logout'>logout</a>
+		</div>` : `
+		<div class='menu-item login' id='auth-toggle'>
+			login
+		</div>
+		<div class='menu-item register'>
+			register
+		</div>` }
+		${ admin ? `
+		<div class='menu-item auth-admin admin-color'>
+			<a href='/admin'>admin</a>
+		</div>` : '' }
+	</div>`
+
+		// <div class='menu-item auth-about'>
+		// 	<a href='/about'>about</a>
+		// </div>
+
+} // panel auth
+
 const links_misc = request => {
 	return ''
 }
@@ -282,7 +317,6 @@ const render = ( type, request, data ) => {
 					${ popups }
 					${ global_data() }
 					${ _embeds }
-					${ auth_standalone( request ) }
 					<div id='content'>
 						<div id='map-wrap'>
 							<div id='map'></div>
@@ -293,6 +327,7 @@ const render = ( type, request, data ) => {
 								</div>
 
 								<div id='panel-nav'>
+									${ panel_auth( request ) }
 									${ links_main( request ) }
 									${ links_misc( request ) }
 								</div>

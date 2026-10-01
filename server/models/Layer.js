@@ -15,14 +15,13 @@ class Layer extends Model {
 	}
 
 	async _handle_post_save( request, pre_data, Classes ){
-		// log('flag', 'handle post save', {
-		// 	pre_data,
-		// 	...request.body,
-		// })
-
 		const {
 			layers,
 		} = pre_data || {}
+
+		log('flag', 'layer post-save', {
+			layers,
+		})
 
 		if( layers ){
 			const {

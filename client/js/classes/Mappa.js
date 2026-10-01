@@ -8,9 +8,6 @@ import fetch_wrap from '../fetch_wrap.js'
 import hal from '../hal.js'
 
 
-
-
-
 const MAP = new Map()
 
 const MAPLIBRE_CSS = 'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css'
@@ -19,7 +16,6 @@ const MAPLIBRE_ESM = [
 	'https://esm.sh/maplibre-gl@4.7.1?bundle',
 	'https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/+esm',
 ]
-
 
 export const NYC = {
 	CENTER:[
@@ -40,6 +36,11 @@ class Mappa extends Model {
 	constructor( init ){
 		super( init )
 		init = init || {}
+
+		this.initialized = undefined
+		this.active_layer = undefined
+
+		this.active_field = 'mappa-active-layer'
 	}
 
 	async init( args ){
@@ -52,6 +53,9 @@ class Mappa extends Model {
 			attributionControl = true,
 		} = args || {}
 
+		if( this.initialized ) return console.error('dupe mappa init')
+	    this.initialized = Date.now()
+
 		await this._load_script()
 
 		this.DOM = {
@@ -59,7 +63,14 @@ class Mappa extends Model {
 			panel: container.querySelector('#layer-panel'),
 			user_layer: container.querySelector('#user-layers-section'),
 			other_layer: container.querySelector('#other-layers-section'),
+			toolbox: {
+				wrap: lib.b('div', 'toolbox'),
+				content: lib.b('div', false, 'toolbox-content'),
+				name: lib.b('div', false, 'toolbox-name'),
+				toggle: lib.b('div', false, 'toolbox-toggle'),
+			},
 		}
+		this._init_toolbox()
 
 		for( const key in this.DOM ){
 			if( !this.DOM[key] ) console.warn('missing dom ele', key )
@@ -76,6 +87,32 @@ class Mappa extends Model {
 	    });
 
 	    return this.map;
+
+	}
+
+	_init_toolbox(){
+		const {
+			toolbox
+		} = this.DOM
+
+		const {
+			wrap,
+			name,
+			content,
+			toggle,
+		} = toolbox
+
+		wrap.append( name )
+		wrap.append( content )
+		wrap.append( toggle )
+
+		toggle.innerHTML = '^'
+
+		toggle.addEventListener('click', e => {
+			wrap.classList.toggle('toggled')
+		})
+
+		// blorb 
 
 	}
 
@@ -165,7 +202,7 @@ class Mappa extends Model {
 		})
 	}
 
-	bind_nav( args ){
+	_bind_nav( args ){
 		const {
 			Layer,
 			nav,
@@ -233,6 +270,55 @@ class Mappa extends Model {
 	} // refresh-layers
 
 
+	set_layer_active = async( event ) => {
+		const {
+			layer,
+		} = event
+
+		console.log('set-layer', event )
+
+		const {
+			uuid,
+			name,
+			listed,
+			locked,
+			mappa, // ( should be this )
+		} = layer
+
+		if( !this.DOM.toolbox.wrap.parent ){
+			document.body.append( this.DOM.toolbox.wrap )
+		}
+
+		this.DOM.toolbox.name.innerText = name
+
+		this.DOM.toolbox.content.innerHTML = ''
+
+		// refill this.DOM.toolbox.content
+
+		this.fill_toolbox({
+			layer,
+			container: this.DOM.toolbox.content,
+		})
+		.catch( err => {
+			console.error( 'err fill toolbox', err )
+		})
+
+		this.active_layer = uuid
+
+		localStorage.setItem( this.active_field, uuid )
+
+	}
+
+
+	async fill_toolbox( args ){
+		const {
+			layer,
+			container,
+		} = args
+
+		container.innerText = 'toolbox...'
+
+	}
 
 
 

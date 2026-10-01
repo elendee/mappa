@@ -56,6 +56,8 @@ const action = async( request ) => {
 	switch( action ){
 
 	case 'get_user_layers':
+		if( !user.id ) return lib.return_fail(`must be logged`, `must be logged`)
+
 		sql = `SELECT * FROM layers WHERE user_key=?`
 		res = await pool.queryPromise( sql, user.id )
 		if( res.error ) return lib.return_fail( res.error, `error getting user layers`)
@@ -75,7 +77,10 @@ const action = async( request ) => {
 	case 'get_other_layers':
 
 
-
+		return {
+			success: true,
+			results,
+		}
 
 	case 'add_friend':
 		if( !lib.is_logged( request ) ) return lib.return_fail(`must be logged`, `must be logged`)
@@ -293,25 +298,9 @@ const action = async( request ) => {
 
 	case 'create_model':
 
-		// pre
-		pre_res = await MODELS.pre_create({
-			pool,
-			request,
-		})
-		if( !pre_res?.success ) return pre_res
-
 		// save
 		res = await MODELS.create( request )
 		if( !res?.success ) return res
-
-		// post
-		post_res = await MODELS.post_create({
-			pool,
-			request,
-			full_model: res.full_model,
-			pre_res,
-		})
-		if( !post_res?.success ) return post_res
 
 		// sanitize...
 		delete res.full_model 
@@ -322,25 +311,8 @@ const action = async( request ) => {
 
 	case 'update_model':
 
-		// pre
-		pre_res = await MODELS.pre_update({
-			pool,
-			request,
-		})
-		if( !pre_res?.success ) return pre_res
-
 		res = await MODELS.update( request )
 		if( !res?.success ) return res
-
-		// post
-		post_res = await MODELS.post_update({
-			pool,
-			request,
-			full_model: res.full_model,
-			pre_res,
-			place_uuid: pre_res.place_uuid
-		})
-		if( !post_res?.success ) return post_res
 
 		BROKER.publish('UPDATE_MODEL', {
 			request,
