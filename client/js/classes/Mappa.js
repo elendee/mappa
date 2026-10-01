@@ -314,8 +314,13 @@ class Mappa extends Model {
 
 	set_tool_active = async( event ) => {
 		const {
-
+			is_custom,
+			tool_data,
 		} = event
+
+
+		console.log('set-tool-active', event )
+
 	}
 
 
