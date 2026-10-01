@@ -11,6 +11,8 @@ import hal from '../hal.js'
 
 
 
+const MAP = new Map()
+
 const MAPLIBRE_CSS = 'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css'
 const STYLE_BASE = `https://tiles.openfreemap.org/styles/` //liberty
 const MAPLIBRE_ESM = [
@@ -94,8 +96,11 @@ class Mappa extends Model {
 
 	}
 
-	pop_new_layer( args ){
+	pop_edit_layer( args ){
 		const {
+			extant_row,
+			extant_data,
+			is_edit,
 			Layer,
 		} = args || {}
 
@@ -110,14 +115,31 @@ class Mappa extends Model {
 		drag.innerHTML = `<img src='/resource/icons/drag.png'>`
 		modal.content.prepend( drag )
 
+		const selected = []
+		for( const key in extant_data ){
+			if( key.match(/^layer_/)){
+				// const _key = key.replace('layer_', '')
+				if( extant_data[ key] ) selected.push( key.replace('layer_', '') )
+			}
+		}
+
+		console.log('pop edit', {
+			selected,
+			extant_data,
+		})
+
 		const base_layers = lib.b('div', false, 'base-layer-wrap')
-		const base_ele = this._build_base_ele()
+		const base_ele = this._build_base_ele({
+			selected,
+			// extant_layer_data: extant_data,
+		})
 		base_layers.append( base_ele )
 		modal.right_panel.append( base_layers )
 
-		const _map = new Layer()
-		const form = _map.build_edit_form()
-
+		const _layer = new Layer( extant_data )
+		_layer.extant_row = extant_row
+		_layer.mappa = this
+		const form = _layer.build_edit_form()
 		modal.left_panel.append( form )
 
 		document.body.append( modal.ele )
@@ -131,11 +153,13 @@ class Mappa extends Model {
 
 	_build_base_ele( args ){
 		const {
+			// extant_layer_data,
 			selected,
 			onChange,
 		} = args || {}
 
 		return build_base_layer_form({
+			// extant_layer_data,
 			selected,
 			onChange,
 		})
@@ -151,7 +175,7 @@ class Mappa extends Model {
 		const find_btn = nav.querySelector('#find-layer')
 
 		create_btn.addEventListener('click', e => {
-			this.pop_new_layer({
+			this.pop_edit_layer({
 				Layer,
 			})
 		})
@@ -165,7 +189,9 @@ class Mappa extends Model {
 
 	async refresh_layers( args ){
 		const {
+			Layer,
 			type,
+			silent,
 		} = args
 
 		let res, action, container
@@ -190,12 +216,15 @@ class Mappa extends Model {
 			action,
 		}, true )
 
-		if( !res?.success ) return hal('error', res?.msg || 'error getting layers', 5000 )
+		if( !res?.success ) return silent || hal('error', res?.msg || 'error getting layers', 5000 )
 
 		for( const layer of res.results || [] ){
 			const extant = container.querySelector('.layer-row[data-layer-uuid="' + layer.uuid + '"]')
 			if( extant ) continue;
-			const _new = this.build_row({
+			const _layer = new Layer( layer )
+			// _layer.extant_row = 
+			_layer.mappa = this
+			const _new = _layer.build_row({
 				data: layer,
 			})
 			container.append( _new )
@@ -204,25 +233,15 @@ class Mappa extends Model {
 	} // refresh-layers
 
 
-	build_row( args ){
-		const {
-			data,
-		} = args
 
-		const wrap = lib.b('div', false, 'layer-row')
-
-		const name = lib.b('div', false, 'layer-name')
-		name.innerText = data.name || 'unnamed'
-		wrap.append( name )
-
-
-		return wrap
-
-	}
 
 
 
 } // Mappa
+
+
+
+
 
 
 

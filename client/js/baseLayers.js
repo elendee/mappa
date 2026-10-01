@@ -61,6 +61,7 @@ export const get_default_base_layers = () => {
 
 export function build_base_layer_form( args ){
 	const {
+		// extant_layer_data,
 		selected,
 		onChange,
 	} = args || {}

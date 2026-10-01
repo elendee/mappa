@@ -5,6 +5,8 @@ import * as lib from './lib.js'
 
 const DRAG_MAP = new Map()
 
+// const pending_field = 'data-pending-restore'
+
 
 let diffX, diffY, dragTarget
 let lastX, lastY
@@ -65,13 +67,24 @@ const make_draggable = ( event ) => {
 	})
 	ele.classList.add('draggable')
 	ele.addEventListener('mousedown', handle_draggable_mousedown )
-	// ele.style.opacity = 0
-	ele.setAttribute('data-pending-restore', Date.now() )
-	setTimeout(() => {
-		if( ele.getAttribute('data-pending-restore') ){
-			console.error('check for restore position and remove this attr if not found')
+
+	const extant = localStorage.getItem( storage_key )
+
+	if( extant ){
+		try{
+			const {
+				left,
+				top,
+			} = JSON.parse( extant )			
+
+			ele.style.left = left 
+			ele.style.top = top
+
+		}catch( err ){
+			console.warn( err )
 		}
-	}, 1000 )
+
+	}
 
 } // make draggable
 
@@ -139,7 +152,7 @@ const restore_draggable = ( event ) => {
 	}
 	
 	ele.style.opacity = 1
-	ele.removeAttribute('data-pending-restore')
+	// ele.removeAttribute( pending_field )
 
 } // restore draggable
 

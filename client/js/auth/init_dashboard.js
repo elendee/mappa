@@ -38,9 +38,13 @@ mappa.bind_nav({
 })
 
 await mappa.refresh_layers({
+	Layer,
 	type: 'user',
+	silent: true,
 })
 
 await mappa.refresh_layers({
+	Layer,
 	type: 'others',
+	silent: true,
 })
