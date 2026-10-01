@@ -113,49 +113,19 @@ const DATA = {
 	FS_ROOT_THUMB: `${public_fs_root}/thumbs`,
 	FS_ROOT_PREVIEWS: `${public_fs_root}/previews`,
 
-
-	FRIENDS: [
-		'amigos',
-		'amis',
-		'amici',
-		'amigos',
-		'prieteni',
-		'Freunde',
-		'vrienden',
-		'vänner',
-		'друзья',
-		'友達',
-		'أصدقاء',
-		'दोस्त',
-		'朋友们',
-		'arkadaşlar',
-		'przyjaciele',
-	],
-
-	LANGUAGES: [
-		['Tonga'],
-		['Gaelic'],
-		['Chinese'],
-		['Spanish',],
-		['English',],
-		['Hindi',],
-		['Arabic',],
-		['Bengali',],
-		['Portuguese',],
-		['Russian',],
-		['Japanese',],
-		['Punjabi'],
-		['German'],
-		['Javanese',],
-		['Korean'],
-		['French',],
-		['Telugu',],
-		['Marathi'],
-		['Turkish',],
-		['Tamil',],
-		['Urdu',],
-		['Vietnamese'],
-	],
+	LAYER_STYLES: {
+		sketch: {
+			tools: [
+				{
+					name: 'chat',
+					// slug: 
+				},
+				{
+					name: 'mouse',
+				}
+			]
+		}
+	},
 
 	ICONS: {
 		clock: 'clock.png',
@@ -176,6 +146,8 @@ const DATA = {
 		WIDTH: 40,
 		// HEIGHT: 80,
 	},
+
+	DEFAULT_STYLE: 'sketch',
 
 }
 

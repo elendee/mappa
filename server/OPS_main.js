@@ -12,11 +12,8 @@ import User from './models/User.js'
 import MODELS from './MODELS.js'
 import MediaItem from './models/MediaItem.js'
 import Layer from './models/Layer.js'
-// import Alcove from './models/Alcove.js'
-// import CoveJoin from './models/CoveJoin.js'
+import Tool from './models/Tool.js'
 import Friendship from './models/Friendship.js'
-// import ChatTranslate from './models/ChatTranslate.js'
-// import Chat from './models/Chat.js'
 import FIELDS from './data/FIELDS.js'
 import BROKER from './BROKER.js'
 import SVGS from './data/SVGS.js'
@@ -44,7 +41,7 @@ const action = async( request ) => {
 	const pool = DB.getPool()
 	let sql, res, pre_res, post_res 
 
-	let value, model, account, err_msg, pub, place, uuid, order, line_item, item, can_edit, req_user, allowed
+	let value, model, account, err_msg, pub, place, uuid, order, line_item, item, can_edit, req_user, allowed, layer
 
 	const results = []
 	const results_obj = {}
@@ -66,6 +63,48 @@ const action = async( request ) => {
 			const layer = new Layer( r )
 			const pub =layer.publish( layer.get_request_allowed( request ))
 			results.push( pub )
+		}
+
+		return {
+			success: true,
+			results,
+		}
+
+
+	case 'get_toolbox':
+
+		// get public tools
+		layer = await GET.layer({
+			uuid: request.body.layer_uuid,
+		})
+		if( !layer ) return lib.return_fail(`layer not found`, `layer not found`)
+
+		value = PUBLIC.LAYER_STYLES[ layer.style ]
+		if( !value ){
+			// lib.return_fail(`layer style not found`)
+			log('flag', 'layer public style not found', layer.style )
+		}else{
+			for( const data of value.tools || [] ){
+				const tool = new Tool( data )
+				const pub = tool.publish( tool.get_request_allowed( request ))
+				results.push( pub )
+			}			
+		}
+
+
+		// add custom tools
+		sql = `SELECT * FROM tools WHERE layer_key=?`
+		res = await pool.queryPromise( sql, layer.id )
+		if( res.error ){
+			log('flag', 'err get tools', res.error )
+		}else{
+			for( const r of res.results || [] ){
+				const tool = new Tool( r )
+				const pub = tool.publish( tool.get_request_allowed( request ))
+				pub.is_custom = true
+				// !!r.user_key
+				results.push( pub )
+			}
 		}
 
 		return {

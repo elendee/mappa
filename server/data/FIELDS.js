@@ -79,6 +79,23 @@ const MODELS = {
 		},
 	},
 
+	Tool: {
+		user_key: {
+			type: 'number',
+		},
+		layer_key: {
+			type: 'number',
+		},
+		name: {
+			type: 'string',
+			view: 'all',
+		},
+		slug: {
+			type: 'string',
+			view: 'all',
+		}
+	},
+
 	Layer: {
 		user_key: {
 			type: 'number',
@@ -165,6 +182,17 @@ const MODELS = {
 			type: 'boolean',
 			view: 'all',
 			no_edit: true,
+		},
+
+		style: {
+			type: 'select_multi',
+			prompt: 'layer style',
+			view: 'all',
+			options: {
+				dog: 1,
+				cat: 'two',
+			}
+			// no_edit: true,
 		},
 
 	},

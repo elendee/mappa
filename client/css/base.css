@@ -121,6 +121,11 @@ body.dark,
 	padding-left: 50px;
 }
 
+.ib{
+	display: inline-block;
+	vertical-align: top
+}
+
 code, code *{
 	font-family: sourcecode;
 	font-size: .9rem;

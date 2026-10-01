@@ -499,8 +499,12 @@ body.dashboard.menu-hidden #layer-panel{
 	left: 10px;
 }
 .edit-layer form{
-	height: 400px;
+	/* height: 400px; */
 }
+.edit-layer input[name=style]{
+	
+}
+
 
 .drag-icon{
 	position: absolute;
@@ -569,6 +573,30 @@ body.dashboard.menu-hidden #layer-panel{
 .toolbox-content{
 	padding: 20px 10px 10px 10px;
 	border: 1px solid green;
+}
+
+.layer-style-preview{
+	width: 150px;
+	height: 150px;
+	border: 1px solid;
+	cursor: pointer;
+	border-radius: 5px;
+}
+
+.layer-style-selector{
+	max-width: 150px;
+	border: 1px solid;
+	margin: 0 5px;
+	cursor: pointer;
+}
+.layer-style-selector:hover{
+	background: lightgrey;
+}
+.edit-layer .layer-style-preview  img{
+	max-width: 150px
+}
+.edit-layer .layer-style-preview{
+	overflow: hidden;
 }
 
 

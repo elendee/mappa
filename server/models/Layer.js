@@ -1,5 +1,7 @@
 import Model from './Model.js'
 import log from '../log.js'
+import PUBLIC from '../data/PUBLIC.js'
+
 
 
 
@@ -11,6 +13,8 @@ class Layer extends Model {
 		init = init || {}
 
 		this.table = Layer.table
+
+		this.style = init.style || this.style || PUBLIC.DEFAULT_STYLE
 
 	}
 

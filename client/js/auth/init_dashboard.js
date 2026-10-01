@@ -47,6 +47,7 @@ await mappa.refresh_layers({
 
 
 BROKER.subscribe('MAPPA_SET_LAYER', mappa.set_layer_active )
+BROKER.subscribe('MAPPA_SET_TOOL', mappa.set_tool_active )
 
 await lib.sleep( 100 )
 

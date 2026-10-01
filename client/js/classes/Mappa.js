@@ -120,8 +120,6 @@ class Mappa extends Model {
 			wrap.classList.toggle('toggled')
 		})
 
-		// blorb 
-
 	}
 
 	async _load_script(){
@@ -183,10 +181,6 @@ class Mappa extends Model {
 		modal.left_panel.append( form )
 
 		document.body.append( modal.ele )
-
-		// modal.content.append( 
-		// 	form.querySelector('input[type=submit]')
-		// )
 
 		BROKER.publish('MAKE_DRAGGABLE', {
 			ele: modal.content,
@@ -304,7 +298,6 @@ class Mappa extends Model {
 
 		this.fill_toolbox({
 			layer,
-			container: this.DOM.toolbox.content,
 		})
 		.catch( err => {
 			console.error( 'err fill toolbox', err )
@@ -316,6 +309,13 @@ class Mappa extends Model {
 
 		this.apply_base_layers( layer )
 
+	}
+
+
+	set_tool_active = async( event ) => {
+		const {
+
+		} = event
 	}
 
 
@@ -349,19 +349,94 @@ class Mappa extends Model {
 	async fill_toolbox( args ){
 		const {
 			layer,
-			container,
 		} = args
 
-		container.innerText = 'toolbox...'
+		this.DOM.toolbox.content.innerText = ''
 
-		hal('standard', 'fill toolboxxxxxx', 10 * 1000 )
+		let res = await fetch_wrap('/action_main', 'post', {
+			action: 'get_toolbox',
+			layer_uuid: layer.uuid,
+		})
 
-	}
+		console.log('fill toolbox', {
+			res,
+		})
+
+		if( !res?.success ){
+			return hal('error', res?.msg || 'error filling style', 5000 )
+		}else{
+			//
+		}
+
+		for( const data of res.results || [] ){
+			const tool = build_tool({
+				mappa: this,
+				data,
+			})
+			this.DOM.toolbox.content.append( tool )
+		}
+
+	} // fill toolbox
 
 
 
 
 } // Mappa
+
+
+
+
+
+const build_tool = args => {
+	const {
+		mappa,
+		is_custom,
+		data,
+	} = args
+
+	const wrap = lib.b('div', false, 'tool-wrap', 'ib')
+
+	console.log('build-tool', {
+		is_custom,
+		data,
+	})
+
+	const img = lib.b('img')
+	img.src = `${is_custom ? '/fs' : '/resource/tools'}/${data.slug}.png`
+	wrap.append( img )
+
+	wrap.addEventListener('click', set_active_tool )
+
+	MAP.set( wrap, {
+		mappa,
+		is_custom,
+		tool_data: data,
+	})
+
+	return wrap
+
+}
+
+
+
+const set_active_tool = e => {
+	const wrap = lib.click_parent( e.target, 'tool-wrap', false, 5 )
+	const {
+		is_custom,
+		tool_data,
+	} = MAP.get( wrap )
+
+	BROKER.publish('MAPPA_SET_TOOL', {
+		is_custom,
+		tool_data,
+	})
+
+	hal('success', 'set tool ' + tool_data.name, 5000 )
+
+}
+
+
+
 
 
 

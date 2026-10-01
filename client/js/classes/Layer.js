@@ -1,5 +1,6 @@
 import Model from './Model.js'
 import * as lib from '../lib.js'
+import GLOBAL from '../GLOBAL.js'
 
 
 
@@ -14,6 +15,8 @@ class Layer extends Model {
 		init = init || {}
 
 		this.name = init.name || ''
+
+		this.style = init.style || this.style || GLOBAL.DEFAULT_STYLE
 
 	}
 
@@ -74,10 +77,40 @@ class Layer extends Model {
 			console.warn('should have extant row for layer')
 		}
 
+		this.mappa.fill_toolbox({
+			layer: this,
+		})
 
+	} // post save
 
-		console.log('post-save', args )
-	}
+	_custom_post_form( args ){
+		const {
+			form,
+			edit_args,
+		} = args
+
+		const select = form.querySelector('select[name=style]')
+		select.style.display = 'none'
+
+		const preview = lib.b('div', false, 'layer-style-preview')
+		const label = lib.b('label')
+		label.innerText = this.style
+		preview.append( label )
+		const img = lib.b('img')
+		img.src = `/resource/layer_styles/${this.style}.jpg`
+		preview.append( img )
+		select.parentElement.insertBefore( preview, select )
+
+		preview.addEventListener('click', choose_layer_style )
+
+		MAP.set( preview, {
+			form,
+			select,
+			layer: this,
+			edit_args,
+		})
+
+	} // custom post form
 
 
 
@@ -115,10 +148,112 @@ class Layer extends Model {
 
 		return wrap
 
-	}
+	} // build row
 
 
 } // Layer
+
+
+
+
+const choose_layer_style = e => {
+
+	const preview = lib.click_parent( e.target, 'layer-style-preview', false, 5 )
+
+	const {
+		form,
+		select,
+		layer,
+		edit_args,
+	} = MAP.get( preview )
+
+	const modal = new Modal({
+		type: 'style-modal',
+	})
+
+	const expl = lib.b('div', false, 'modal-expl')
+	expl.innerText = `Each style comes with different icons and tools available.`
+	modal.content.append( expl )
+
+	for( const type in GLOBAL.LAYER_STYLES ){
+		const data = GLOBAL.LAYER_STYLES[type]
+		const selector = build_layer_selector({
+			select,
+			modal,
+			type,
+			data,
+			preview,
+		})
+		modal.content.append( selector )
+	}
+
+	document.body.append( modal.ele )
+
+} // choose layer style
+
+
+
+const build_layer_selector = args => {
+	const {
+		select,
+		modal,
+		type,
+		data,
+		preview,
+	} = args
+
+	const wrap = lib.b('div', false, 'layer-style-selector', 'ib')
+	wrap.setAttribute('data-style-type', type )
+	wrap.addEventListener('click', select_layer_style )
+
+	const label = lib.b('label')
+	label.innerHTML = type
+	wrap.append( label )
+	wrap.append( lib.b('br') )
+
+	const img = lib.b('img')
+	img.src = `/resource/layer_styles/${type}.jpg`
+	wrap.append( img )
+
+	MAP.set( wrap, {
+		preview,
+		select,
+		img,
+		modal,
+		type,
+	})
+
+	return wrap
+
+}
+
+
+const select_layer_style = e => {
+
+	const selector = lib.click_parent( e.target, 'layer-style-selector', false, 5 )
+
+	const {
+		preview,
+		select,
+		img,
+		modal,
+		type,
+	} = MAP.get( selector )
+
+	modal.close.click()
+
+	select.value = type
+
+	preview.src = `/resource/layer_styles/${type}.jpg` // querySelector('img')
+
+	selector.setAttribute('data-style-type', type )
+
+	selector.querySelector('label').innerText = type
+
+	hal('success', 'selected ' + type, 3000 )
+
+
+}
 
 
 

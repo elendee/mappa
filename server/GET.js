@@ -3,43 +3,11 @@ import * as lib from './lib.js'
 import log from './log.js'
 import DB from './db.js'
 import User from './models/User.js'
+import Layer from './models/Layer.js'
 
 
 
 
-
-/*
-	a very loose factory mapper
-*/
-
-
-
-
-
-
-const parser = async( uuid ) => {
-
-	const pool = DB.getPool()
-	let sql, res
-
-	let parser
-
-	if( uuid ){
-		sql = `SELECT * FROM parsers WHERE uuid=?`
-		res = await pool.queryPromise( sql, uuid )
-	}else{
-		return log('flag', 'unhandled parser')
-	}
-
-	if( res.error ) return log('flag', res.error )
-
-	if( res.results?.length ){
-		return new Parser( res.results[0] )
-	}else{
-		log('flag', 'no parser found', uuid )
-	}
-
-}
 
 
 
@@ -88,7 +56,93 @@ const user = async( args ) => {
 		})
 	}
 
-}
+} // layer
+
+
+
+
+
+const layer = async( args ) => {
+	const {
+		id, 
+		uuid,
+	} = args
+
+	const pool = DB.getPool()
+	let sql, res
+
+	let layer
+
+	if( id ){
+		sql = `SELECT * FROM layers WHERE id=?`
+		res = await pool.queryPromise( sql, id )
+	}else if( uuid ){
+		sql = `SELECT * FROM layers WHERE uuid=?`
+		res = await pool.queryPromise( sql, uuid )
+	}else{
+		return log('flag', 'get-layer: not found', {
+			id,
+			uuid,
+		})
+	}
+
+	if( res.error ) return log('flag', 'err get layer', res.error )
+
+	if( res.results?.length ){
+		return new Layer( res.results[0] )
+	}else{
+		log('flag', 'no layer found', {
+			uuid,
+			id,
+		})
+	}
+
+} // layer
+
+
+
+
+
+
+const tool = async( args ) => {
+	// const {
+	// 	id, 
+	// 	uuid,
+	// } = args
+
+	// const pool = DB.getPool()
+	// let sql, res
+
+	// let tool
+
+	// if( id ){
+	// 	sql = `SELECT * FROM tools WHERE id=?`
+	// 	res = await pool.queryPromise( sql, id )
+	// }else if( uuid ){
+	// 	sql = `SELECT * FROM tools WHERE uuid=?`
+	// 	res = await pool.queryPromise( sql, uuid )
+	// }else{
+	// 	return log('flag', 'get-tool: not found', {
+	// 		id,
+	// 		uuid,
+	// 	})
+	// }
+
+	// if( res.error ) return log('flag', 'err get tool', res.error )
+
+	// if( res.results?.length ){
+	// 	return new Tool( res.results[0] )
+	// }else{
+	// 	log('flag', 'no tool found', {
+	// 		uuid,
+	// 		id,
+	// 	})
+	// }
+
+	log('flag', 'UNHANDLED GET-TOOL')
+
+} // tool
+
 
 
 
@@ -102,6 +156,7 @@ const user = async( args ) => {
 
 
 export {
+	tool,
+	layer,
 	user,
-	parser,
 }
