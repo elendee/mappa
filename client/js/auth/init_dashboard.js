@@ -15,18 +15,13 @@ const panel = document.getElementById('layer-panel')
 
 
 
-// https://tiles.openfreemap.org/styles/liberty
-// https://tiles.openfreemap.org/styles/bright
-// https://tiles.openfreemap.org/styles/positron
-// https://tiles.openfreemap.org/styles/dark
-// https://tiles.openfreemap.org/styles/fiord
+// base style is fixed to CARTO positron (see Mappa.init)
 
 
 const mappa = window.mappa = new Mappa()
 
 await mappa.init({
 	container: content,
-	style: 'positron',
 	// center
 	// zoom
 	// maxBounds

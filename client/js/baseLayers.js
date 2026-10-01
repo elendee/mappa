@@ -1,6 +1,7 @@
-// baseLayers.js — abstracted base-layer definitions + one-time creation form.
-// No localStorage here: user picks visible groups once while creating a Layer.
-// Model persistence is handled elsewhere; this module is clientside form only.
+// baseLayers.js — base-layer group definitions (positron-locked) + creation form.
+// The map style is fixed to CARTO positron (see Mappa.init), so group matchers
+// target positron style layer ids directly. No multi-style fallback, no localStorage:
+// the active Layer's saved layer_* prefs are the single source of truth.
 
 import * as lib from './lib.js'
 
@@ -9,51 +10,85 @@ export const BASE_LAYER_GROUPS = [
 		id: 'roads',
 		label: 'Roads',
 		desc: 'Streets, highways, minor/major roads, bridges & tunnels',
+		match: /^(road_|tunnel_|bridge_)/,
+		exclude: /(rail|transit)/,
 		defaultVisible: true,
 	},
 	{
 		id: 'transit',
 		label: 'Transit / Rail',
 		desc: 'Subway, rail & tram lines',
+		match: /(rail|transit)/,
 		defaultVisible: true,
 	},
 	{
 		id: 'road_labels',
 		label: 'Road labels',
-		desc: 'Street names & highway shields',
+		desc: 'Street names & house numbers',
+		match: /^(roadname_|housenumber)/,
 		defaultVisible: true,
 	},
 	{
 		id: 'landmarks',
 		label: 'Landmarks / POI',
 		desc: 'Shops, amenities, transit hubs & airports',
+		match: /^(poi_|airport)/,
 		defaultVisible: true,
 	},
 	{
 		id: 'neighborhoods',
 		label: 'Neighborhood names',
 		desc: 'City, town, village & district labels',
+		match: /^place_/,
 		defaultVisible: true,
 	},
 	{
 		id: 'buildings',
 		label: 'Buildings',
 		desc: 'Building footprints & 3D extrusions',
+		match: /^building/,
 		defaultVisible: true,
 	},
 	{
 		id: 'water',
 		label: 'Water',
 		desc: 'Rivers, lakes, waterways & labels',
+		match: /^water/,
 		defaultVisible: true,
 	},
 	{
 		id: 'land',
 		label: 'Parks & landuse',
 		desc: 'Parks, forests, grass, sand & landcover',
+		match: /^(park$|park_|landuse_|landcover_|aeroway[-_])/,
 		defaultVisible: true,
 	},
 ]
+
+// resolve each group to concrete style layer ids present in the loaded style
+export function resolveGroups( map ){
+	const layers = map.getStyle?.()?.layers || []
+	const allIds = layers.map( l => l.id )
+
+	return BASE_LAYER_GROUPS.map( g => {
+		let ids = allIds.filter( id => g.match.test( id ) )
+		if( g.exclude ) ids = ids.filter( id => !g.exclude.test( id ) )
+		return { ...g, layerIds: ids }
+	}).filter( g => g.layerIds.length > 0 )
+}
+
+// set visibility for every style layer in a group; no-op false if group unknown
+export function setBaseLayerVisible( map, groupOrId, visible ){
+	const id = typeof groupOrId === 'string' ? groupOrId : groupOrId?.id
+	if( !id || !map?.getLayer ) return false
+	const g = resolveGroups( map ).find( x => x.id === id )
+	if( !g ) return false
+	for( const lid of g.layerIds ){
+		if( !map.getLayer( lid ) ) continue
+		try{ map.setLayoutProperty( lid, 'visibility', visible ? 'visible' : 'none' ) }catch(_){}
+	}
+	return true
+}
 
 export const get_default_base_layers = () => {
 	return BASE_LAYER_GROUPS.filter( g => g.defaultVisible ).map( g => g.id )
@@ -148,6 +183,8 @@ export function build_base_layer_form( args ){
 
 export default {
 	BASE_LAYER_GROUPS,
+	resolveGroups,
+	setBaseLayerVisible,
 	get_default_base_layers,
 	build_base_layer_form,
 }

@@ -76,6 +76,11 @@
 
 .save-wrap{
     display: inline-block;
+	width: 100%;
+}
+.save-wrap input{
+	width: auto;
+	display: inline-block;
 }
 
 .model-summary{

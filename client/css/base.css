@@ -508,6 +508,9 @@ img#flash{
 .align-center{
 	text-align: center;
 }
+.align-right{
+	text-align: right;
+}
 
 .alert-icon{
 	position: absolute;

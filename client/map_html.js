@@ -345,11 +345,11 @@ const render = ( type, request, data ) => {
 								<div id='user-layers-section' class='nav-section'>
 									<div id='layer-panel-header'>
 										<button class='panel-toggle'>-</button>
-										<h4>Your Layers</h4>
+										<h4>Your Maps</h4>
 										<button class='info-btn' data-info='user'>?</button>
 									</div>
 									<div id='add-layer-row'>
-										<button id='add-layer' class='button prime'>+ create layer</button>
+										<button id='add-layer' class='button prime'>+ create map</button>
 									</div>
 									<div id='layer-list'></div>
 									<div class='layer-login-prompt hidden'>
@@ -360,11 +360,11 @@ const render = ( type, request, data ) => {
 								<div id='other-layers-section' class='nav-section'>
 									<div id='layer-panel-header'>
 										<button class='panel-toggle'>-</button>
-										<h4>Other Layers</h4>
+										<h4>Other Maps</h4>
 										<button class='info-btn' data-info='other'>?</button>
 									</div>
 									<div id='find-layer-row'>
-										<button id='find-layer' class='button prime'>+ find layer</button>
+										<button id='find-layer' class='button prime'>+ find map</button>
 									</div>
 									<div id='find-layer-list'></div>
 									<div class='layer-login-prompt hidden'>

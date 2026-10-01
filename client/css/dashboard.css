@@ -473,6 +473,16 @@ body.dashboard.menu-hidden #layer-panel{
 .edit-layer .model-form-Layer{
 	padding-top: 0;
 }
+.edit-layer .model-form-Layer .boolean{
+	display: inline-block;
+	/* border: 1px solid; */
+	width: auto;
+	margin-right: 10px;
+	/* margin: 0 5px; */
+}
+.edit-layer .model-form-Layer .boolean label{
+	padding: 2px 0;
+}
 .edit-layer .model-form{
 	padding-left: 0;
 	/* padding-top: 0; */
@@ -482,6 +492,14 @@ body.dashboard.menu-hidden #layer-panel{
 }
 .modal.edit-layer{
 	background: transparent;
+}
+.edit-layer input[type=submit]{
+	position: absolute;
+	bottom: 10px;
+	left: 10px;
+}
+.edit-layer form{
+	height: 400px;
 }
 
 .drag-icon{

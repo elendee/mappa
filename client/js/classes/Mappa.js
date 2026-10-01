@@ -2,7 +2,7 @@ import { Modal } from '../Modal.js'
 import BROKER from '../EventBroker.js'
 import Model from './Model.js'
 import * as lib from '../lib.js'
-import { build_base_layer_form } from '../baseLayers.js'
+import { build_base_layer_form, BASE_LAYER_GROUPS, setBaseLayerVisible } from '../baseLayers.js'
 import draggable from '../draggable.js'
 import fetch_wrap from '../fetch_wrap.js'
 import hal from '../hal.js'
@@ -16,6 +16,9 @@ const MAPLIBRE_ESM = [
 	'https://esm.sh/maplibre-gl@4.7.1?bundle',
 	'https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/+esm',
 ]
+
+// base map style is fixed — group matchers in baseLayers.js target these ids
+const POSITRON_STYLE = `https://basemaps.cartocdn.com/gl/positron-gl-style/style.json`
 
 export const NYC = {
 	CENTER:[
@@ -39,6 +42,7 @@ class Mappa extends Model {
 
 		this.initialized = undefined
 		this.active_layer = undefined
+		this._pending_base_layer = undefined
 
 		this.active_field = 'mappa-active-layer'
 	}
@@ -46,7 +50,6 @@ class Mappa extends Model {
 	async init( args ){
 		const {
 			container,
-			style = 'positron',
 			center = NYC.CENTER,
 			zoom = NYC.ZOOM,
 			maxBounds = NYC.BOUNDS,
@@ -79,12 +82,17 @@ class Mappa extends Model {
 		// init maplibre here
 		this.map = new maplibregl.Map({
 	    	container: this.DOM.map,
-	    	style: `https://basemaps.cartocdn.com/gl/${style}-gl-style/style.json`,
+	    	style: POSITRON_STYLE,
 	    	center,
 	    	zoom,
 	    	maxBounds,
 	    	attributionControl,
 	    });
+
+	    // a layer can be selected before the style finishes loading;
+	    // replay the pending prefs once the style is ready
+	    this.map.on('load', () => this._apply_pending_base_layers() )
+	    this.map.on('styledata', () => this._apply_pending_base_layers() )
 
 	    return this.map;
 
@@ -143,7 +151,7 @@ class Mappa extends Model {
 
 		const modal = new Modal({
 			type: 'edit-layer',
-			expl: 'Basic settings for your layer. These can be edited anytime.',
+			expl: 'Basic settings for your map. These can be edited anytime.',
 		})
 
 		modal.make_columns()
@@ -160,11 +168,6 @@ class Mappa extends Model {
 			}
 		}
 
-		console.log('pop edit', {
-			selected,
-			extant_data,
-		})
-
 		const base_layers = lib.b('div', false, 'base-layer-wrap')
 		const base_ele = this._build_base_ele({
 			selected,
@@ -180,6 +183,10 @@ class Mappa extends Model {
 		modal.left_panel.append( form )
 
 		document.body.append( modal.ele )
+
+		// modal.content.append( 
+		// 	form.querySelector('input[type=submit]')
+		// )
 
 		BROKER.publish('MAKE_DRAGGABLE', {
 			ele: modal.content,
@@ -307,6 +314,35 @@ class Mappa extends Model {
 
 		localStorage.setItem( this.active_field, uuid )
 
+		this.apply_base_layers( layer )
+
+	}
+
+
+	// update the map with the active layer's saved base-layer prefs
+	// (layer.layer_roads … layer.layer_land; missing/null = visible default).
+	// defers if the style isn't loaded yet — replayed on load/styledata.
+	apply_base_layers( layer ){
+		if( !layer || !this.map ) return false
+		if( typeof this.map.isStyleLoaded === 'function' && !this.map.isStyleLoaded() ){
+			this._pending_base_layer = layer
+			return false
+		}
+		this._pending_base_layer = undefined
+		for( const g of BASE_LAYER_GROUPS ){
+			const raw = layer[ 'layer_' + g.id ]
+			const visible = ( raw === undefined || raw === null ) ? true : !!raw
+			setBaseLayerVisible( this.map, g.id, visible )
+		}
+		return true
+	}
+
+	_apply_pending_base_layers(){
+		if( this._pending_base_layer && this.map?.isStyleLoaded?.() ){
+			const layer = this._pending_base_layer
+			this._pending_base_layer = undefined
+			this.apply_base_layers( layer )
+		}
 	}
 
 
@@ -317,6 +353,8 @@ class Mappa extends Model {
 		} = args
 
 		container.innerText = 'toolbox...'
+
+		hal('standard', 'fill toolboxxxxxx', 10 * 1000 )
 
 	}
 
