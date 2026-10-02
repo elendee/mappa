@@ -118,7 +118,7 @@ const DATA = {
 			tools: [
 				{
 					name: 'chat',
-					// slug: 
+					// slug: autofill below
 				},
 				{
 					name: 'mouse',
@@ -150,6 +150,18 @@ const DATA = {
 	DEFAULT_STYLE: 'sketch',
 
 }
+
+
+// set layer style slugs
+for( const key in DATA.LAYER_STYLES ){
+	const {
+		tools
+	} = DATA.LAYER_STYLES[ key ]
+	for( const entry of tools ){
+		entry.slug = entry.name.replace(/ /g, '_')		
+	}
+}
+
 
 
 export default DATA

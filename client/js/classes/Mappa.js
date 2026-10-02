@@ -314,14 +314,69 @@ class Mappa extends Model {
 
 	set_tool_active = async( event ) => {
 		const {
+			wrap,
 			is_custom,
 			tool_data,
 		} = event
 
+		hal('success', 'set tool ' + tool_data.name + '; click to place', 5000 )
 
 		console.log('set-tool-active', event )
 
-	}
+		// blank slate
+		const tools = wrap.parentElement.querySelectorAll('.tool-wrap')
+		for( const ele of tools ){
+			ele.classList.remove('selected')
+		}
+		wrap.classList.add('selected')
+
+		this.active_tool = tool_data.slug
+
+		if( window.innerWidth > 800 ){ // desktop
+
+			this.set_cursor({
+				state: true,
+				tool_data,
+			})
+
+		}else{ // mobile
+
+
+
+		}
+
+
+	} // set tool active
+
+
+	set_cursor( args ){
+		const {
+			state,
+			tool_data,
+		} = args
+
+		const type = tool_data.slug
+
+		if( !state ){
+			window.removeEventListener('mousemove', move_img_cursor )
+			window.removeEventListener('click', unset_img_cursor )
+			document.body.classList.remove('dragging')
+			return;
+		}
+
+		let url
+		if( tool_data.is_custom ){
+			// img_cursor.querySelector('img').src
+		}else{
+			img_cursor.querySelector('img').src = `/resource/tools/${tool_data.slug}.png`
+		}
+
+		document.body.classList.add('dragging')
+
+		document.addEventListener('mousemove', move_img_cursor )
+		document.addEventListener('click', unset_img_cursor )
+
+	} // set cursor
 
 
 	// update the map with the active layer's saved base-layer prefs
@@ -434,12 +489,27 @@ const set_active_tool = e => {
 	BROKER.publish('MAPPA_SET_TOOL', {
 		is_custom,
 		tool_data,
+		wrap,
 	})
-
-	hal('success', 'set tool ' + tool_data.name, 5000 )
 
 }
 
+
+
+let img_cursor = lib.b('div', 'img-cursor')
+const _img = lib.b('img')
+img_cursor.append( _img )
+document.body.append( img_cursor ) // shows only on classlist dragging
+
+const move_img_cursor = e => {
+	img_cursor.style.top = e.clientY + 'px'
+	img_cursor.style.left = e.clientX + 'px'
+}
+
+const unset_img_cursor = e => {
+	window.removeEventListener('mousemove', move_img_cursor )
+	img_cursor.style.display = 'none'
+}
 
 
 

@@ -613,6 +613,16 @@ body.dashboard.menu-hidden #layer-panel{
 	border: 2px solid black;
 }
 
+#img-cursor{
+	position: fixed;
+	z-index: 99;
+	border: 2px solid green;
+}
+.dragging #img-cursor{
+	display: inline-block;
+}
+
+
 @media screen and (max-width: 800px){
 	#view-main,
 	#view-p1{
