@@ -205,16 +205,16 @@ exp.get('/', async(request, response)  => {
 
 
 // shim cache it
-let style_files = []
-setTimeout(() => {
-	fs.readdir( env.ROOT + '/node_modules/highlight.js/styles', ( err, files ) => {
-		if( err ) log('flag', err )
-		for( const f of files || [] ){
-			style_files.push( f )
-		}
-		log('boot', 'initialized style files: ' + style_files?.length )
-	})
-}, 1000 )
+// let style_files = []
+// setTimeout(() => {
+// 	fs.readdir( env.ROOT + '/node_modules/highlight.js/styles', ( err, files ) => {
+// 		if( err ) log('flag', err )
+// 		for( const f of files || [] ){
+// 			style_files.push( f )
+// 		}
+// 		log('boot', 'initialized style files: ' + style_files?.length )
+// 	})
+// }, 1000 )
 
 
 // node_modules/highlight.js

@@ -73,8 +73,8 @@ const styles = {
 
 	chat: `<link rel='stylesheet' href='/css/chat.css'>`,
 
-	highlight_light: `<link id='highlight-light' rel='stylesheet' href='/node_modules/highlight.js/styles/paraiso-light.min.css'>`,
-	highlight_dark: `<link id='highlight-dark' rel='stylesheet' href='/node_modules/highlight.js/styles/night-owl.min.css'>`,
+	// highlight_light: `<link id='highlight-light' rel='stylesheet' href='/node_modules/highlight.js/styles/paraiso-light.min.css'>`,
+	// highlight_dark: `<link id='highlight-dark' rel='stylesheet' href='/node_modules/highlight.js/styles/night-owl.min.css'>`,
 
 	ele_user: `<link rel='stylesheet' href='/css/ele_user.css'>`,
 

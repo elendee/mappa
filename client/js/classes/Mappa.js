@@ -119,6 +119,9 @@ class Mappa extends Model {
 		toggle.addEventListener('click', e => {
 			wrap.classList.toggle('toggled')
 		})
+		this.DOM.toolbox.name.addEventListener('click', e => {
+			wrap.classList.toggle('toggled')
+		})
 
 	}
 
