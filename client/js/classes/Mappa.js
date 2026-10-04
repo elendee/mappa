@@ -364,6 +364,7 @@ class Mappa extends Model {
 			window.removeEventListener('mousemove', move_img_cursor )
 			window.removeEventListener('click', unset_img_cursor )
 			document.body.classList.remove('dragging')
+			document.body.remove( img_cursor )
 			return;
 		}
 
@@ -373,6 +374,8 @@ class Mappa extends Model {
 		}else{
 			img_cursor.querySelector('img').src = `/resource/tools/${tool_data.slug}.png`
 		}
+
+		document.body.append( img_cursor )
 
 		document.body.classList.add('dragging')
 
@@ -502,7 +505,7 @@ const set_active_tool = e => {
 let img_cursor = lib.b('div', 'img-cursor')
 const _img = lib.b('img')
 img_cursor.append( _img )
-document.body.append( img_cursor ) // shows only on classlist dragging
+document.body.append( img_cursor ) // shows only on classlist drag ging
 
 const move_img_cursor = e => {
 	img_cursor.style.top = e.clientY + 'px'
@@ -511,7 +514,8 @@ const move_img_cursor = e => {
 
 const unset_img_cursor = e => {
 	window.removeEventListener('mousemove', move_img_cursor )
-	img_cursor.style.display = 'none'
+	// img_cursor.style.display = 'none'
+	document.body.remove( img_cursor )
 }
 
 
