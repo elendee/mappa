@@ -9,19 +9,19 @@ import GLOBAL from './GLOBAL.js'
 
 
 
-if( !GLOBAL.SKIP.THIRD_PARTY_SCRIPTS ){
-	import('https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/es/highlight.min.js')
-	.then( module => {
-		window.hljs = module.default
-	})
-	.catch( err => {
-		if( env.LOCAL ){
-			console.warn('no-load hljs')
-		}else{
-			console.log( err )
-		}
-	})
-}
+// if( !GLOBAL.SKIP.THIRD_PARTY_SCRIPTS ){
+// 	import('https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/es/highlight.min.js')
+// 	.then( module => {
+// 		window.hljs = module.default
+// 	})
+// 	.catch( err => {
+// 		if( env.LOCAL ){
+// 			console.warn('no-load hljs')
+// 		}else{
+// 			console.log( err )
+// 		}
+// 	})
+// }
 
 
 
