@@ -154,7 +154,15 @@ if( env.LOCAL ){
 	exp.use('/js', express.static( './client/js' )) // __dirname + 
 	exp.use('/fs', express.static( './fs' ))
 	exp.use('/inc', express.static( './inc' )) // __dirname + 
-	exp.use('/resource', express.static( './resource' )) // __dirname + 
+	exp.use('/resource', express.static( './resource', {
+		setHeaders: ( res, filePath ) => {
+			if( filePath.endsWith('.pbf') ){
+				res.setHeader( 'Content-Type', 'application/x-protobuf' )
+				// tilemaker dir tiles are gzip-on-disk; font glyphs are raw protobuf
+				if( filePath.includes('/tiles/') ) res.setHeader( 'Content-Encoding', 'gzip' )
+			}
+		},
+	})) // __dirname + 
 	exp.use('/node_modules/', express.static( './node_modules/' )) // __dirname + 
 	// exp.use('/geometries', express.static( './geometries' )) // __dirname + 
 }

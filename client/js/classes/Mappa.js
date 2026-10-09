@@ -21,7 +21,8 @@ const MAPLIBRE_ESM = [
 	// 'https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/+esm',
 ]
 
-// base map style is fixed — group matchers in baseLayers.js target these ids
+// base map style is local offline — group matchers in baseLayers.js target these ids
+const NYC_OFFLINE_STYLE = `/resource/styles/nyc-offline.json`
 const POSITRON_STYLE = `https://basemaps.cartocdn.com/gl/positron-gl-style/style.json`
 
 export const NYC = {
@@ -84,9 +85,12 @@ class Mappa extends Model {
 		}
 
 		// init maplibre here
+		// workers are blob-URL based and can't resolve relative tile/glyph urls,
+		// so absolutize the offline style against its own url before handing it over
+		const style = await this._load_offline_style( NYC_OFFLINE_STYLE )
 		this.map = new maplibregl.Map({
 	    	container: this.DOM.map,
-	    	style: POSITRON_STYLE,
+	    	style,
 	    	center,
 	    	zoom,
 	    	maxBounds,
@@ -144,6 +148,22 @@ class Mappa extends Model {
 		if( mapEl ) mapEl.innerText = 'Failed to load map.'
 		return null
 
+	}
+
+	async _load_offline_style( url ){
+		const res = await fetch( url )
+		if( !res.ok ) throw new Error('failed to load style ' + url + ': ' + res.status )
+		const style = await res.json()
+		const base = res.url || ( window.location.origin + url )
+		// new URL() percent-encodes {tokens}; restore the maplibre ones afterwards
+		const absolutize = u => new URL( u, base ).href.replace( /%7B/gi, '{' ).replace( /%7D/gi, '}' )
+		if( style.glyphs ) style.glyphs = absolutize( style.glyphs )
+		for( const key in ( style.sources || {} ) ){
+			const src = style.sources[ key ]
+			if( Array.isArray( src.tiles ) ) src.tiles = src.tiles.map( absolutize )
+			if( src.url ) src.url = absolutize( src.url )
+		}
+		return style
 	}
 
 	pop_edit_layer( args ){
