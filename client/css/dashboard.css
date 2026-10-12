@@ -231,7 +231,7 @@ body.dashboard.menu-hidden #layer-panel{
 	box-shadow: 0 1px 3px rgba(0,0,0,0.09);
 	border: 1px solid #dee2e6;
 }
-#global-layers-section{
+#global-mappas-section{
 	background: #f8f9fa;
 	border: 1px solid #e9ecef;
 }
@@ -251,7 +251,7 @@ body.dashboard.menu-hidden #layer-panel{
 
 
 
-#global-layer-list .global-layer-row{
+#global-mappa-list .global-mappa-row{
 	display: flex;
 	align-items: center;
 	gap: 10px;
@@ -262,14 +262,14 @@ body.dashboard.menu-hidden #layer-panel{
 	margin-bottom: 8px;
 	cursor: pointer;
 }
-#global-layer-list .global-layer-row:last-child{ margin-bottom: 0; }
-#global-layer-list .global-layer-row.disabled-layer{ opacity: .55; }
-#global-layer-list .global-layer-row input[type=checkbox]{ width: 18px; height: 18px; flex-shrink: 0; }
-.global-layer-text{ flex:1; min-width:0; }
-.global-layer-name{ font-size: .9rem; font-weight: 600; }
-.global-layer-desc{ font-size: .75rem; color: #6c757d; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#global-mappa-list .global-mappa-row:last-child{ margin-bottom: 0; }
+#global-mappa-list .global-mappa-row.disabled-layer{ opacity: .55; }
+#global-mappa-list .global-mappa-row input[type=checkbox]{ width: 18px; height: 18px; flex-shrink: 0; }
+.global-mappa-text{ flex:1; min-width:0; }
+.global-mappa-name{ font-size: .9rem; font-weight: 600; }
+.global-mappa-desc{ font-size: .75rem; color: #6c757d; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #layer-panel-header,
-#global-layers-header{
+#global-mappas-header{
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -277,10 +277,10 @@ body.dashboard.menu-hidden #layer-panel{
 	padding-bottom: 8px;
 }
 #layer-panel-header h4,
-#global-layers-header h4{
+#global-mappas-header h4{
 	margin: 0;
 }
-#add-layer-row{
+#add-mappa-row{
 	margin-bottom: 12px;
 }
 #layer-panel #find-layer,
@@ -288,7 +288,7 @@ body.dashboard.menu-hidden #layer-panel{
 	/* font-size: .85rem; */
 	font-weight: bold;
 }
-.layer-row{
+.mappa-row{
 	display: flex;
 	align-items: center;
 	gap: 8px;
@@ -298,12 +298,12 @@ body.dashboard.menu-hidden #layer-panel{
 	position: relative;
 	background: #fbfbfb;
 }
-.layer-row.selected{
+.mappa-row.selected{
 	border: 1px solid black;
 	font-weight: bold;
 }
 
-.layer-row input[type=checkbox]{
+.mappa-row input[type=checkbox]{
 	width: 18px;
 	height: 18px;
 }
@@ -315,7 +315,7 @@ body.dashboard.menu-hidden #layer-panel{
 	text-overflow: ellipsis;
 	/* border: 1px solid; */
 }
-.layer-row .button.small{
+.mappa-row .button.small{
 	font-size: .7rem;
 	padding: 2px 6px;
 	top: -8px;
@@ -517,7 +517,7 @@ body.dashboard.menu-hidden #layer-panel{
 	padding-top: 50px;
 }
 
-.global-layer-text{
+.global-mappa-text{
 	display: inline-block;
 	vertical-align: middle;
 	padding-left: 10px;

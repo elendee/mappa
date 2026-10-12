@@ -46,14 +46,14 @@ await mappa.refresh_layers({
 })
 
 
-BROKER.subscribe('MAPPA_SET_LAYER', mappa.set_layer_active )
+BROKER.subscribe('MAPPA_SET_MAPPA', mappa.set_mappa_active )
 BROKER.subscribe('MAPPA_SET_TOOL', mappa.set_tool_active )
 
 await lib.sleep( 100 )
 
 const active_uuid = localStorage.getItem( mappa.active_field )
 if( active_uuid ){
-	const button = mappa.DOM.panel.querySelector(`.layer-row[data-layer-uuid='${active_uuid}']`)
+	const button = mappa.DOM.panel.querySelector(`.mappa-row[data-layer-uuid='${active_uuid}']`)
 	if( button ){
 		button.click()
 	}

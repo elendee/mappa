@@ -78,7 +78,7 @@ export function resolveGroups( map ){
 }
 
 // set visibility for every style layer in a group; no-op false if group unknown
-export function setBaseLayerVisible( map, groupOrId, visible ){
+export function setBaseLayerVisible( map, groupOrId, visible, caller ){
 	const id = typeof groupOrId === 'string' ? groupOrId : groupOrId?.id
 	if( !id || !map?.getLayer ) return false
 	const g = resolveGroups( map ).find( x => x.id === id )
@@ -87,6 +87,11 @@ export function setBaseLayerVisible( map, groupOrId, visible ){
 		if( !map.getLayer( lid ) ) continue
 		try{ map.setLayoutProperty( lid, 'visibility', visible ? 'visible' : 'none' ) }catch(_){}
 	}
+	console.log('LAYERS set-base-layer-visible', {
+		groupOrId,
+		visible,
+		caller,
+	})
 	return true
 }
 
@@ -122,7 +127,7 @@ export function build_base_layer_form( args ){
 	}
 
 	for( const g of BASE_LAYER_GROUPS ){
-		const row = lib.b('label', false, 'global-layer-row')
+		const row = lib.b('label', false, 'global-mappa-row')
 		row.title = g.desc
 
 		const cb = lib.b('input')
@@ -131,10 +136,10 @@ export function build_base_layer_form( args ){
 		cb.setAttribute('data-base-layer', g.id )
 		inputs.set( g.id, cb )
 
-		const text = lib.b('div', false, 'global-layer-text')
-		const name = lib.b('div', false, 'global-layer-name')
+		const text = lib.b('div', false, 'global-mappa-text')
+		const name = lib.b('div', false, 'global-mappa-name')
 		name.innerText = g.label
-		const desc = lib.b('div', false, 'global-layer-desc')
+		const desc = lib.b('div', false, 'global-mappa-desc')
 		desc.innerText = g.desc
 		text.append( name )
 		text.append( desc )
@@ -174,7 +179,7 @@ export function build_base_layer_form( args ){
 		const set = new Set( Array.isArray( ids ) ? ids : [] )
 		for( const [ id, cb ] of inputs ){
 			cb.checked = set.has( id )
-			cb.closest('.global-layer-row')?.classList.toggle('disabled-layer', !cb.checked )
+			cb.closest('.global-mappa-row')?.classList.toggle('disabled-layer', !cb.checked )
 		}
 	}
 

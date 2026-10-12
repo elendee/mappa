@@ -110,12 +110,12 @@ class Mappa extends Model {
 
 	    // a layer can be selected before the style finishes loading;
 	    // replay the pending prefs once the style is ready
-	    this.map.on('load', () => this._apply_pending_base_layers() )
-	    this.map.on('styledata', () => this._apply_pending_base_layers() )
+	    this.map.on('load', () => this._apply_pending_base_layers({caller: 'load'}) )
+	    this.map.on('styledata', () => this._apply_pending_base_layers({caller: 'styledata'}) )
 
 	    return this.map;
 
-	}
+	} // init
 
 	_init_toolbox(){
 		const {
@@ -142,7 +142,7 @@ class Mappa extends Model {
 			wrap.classList.toggle('toggled')
 		})
 
-	}
+	} // init toolbox
 
 	async _load_script(){
 
@@ -167,6 +167,10 @@ class Mappa extends Model {
 		const style = await res.json()
 		const base = res.url || ( window.location.origin + url )
 		// new URL() percent-encodes {tokens}; restore the maplibre ones afterwards
+		console.log('LAYERS load-offline-styles', {
+			url,
+			base,
+		})
 		const absolutize = u => new URL( u, base ).href.replace( /%7B/gi, '{' ).replace( /%7D/gi, '}' )
 		if( style.glyphs ) style.glyphs = absolutize( style.glyphs )
 		for( const key in ( style.sources || {} ) ){
@@ -225,7 +229,7 @@ class Mappa extends Model {
 			storage_key: 'mappa-edit-layer',
 		})
 
-	}
+	} // pop edit layer
 
 	_build_base_ele( args ){
 		const {
@@ -260,7 +264,7 @@ class Mappa extends Model {
 			console.log('find')
 		})
 
-	}
+	} // bind nav
 
 
 	async refresh_layers( args ){
@@ -295,10 +299,9 @@ class Mappa extends Model {
 		if( !res?.success ) return silent || hal('error', res?.msg || 'error getting layers', 5000 )
 
 		for( const layer of res.results || [] ){
-			const extant = container.querySelector('.layer-row[data-layer-uuid="' + layer.uuid + '"]')
+			const extant = container.querySelector('.mappa-row[data-layer-uuid="' + layer.uuid + '"]')
 			if( extant ) continue;
 			const _layer = new Layer( layer )
-			// _layer.extant_row = 
 			_layer.mappa = this
 			const _new = _layer.build_row({
 				data: layer,
@@ -309,12 +312,14 @@ class Mappa extends Model {
 	} // refresh-layers
 
 
-	set_layer_active = async( event ) => {
+	set_mappa_active = async( event ) => {
 		const {
 			layer,
 		} = event
 
-		console.log('set-layer', event )
+		console.log('LAYERS set-mappa-active', {
+			layer,
+		})
 
 		const {
 			uuid,
@@ -332,8 +337,6 @@ class Mappa extends Model {
 
 		this.DOM.toolbox.content.innerHTML = ''
 
-		// refill this.DOM.toolbox.content
-
 		this.fill_toolbox({
 			layer,
 		})
@@ -345,9 +348,9 @@ class Mappa extends Model {
 
 		localStorage.setItem( this.active_field, uuid )
 
-		this.apply_base_layers( layer )
+		this.apply_base_layers( layer, 'set-layer-active' )
 
-	}
+	} // set layer active
 
 
 	set_tool_active = async( event ) => {
@@ -421,10 +424,13 @@ class Mappa extends Model {
 
 
 	// update the map with the active layer's saved base-layer prefs
-	// (layer.layer_roads … layer.layer_land; missing/null = visible default).
 	// defers if the style isn't loaded yet — replayed on load/styledata.
-	apply_base_layers( layer ){
+	apply_base_layers( layer, caller ){
 		if( !layer || !this.map ) return false
+		console.log('LAYERS apply-base-layers', {
+			layer,
+			caller,
+		})
 		if( typeof this.map.isStyleLoaded === 'function' && !this.map.isStyleLoaded() ){
 			this._pending_base_layer = layer
 			return false
@@ -433,16 +439,23 @@ class Mappa extends Model {
 		for( const g of BASE_LAYER_GROUPS ){
 			const raw = layer[ 'layer_' + g.id ]
 			const visible = ( raw === undefined || raw === null ) ? true : !!raw
-			setBaseLayerVisible( this.map, g.id, visible )
+			setBaseLayerVisible( this.map, g.id, visible, 'apply-base-layers' )
 		}
 		return true
 	}
 
-	_apply_pending_base_layers(){
+	_apply_pending_base_layers( args ){
+		const {
+			caller,
+		} = args || {}
 		if( this._pending_base_layer && this.map?.isStyleLoaded?.() ){
+			console.log('LAYERS apply-pending-base-layers', {
+				pending: this._pending_base_layer,
+				caller,
+			})
 			const layer = this._pending_base_layer
 			this._pending_base_layer = undefined
-			this.apply_base_layers( layer )
+			this.apply_base_layers( layer, 'apply-pending' )
 		}
 	}
 

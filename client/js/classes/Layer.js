@@ -34,7 +34,7 @@ class Layer extends Model {
 		const modal = lib.click_parent( form, 'modal-content', false, 4 )
 		const base_layers = modal.querySelector('.base-layer-wrap')
 
-		const rows = base_layers.querySelectorAll('.global-layer-row')
+		const rows = base_layers.querySelectorAll('.global-mappa-row')
 		for( const row of rows ){
 			const input = row.querySelector('input')
 			const name = input.getAttribute('data-base-layer')
@@ -120,9 +120,9 @@ class Layer extends Model {
 			data,
 		} = args
 
-		const wrap = lib.b('div', false, 'layer-row')
+		const wrap = lib.b('div', false, 'mappa-row')
 		wrap.setAttribute('data-layer-uuid', this.uuid )
-		wrap.addEventListener('click', set_layer )
+		wrap.addEventListener('click', set_mappa )
 
 		const name = lib.b('div', false, 'layer-name')
 		name.innerText = data.name || 'unnamed'
@@ -258,18 +258,18 @@ const select_layer_style = e => {
 
 
 
-const set_layer = e => {
+const set_mappa = e => {
 	const btn = lib.click_parent( e.target, 'layer-edit', false, 4 )
 	if( btn ) return;
 
-	const wrap = lib.click_parent( e.target, 'layer-row', false, 5 )
+	const wrap = lib.click_parent( e.target, 'mappa-row', false, 5 )
 	if( !wrap ) return;
 
 	const nav = lib.click_parent( wrap, false, 'layer-panel', 10 )
 
 	const container = lib.click_parent( wrap, 'nav-section', false, 4 )
 
-	const rows = nav.querySelectorAll('.layer-row')
+	const rows = nav.querySelectorAll('.mappa-row')
 	for( const row of rows ){
 		row.classList.remove('selected')
 	}
@@ -281,7 +281,7 @@ const set_layer = e => {
 		mappa,
 	} = MAP.get( wrap )
 
-	BROKER.publish('MAPPA_SET_LAYER', {
+	BROKER.publish('MAPPA_SET_MAPPA', {
 		layer,
 	})
 

@@ -90,7 +90,7 @@
 	height: 60px;
 	overflow: hidden;
 }
-.toggled #global-layerr-list,
+.toggled #global-mappa-list,
 .toggled #layer-list{
 	display: none;
 }
