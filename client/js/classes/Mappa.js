@@ -3,7 +3,11 @@ import { Modal } from '../Modal.js'
 import BROKER from '../EventBroker.js'
 import Model from './Model.js'
 import * as lib from '../lib.js'
-import { build_base_layer_form, BASE_LAYER_GROUPS, setBaseLayerVisible } from '../baseLayers.js'
+import { 
+	build_base_layer_form, 
+	BASE_LAYER_GROUPS, 
+	setBaseLayerVisible 
+} from '../baseLayers.js'
 import draggable from '../draggable.js'
 import fetch_wrap from '../fetch_wrap.js'
 import hal from '../hal.js'
@@ -12,12 +16,12 @@ import hal from '../hal.js'
 const MAP = new Map()
 
 // const MAPLIBRE_CSS = 'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css'
+
 const MAPLIBRE_CSS = '/resource/inc/maplibre-gl.css'
 const STYLE_BASE = `https://tiles.openfreemap.org/styles/` //liberty
 const MAPLIBRE_ESM = [
 	'/resource/inc/maplibre-gl.bundle.mjs',
 	// '/resource/inc/maplibre-gl@4.7.1?bundle',
-
 	// 'https://esm.sh/maplibre-gl@4.7.1?bundle',
 	// 'https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/+esm',
 ]
