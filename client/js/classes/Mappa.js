@@ -1,3 +1,4 @@
+import env from '../env.js'
 import { Modal } from '../Modal.js'
 import BROKER from '../EventBroker.js'
 import Model from './Model.js'
@@ -22,8 +23,14 @@ const MAPLIBRE_ESM = [
 ]
 
 // base map style is local offline — group matchers in baseLayers.js target these ids
-const NYC_OFFLINE_STYLE = `/resource/styles/nyc-offline.json`
+// const NYC_OFFLINE_STYLE = `/resource/styles/nyc-offline.json`
+// const NYC_OFFLINE_STYLE = `/resource/styles/positron_local.json`
+const NYC_OFFLINE_STYLE = `/resource/styles/positron_offline.json`
+// const NYC_OFFLINE_STYLE = `/resource/styles/dark_matter.json`
 const POSITRON_STYLE = `https://basemaps.cartocdn.com/gl/positron-gl-style/style.json`
+
+let MAP_STYLE = env.LOCAL_MAPS ? NYC_OFFLINE_STYLE : POSITRON_STYLE
+
 
 export const NYC = {
 	CENTER:[
@@ -87,7 +94,7 @@ class Mappa extends Model {
 		// init maplibre here
 		// workers are blob-URL based and can't resolve relative tile/glyph urls,
 		// so absolutize the offline style against its own url before handing it over
-		const style = await this._load_offline_style( NYC_OFFLINE_STYLE )
+		const style = await this._load_offline_style( MAP_STYLE )
 		this.map = new maplibregl.Map({
 	    	container: this.DOM.map,
 	    	style,
