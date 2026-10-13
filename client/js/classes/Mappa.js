@@ -554,7 +554,7 @@ const build_tool = args => {
 	})
 
 	const img = lib.b('img')
-	img.src = `${is_custom ? '/fs' : '/resource/tools'}/${data.slug}.png`
+	img.src = `/fs/tools/${data.img_slug}.png`
 	wrap.append( img )
 
 	wrap.addEventListener('click', set_active_tool )

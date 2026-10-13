@@ -79,17 +79,16 @@ const action = async( request ) => {
 		})
 		if( !layer ) return lib.return_fail(`layer not found`, `layer not found`)
 
-		value = PUBLIC.LAYER_STYLES[ layer.style ]
-		if( !value ){
-			// lib.return_fail(`layer style not found`)
-			log('flag', 'layer public style not found', layer.style )
-		}else{
-			for( const data of value.tools || [] ){
-				const tool = new Tool( data )
-				const pub = tool.publish( tool.get_request_allowed( request ))
-				results.push( pub )
-			}			
-		}
+		// value = PUBLIC.LAYER_STYLES[ layer.style ]
+		// if( !value ){
+		// 	log('flag', 'layer public style not found', layer.style )
+		// }else{
+		// 	for( const data of value.tools || [] ){
+		// 		const tool = new Tool( data )
+		// 		const pub = tool.publish( tool.get_request_allowed( request ))
+		// 		results.push( pub )
+		// 	}			
+		// }
 
 
 		// add custom tools

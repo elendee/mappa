@@ -65,13 +65,13 @@ import * as GET from './server/GET.js'
 import * as ModelClasses from './server/models/ModelClasses.js'
 // import NOTIFICATIONS from './server/NOTIFICATIONS.js'
 import WORLD from './server/WORLD.js'
+import validate_env from './server/validate_env.js'
 
 
 
 
 
 
-if( !env.APP_ROOT ) throw new Error('must define app-root')
 
 
 
@@ -445,13 +445,14 @@ exp.use((req, res) => {
 
 
 
-const done = await ModelClasses.init()
-
-
 DB.initPool( async( err, pool ) => {
 
 	if( err ) return console.error( 'no db: ', err )
-	
+
+	await validate_env()
+
+	const done = await ModelClasses.init()
+
 	await new Promise((resolve, reject) => {
 		server.listen( env.PORT, function() {
 			resolve()

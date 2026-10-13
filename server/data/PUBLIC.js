@@ -113,20 +113,6 @@ const DATA = {
 	FS_ROOT_THUMB: `${public_fs_root}/thumbs`,
 	FS_ROOT_PREVIEWS: `${public_fs_root}/previews`,
 
-	LAYER_STYLES: {
-		sketch: {
-			tools: [
-				{
-					name: 'chat',
-					// slug: autofill below
-				},
-				{
-					name: 'mouse',
-				}
-			]
-		}
-	},
-
 	ICONS: {
 		clock: 'clock.png',
 		check: 'check.png',
@@ -156,16 +142,6 @@ const DATA = {
 
 }
 
-
-// set layer style slugs
-for( const key in DATA.LAYER_STYLES ){
-	const {
-		tools
-	} = DATA.LAYER_STYLES[ key ]
-	for( const entry of tools ){
-		entry.slug = entry.name.replace(/ /g, '_')		
-	}
-}
 
 
 

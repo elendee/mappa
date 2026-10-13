@@ -93,6 +93,10 @@ const MODELS = {
 		slug: {
 			type: 'string',
 			view: 'all',
+		},
+		img_slug: {
+			type: 'string',
+			view: 'all',
 		}
 	},
 
