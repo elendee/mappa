@@ -17,8 +17,8 @@ const MAP = new Map()
 
 // const MAPLIBRE_CSS = 'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css'
 
-const MAPLIBRE_CSS = '/resource/inc/maplibre-gl.css'
-const STYLE_BASE = `https://tiles.openfreemap.org/styles/` //liberty
+// const MAPLIBRE_CSS = '/resource/inc/maplibre-gl.css'
+// const STYLE_BASE = `https://tiles.openfreemap.org/styles/` //liberty
 const MAPLIBRE_ESM = [
 	'/resource/inc/maplibre-gl.bundle.mjs',
 	// '/resource/inc/maplibre-gl@4.7.1?bundle',
@@ -26,15 +26,19 @@ const MAPLIBRE_ESM = [
 	// 'https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/+esm',
 ]
 
-// base map style is local offline — group matchers in baseLayers.js target these ids
-// const NYC_OFFLINE_STYLE = `/resource/styles/nyc-offline.json`
+const map_styles = {
+	positron_local_all: `positron_offline.json`,
+	positron_local_all_dark: `positron_offline_dark.json`,
+	positron_local_json_only: `positron_local.json`,
+	position_cloud: `https://basemaps.cartocdn.com/gl/positron-gl-style/style.json`,
+}
 
-const NYC_OFFLINE_PARTIAL = `/resource/styles/positron_local.json`
-const NYC_OFFLINE_FULL = `/resource/styles/positron_offline.json`
-const NYC_OFFLINE_FULL_DARK = `/resource/styles/positron_offline_dark.json`
-const POSITRON_STYLE = `https://basemaps.cartocdn.com/gl/positron-gl-style/style.json`
-
-let MAP_STYLE = env.LOCAL_MAPS ? NYC_OFFLINE_FULL_DARK : POSITRON_STYLE
+let USE_STYLE
+if( !env.MAP_STYLE || env.MAP_STYLE.match(/cloud/) ){
+	USE_STYLE = map_styles.position_cloud
+}else{
+	USE_STYLE = `/resource/styles/${map_styles[ env.MAP_STYLE || 'positron_local_all' ]}`
+}
 
 
 export const NYC = {
@@ -102,7 +106,7 @@ class Mappa extends Model {
 		// init maplibre here
 		// workers are blob-URL based and can't resolve relative tile/glyph urls,
 		// so absolutize the offline style against its own url before handing it over
-		const style = await this._load_offline_style( MAP_STYLE )
+		const style = await this._load_offline_style( USE_STYLE )
 		this.map = new maplibregl.Map({
 	    	container: this.DOM.map,
 	    	style,
