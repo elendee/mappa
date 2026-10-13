@@ -78,21 +78,33 @@ export function resolveGroups( map ){
 }
 
 // set visibility for every style layer in a group; no-op false if group unknown
-export function setBaseLayerVisible( map, groupOrId, visible, caller ){
+export function setBaseLayerVisible( args ){
+	const {
+		map, 
+		groupOrId, 
+		visible, 
+		caller
+	} = args || {}
+
 	const id = typeof groupOrId === 'string' ? groupOrId : groupOrId?.id
 	if( !id || !map?.getLayer ) return false
+
 	const g = resolveGroups( map ).find( x => x.id === id )
 	if( !g ) return false
+
 	for( const lid of g.layerIds ){
 		if( !map.getLayer( lid ) ) continue
 		try{ map.setLayoutProperty( lid, 'visibility', visible ? 'visible' : 'none' ) }catch(_){}
 	}
+
 	console.log('LAYERS set-base-layer-visible', {
 		groupOrId,
 		visible,
 		caller,
 	})
+
 	return true
+	
 }
 
 export const get_default_base_layers = () => {

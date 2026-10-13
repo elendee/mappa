@@ -96,7 +96,7 @@ const MODELS = {
 		}
 	},
 
-	Layer: {
+	MapView: {
 		user_key: {
 			type: 'number',
 		},
@@ -188,10 +188,11 @@ const MODELS = {
 			type: 'select_multi',
 			prompt: 'layer style',
 			view: 'all',
-			options: {
-				dog: 1,
-				cat: 'two',
-			}
+			options: 'MAP_STYLES',
+			// : {
+			// 	dog: 1,
+			// 	cat: 'two',
+			// }
 			// no_edit: true,
 		},
 
@@ -361,7 +362,7 @@ const FIELDS = {
 		'MediaItem': 16,
 		'User': 8,
 		'Chat': 16,
-		'Layer': 8,
+		'MapView': 8,
 		'LayerElement': 16,
 	},
 

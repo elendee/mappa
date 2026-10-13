@@ -9,7 +9,7 @@ const MAP = new Map()
 
 
 
-class Layer extends Model {
+class MapView extends Model {
 	constructor( init ){
 		super( init )
 		init = init || {}
@@ -63,7 +63,7 @@ class Layer extends Model {
 		} = res || {}
 
 		if( this.extant_row ){
-			const layer = new Layer( model )
+			const layer = new MapView( model )
 			layer.mappa = this.mappa
 			const new_row = layer.build_row({
 				data: this,
@@ -78,7 +78,7 @@ class Layer extends Model {
 		}
 
 		this.mappa.fill_toolbox({
-			layer: this,
+			mapview: this,
 		})
 
 	} // post save
@@ -122,7 +122,12 @@ class Layer extends Model {
 
 		const wrap = lib.b('div', false, 'mappa-row')
 		wrap.setAttribute('data-layer-uuid', this.uuid )
-		wrap.addEventListener('click', set_mappa )
+		wrap.addEventListener('click', set_map )
+		MAP.set( wrap, {
+			mapview: this,
+			layer_data: data,
+			mappa
+		})
 
 		const name = lib.b('div', false, 'layer-name')
 		name.innerText = data.name || 'unnamed'
@@ -140,18 +145,12 @@ class Layer extends Model {
 			mappa
 		})
 
-		MAP.set( wrap, {
-			layer: this,
-			layer_data: data,
-			mappa
-		})
-
 		return wrap
 
 	} // build row
 
 
-} // Layer
+} // Map-View
 
 
 
@@ -258,7 +257,7 @@ const select_layer_style = e => {
 
 
 
-const set_mappa = e => {
+const set_map = e => {
 	const btn = lib.click_parent( e.target, 'layer-edit', false, 4 )
 	if( btn ) return;
 
@@ -276,13 +275,13 @@ const set_mappa = e => {
 	wrap.classList.add('selected')
 
 	const {
-		layer,
+		mapview,
 		layer_data,
 		mappa,
 	} = MAP.get( wrap )
 
-	BROKER.publish('MAPPA_SET_MAPPA', {
-		layer,
+	BROKER.publish('MAPPA_SET_MAPVIEW', {
+		mapview,
 	})
 
 } // set layer
@@ -303,7 +302,7 @@ const edit_layer = e => {
 		extant_data: layer_data,
 		is_edit: true,
 		mappa,
-		Layer,
+		MapView,
 	})
 
 } // edit layer
@@ -311,4 +310,4 @@ const edit_layer = e => {
 
 
 
-export default Layer
+export default MapView

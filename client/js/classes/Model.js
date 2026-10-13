@@ -620,7 +620,10 @@ class Model {
 				if( OPT_SET ){
 					lib.render_multi_options( this, OPT_SET, key, existing_multi )
 				}else{
-					console.error('invalid option set to hydrate key: ' + this.constructor.name, key )
+					console.error('invalid option set to hydrate key', {
+						name: this.constructor.name, 
+						key 
+					})
 				}
 			}
 

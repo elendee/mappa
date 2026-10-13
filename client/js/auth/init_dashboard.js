@@ -1,7 +1,7 @@
 import ui from '../ui.js'
 import * as lib from '../lib.js'
 import Mappa from '../classes/Mappa.js'
-import Layer from '../classes/Layer.js'
+import MapView from '../classes/MapView.js'
 
 
 
@@ -29,24 +29,24 @@ await mappa.init({
 })
 
 mappa._bind_nav({
-	Layer,
+	MapView,
 	nav: panel,
 })
 
 await mappa.refresh_layers({
-	Layer,
+	MapView,
 	type: 'user',
 	silent: true,
 })
 
 await mappa.refresh_layers({
-	Layer,
+	MapView,
 	type: 'others',
 	silent: true,
 })
 
 
-BROKER.subscribe('MAPPA_SET_MAPPA', mappa.set_mappa_active )
+BROKER.subscribe('MAPPA_SET_MAPVIEW', mappa.set_mapview_active )
 BROKER.subscribe('MAPPA_SET_TOOL', mappa.set_tool_active )
 
 await lib.sleep( 100 )

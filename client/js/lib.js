@@ -1637,6 +1637,39 @@ const build_select = args => {
 }
 
 
+const render_multi_options = ( model, OPTIONS, key, container ) => {
+	/*
+		take a CSV of multiple options and render removeable buttons
+	*/
+	
+	const responses = model[key]?.split(',') || []
+	for( const choice of responses ){
+		// if( choice === '' ) continue
+		if( typeof choice !== 'string' ) continue
+		const key = choice.trim()
+		const value = OPTIONS[ key ]
+		if( !value ) continue
+		const wrap = build_multi( key, value )
+		container.append( wrap )
+	}
+}
+
+const build_multi = ( key, value ) => {
+	const wrap = b('div', false, 'multi-option')
+	wrap.innerText = value
+	wrap.setAttribute('data-value', key )
+	const rm = b('div', false, 'button', 'rm')
+	rm.innerHTML = '&times;'
+	rm.addEventListener('click', remove_multi_choice )
+	wrap.append( rm )
+	return wrap
+}
+
+const remove_multi_choice = e => {
+	const wrap = click_parent( e.target, 'multi-option', false, 5 )
+	wrap.remove()
+}
+
 
 
 
@@ -1724,5 +1757,6 @@ export {
 	build_checkbox,
 	build_text_input,
 	build_select,
-	syntax_types
+	syntax_types,
+	render_multi_options,
 }

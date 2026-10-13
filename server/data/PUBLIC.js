@@ -149,6 +149,11 @@ const DATA = {
 
 	DEFAULT_STYLE: 'sketch',
 
+	MAP_STYLES: {
+		cat: 1,
+		dog: 2,
+	}
+
 }
 
 

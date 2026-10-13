@@ -11,7 +11,7 @@ import {
 import User from './models/User.js'
 import MODELS from './MODELS.js'
 import MediaItem from './models/MediaItem.js'
-import Layer from './models/Layer.js'
+import MapView from './models/MapView.js'
 import Tool from './models/Tool.js'
 import Friendship from './models/Friendship.js'
 import FIELDS from './data/FIELDS.js'
@@ -55,12 +55,12 @@ const action = async( request ) => {
 	case 'get_user_layers':
 		if( !user.id ) return lib.return_fail(`must be logged`, `must be logged`)
 
-		sql = `SELECT * FROM layers WHERE user_key=?`
+		sql = `SELECT * FROM mapviews WHERE user_key=?`
 		res = await pool.queryPromise( sql, user.id )
 		if( res.error ) return lib.return_fail( res.error, `error getting user layers`)
 
 		for( const r of res.results ){
-			const layer = new Layer( r )
+			const layer = new MapView( r )
 			const pub =layer.publish( layer.get_request_allowed( request ))
 			results.push( pub )
 		}
@@ -74,8 +74,8 @@ const action = async( request ) => {
 	case 'get_toolbox':
 
 		// get public tools
-		layer = await GET.layer({
-			uuid: request.body.layer_uuid,
+		layer = await GET.mapview({
+			uuid: request.body.mapview_uuid,
 		})
 		if( !layer ) return lib.return_fail(`layer not found`, `layer not found`)
 
@@ -384,7 +384,7 @@ const action = async( request ) => {
 
 	case 'list_layers':
 		if( !lib.is_logged( request ) ) return lib.return_fail(`must be logged in`, `must be logged in`)
-		value = await Layer.list_for_user( user.id )
+		value = await MapView.list_for_user( user.id )
 		results.length = 0
 		for( const l of value ){
 			results.push( await l.publish_with_items() )
@@ -399,9 +399,9 @@ const action = async( request ) => {
 	case 'create_layer':
 		if( !lib.is_logged( request ) ) return lib.return_fail(`must be logged in`, `must be logged in`)
 
-		uuid = await lib.get_unique_uuid( DB, 'layers', FIELDS.PERSISTS_UUID.Layer )
+		uuid = await lib.get_unique_uuid( DB, 'layers', FIELDS.PERSISTS_UUID.MapView )
 
-		value = new Layer({
+		value = new MapView({
 			uuid,
 			user_key: user.id,
 			name: request.body.layer?.name || 'new layer',
@@ -420,7 +420,7 @@ const action = async( request ) => {
 
 	case 'update_layer':
 		if( !lib.is_logged( request ) ) return lib.return_fail(`must be logged in`, `must be logged in`)
-		value = await Layer.get_by_uuid( request.body.layer?.id )
+		value = await MapView.get_by_uuid( request.body.layer?.id )
 		if( !value ) return lib.return_fail(`layer not found`, `layer not found`)
 		// TODO: verify value.user_key === user.id (or shared/collab grant)
 		const patch = {}
@@ -440,7 +440,7 @@ const action = async( request ) => {
 
 	case 'delete_layer':
 		if( !lib.is_logged( request ) ) return lib.return_fail(`must be logged in`, `must be logged in`)
-		value = await Layer.get_by_uuid( request.body.layer?.id )
+		value = await MapView.get_by_uuid( request.body.layer?.id )
 		if( !value ) return lib.return_fail(`layer not found`, `layer not found`)
 		// TODO: verify value.user_key === user.id
 		// pseudo: cascade-delete elements — DELETE FROM layer_elements WHERE layer_key=?
@@ -458,7 +458,7 @@ const action = async( request ) => {
 		//   element: { kind:'restaurant', name:'...', lat, lng, icon:'restaurant', data:{...} },
 		// }, true)
 		if( !lib.is_logged( request ) ) return lib.return_fail(`must be logged in`, `must be logged in`)
-		value = await Layer.get_by_uuid( request.body.layer_uuid )
+		value = await MapView.get_by_uuid( request.body.layer_uuid )
 		if( !value ) return lib.return_fail(`layer not found`, `layer not found`)
 		// TODO: verify value.user_key === user.id
 		const el_in = request.body.element || {}
@@ -485,7 +485,7 @@ const action = async( request ) => {
 
 	case 'list_layer_elements':
 		if( !lib.is_logged( request ) ) return lib.return_fail(`must be logged in`, `must be logged in`)
-		value = await Layer.get_by_uuid( request.body.layer_uuid )
+		value = await MapView.get_by_uuid( request.body.layer_uuid )
 		if( !value ) return lib.return_fail(`layer not found`, `layer not found`)
 		// TODO: verify value.user_key === user.id
 		// pseudo future: WHERE lat BETWEEN ? AND ? AND lng BETWEEN ? AND ? for bbox lazy-load

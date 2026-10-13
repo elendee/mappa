@@ -28,12 +28,13 @@ const MAPLIBRE_ESM = [
 
 // base map style is local offline — group matchers in baseLayers.js target these ids
 // const NYC_OFFLINE_STYLE = `/resource/styles/nyc-offline.json`
-// const NYC_OFFLINE_STYLE = `/resource/styles/positron_local.json`
-const NYC_OFFLINE_STYLE = `/resource/styles/positron_offline.json`
-// const NYC_OFFLINE_STYLE = `/resource/styles/dark_matter.json`
+
+const NYC_OFFLINE_PARTIAL = `/resource/styles/positron_local.json`
+const NYC_OFFLINE_FULL = `/resource/styles/positron_offline.json`
+const NYC_OFFLINE_FULL_DARK = `/resource/styles/positron_offline_dark.json`
 const POSITRON_STYLE = `https://basemaps.cartocdn.com/gl/positron-gl-style/style.json`
 
-let MAP_STYLE = env.LOCAL_MAPS ? NYC_OFFLINE_STYLE : POSITRON_STYLE
+let MAP_STYLE = env.LOCAL_MAPS ? NYC_OFFLINE_FULL_DARK : POSITRON_STYLE
 
 
 export const NYC = {
@@ -43,8 +44,8 @@ export const NYC = {
 	],
 	ZOOM:10.5,
 	BOUNDS:[
-		[-74.5,40.4],
-		[-73.5,41.1]
+		[-74.1,40.5],
+		[-73.8,40.9]
 	]
 }
 
@@ -57,8 +58,8 @@ class Mappa extends Model {
 		init = init || {}
 
 		this.initialized = undefined
-		this.active_layer = undefined
-		this._pending_base_layer = undefined
+		this.active_mapview = undefined
+		this._pending_base_mapview = undefined
 
 		this.active_field = 'mappa-active-layer'
 	}
@@ -82,12 +83,15 @@ class Mappa extends Model {
 			panel: container.querySelector('#layer-panel'),
 			user_layer: container.querySelector('#user-layers-section'),
 			other_layer: container.querySelector('#other-layers-section'),
+			user_list: container.querySelector('#user-layers-section .layer-list'),
+			other_list: container.querySelector('#other-layers-section .layer-list'),
 			toolbox: {
 				wrap: lib.b('div', 'toolbox'),
 				content: lib.b('div', false, 'toolbox-content'),
 				name: lib.b('div', false, 'toolbox-name'),
 				toggle: lib.b('div', false, 'toolbox-toggle'),
 			},
+
 		}
 		this._init_toolbox()
 
@@ -110,8 +114,8 @@ class Mappa extends Model {
 
 	    // a layer can be selected before the style finishes loading;
 	    // replay the pending prefs once the style is ready
-	    this.map.on('load', () => this._apply_pending_base_layers({caller: 'load'}) )
-	    this.map.on('styledata', () => this._apply_pending_base_layers({caller: 'styledata'}) )
+	    this.map.on('load', () => this.__apply_pending_base_layers({caller: 'load'}) )
+	    this.map.on('styledata', () => this.__apply_pending_base_layers({caller: 'styledata'}) )
 
 	    return this.map;
 
@@ -186,7 +190,7 @@ class Mappa extends Model {
 			extant_row,
 			extant_data,
 			is_edit,
-			Layer,
+			MapView,
 		} = args || {}
 
 		const modal = new Modal({
@@ -216,7 +220,7 @@ class Mappa extends Model {
 		base_layers.append( base_ele )
 		modal.right_panel.append( base_layers )
 
-		const _layer = new Layer( extant_data )
+		const _layer = new MapView( extant_data )
 		_layer.extant_row = extant_row
 		_layer.mappa = this
 		const form = _layer.build_edit_form()
@@ -247,7 +251,7 @@ class Mappa extends Model {
 
 	_bind_nav( args ){
 		const {
-			Layer,
+			MapView,
 			nav,
 		} = args || {}
 
@@ -256,7 +260,7 @@ class Mappa extends Model {
 
 		create_btn.addEventListener('click', e => {
 			this.pop_edit_layer({
-				Layer,
+				MapView,
 			})
 		})
 
@@ -269,7 +273,7 @@ class Mappa extends Model {
 
 	async refresh_layers( args ){
 		const {
-			Layer,
+			MapView,
 			type,
 			silent,
 		} = args
@@ -280,12 +284,12 @@ class Mappa extends Model {
 
 		case 'user':
 			action = 'get_user_layers'
-			container = this.DOM.user_layer
+			container = this.DOM.user_list
 			break;
 
 		case 'others':
 			action = 'get_other_layers'
-			container = this.DOM.other_layer
+			container = this.DOM.other_list
 			break;
 
 		default:
@@ -301,7 +305,7 @@ class Mappa extends Model {
 		for( const layer of res.results || [] ){
 			const extant = container.querySelector('.mappa-row[data-layer-uuid="' + layer.uuid + '"]')
 			if( extant ) continue;
-			const _layer = new Layer( layer )
+			const _layer = new MapView( layer )
 			_layer.mappa = this
 			const _new = _layer.build_row({
 				data: layer,
@@ -312,13 +316,15 @@ class Mappa extends Model {
 	} // refresh-layers
 
 
-	set_mappa_active = async( event ) => {
+	set_mapview_active = async( event ) => {
 		const {
-			layer,
+			mapview,
 		} = event
 
+		if( event.layer ) throw new Error('stop doing this')
+
 		console.log('LAYERS set-mappa-active', {
-			layer,
+			mapview,
 		})
 
 		const {
@@ -327,7 +333,7 @@ class Mappa extends Model {
 			listed,
 			locked,
 			mappa, // ( should be this )
-		} = layer
+		} = mapview
 
 		if( !this.DOM.toolbox.wrap.parent ){
 			document.body.append( this.DOM.toolbox.wrap )
@@ -338,19 +344,24 @@ class Mappa extends Model {
 		this.DOM.toolbox.content.innerHTML = ''
 
 		this.fill_toolbox({
-			layer,
+			mapview,
+		})
+		.then( res => {
+			if( env.SPOOF.INIT_TOOLBOX ){
+				this.DOM.toolbox.toggle.click()
+			}
 		})
 		.catch( err => {
 			console.error( 'err fill toolbox', err )
 		})
 
-		this.active_layer = uuid
+		this.active_mapview = uuid
 
 		localStorage.setItem( this.active_field, uuid )
 
-		this.apply_base_layers( layer, 'set-layer-active' )
+		this.apply_base_layers( mapview, 'set-layer-active' )
 
-	} // set layer active
+	} // set mappa active
 
 
 	set_tool_active = async( event ) => {
@@ -386,8 +397,8 @@ class Mappa extends Model {
 
 		}
 
-
 	} // set tool active
+
 
 
 	set_cursor( args ){
@@ -408,7 +419,7 @@ class Mappa extends Model {
 
 		let url
 		if( tool_data.is_custom ){
-			// img_cursor.querySelector('img').src
+			// 
 		}else{
 			img_cursor.querySelector('img').src = `/resource/tools/${tool_data.slug}.png`
 		}
@@ -423,53 +434,76 @@ class Mappa extends Model {
 	} // set cursor
 
 
-	// update the map with the active layer's saved base-layer prefs
-	// defers if the style isn't loaded yet — replayed on load/styledata.
-	apply_base_layers( layer, caller ){
-		if( !layer || !this.map ) return false
-		console.log('LAYERS apply-base-layers', {
-			layer,
-			caller,
-		})
+
+	apply_base_layers( mapview, caller ){
+		/*
+			update the map with the active mapview's saved base-layer prefs
+			defers if the style isn't loaded yet — replayed on load/styledata.
+		*/
+		// validate props
+		if( !mapview || !this.map ) return false
+		// validate async
 		if( typeof this.map.isStyleLoaded === 'function' && !this.map.isStyleLoaded() ){
-			this._pending_base_layer = layer
+			this._pending_base_mapview = mapview
 			return false
 		}
-		this._pending_base_layer = undefined
+		this._pending_base_mapview = undefined
+		// log
+		console.log('LAYERS apply-base-layers', {
+			mapview,
+			caller,
+		})
+		// the apply
 		for( const g of BASE_LAYER_GROUPS ){
-			const raw = layer[ 'layer_' + g.id ]
+			const raw = mapview[ 'layer_' + g.id ] // layer_ = my db mapping prefix
 			const visible = ( raw === undefined || raw === null ) ? true : !!raw
-			setBaseLayerVisible( this.map, g.id, visible, 'apply-base-layers' )
+
+			setBaseLayerVisible({
+				map: this.map,
+				groupOrId: g.id, 
+				visible, 
+				caller: 'apply-base-layers'
+			})
+
 		}
+
 		return true
+
 	}
 
-	_apply_pending_base_layers( args ){
+
+
+	__apply_pending_base_layers( args ){
+		/*
+			purely an async patch
+			all business logic in apply-base-layers
+		*/
 		const {
 			caller,
 		} = args || {}
-		if( this._pending_base_layer && this.map?.isStyleLoaded?.() ){
+		if( this._pending_base_mapview && this.map?.isStyleLoaded?.() ){
 			console.log('LAYERS apply-pending-base-layers', {
-				pending: this._pending_base_layer,
+				pending: this._pending_base_mapview,
 				caller,
 			})
-			const layer = this._pending_base_layer
-			this._pending_base_layer = undefined
-			this.apply_base_layers( layer, 'apply-pending' )
+			const mapview = this._pending_base_mapview
+			this._pending_base_mapview = undefined
+			this.apply_base_layers( mapview, 'apply-pending' )
 		}
 	}
+
 
 
 	async fill_toolbox( args ){
 		const {
-			layer,
+			mapview,
 		} = args
 
 		this.DOM.toolbox.content.innerText = ''
 
 		let res = await fetch_wrap('/action_main', 'post', {
 			action: 'get_toolbox',
-			layer_uuid: layer.uuid,
+			mapview_uuid: mapview.uuid,
 		})
 
 		console.log('fill toolbox', {

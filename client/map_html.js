@@ -332,16 +332,6 @@ const render = ( type, request, data ) => {
 									${ links_misc( request ) }
 								</div>
 
-								<!-- div id='global-mappas-section' class='nav-section'>
-									<div id='global-mappas-header'>
-										<button class='panel-toggle'>-</button>
-										<h4 class='section-title'>Base Layers</h4>
-										<button class='info-btn' data-info='base'>?</button>
-									</div>
-									<div id='global-mappa-list'></div>
-								</div>
-								<hr-->
-
 								<div id='user-layers-section' class='nav-section'>
 									<div id='layer-panel-header'>
 										<button class='panel-toggle'>-</button>
@@ -351,7 +341,7 @@ const render = ( type, request, data ) => {
 									<div id='add-mappa-row'>
 										<button id='add-layer' class='button prime'>+ create map</button>
 									</div>
-									<div id='layer-list'></div>
+									<div class='layer-list'></div>
 									<div class='layer-login-prompt hidden'>
 										<span class='menu-item login login-link'>Log in</span> to create and toggle layers.
 									</div>
@@ -366,7 +356,7 @@ const render = ( type, request, data ) => {
 									<div id='find-mappa-row'>
 										<button id='find-layer' class='button prime'>+ find map</button>
 									</div>
-									<div id='find-layer-list'></div>
+									<div class='layer-list'></div>
 									<div class='layer-login-prompt hidden'>
 										<span class='menu-item login login-link'>Log in</span> to create and toggle layers.
 									</div>

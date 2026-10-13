@@ -5,14 +5,14 @@ import PUBLIC from '../data/PUBLIC.js'
 
 
 
-class Layer extends Model { 
-	static table='layers'; 
+class MapView extends Model { 
+	static table='mapviews'; 
 	static owner_test='user_key' 
 	constructor(init){
 		super( init )
 		init = init || {}
 
-		this.table = Layer.table
+		this.table = MapView.table
 
 		this.style = init.style || this.style || PUBLIC.DEFAULT_STYLE
 
@@ -53,4 +53,4 @@ class Layer extends Model {
 
 
 
-export default Layer
+export default MapView

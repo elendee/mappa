@@ -3,7 +3,7 @@ import * as lib from './lib.js'
 import log from './log.js'
 import DB from './db.js'
 import User from './models/User.js'
-import Layer from './models/Layer.js'
+import MapView from './models/MapView.js'
 
 
 
@@ -56,13 +56,13 @@ const user = async( args ) => {
 		})
 	}
 
-} // layer
+} // user
 
 
 
 
 
-const layer = async( args ) => {
+const mapview = async( args ) => {
 	const {
 		id, 
 		uuid,
@@ -71,33 +71,33 @@ const layer = async( args ) => {
 	const pool = DB.getPool()
 	let sql, res
 
-	let layer
+	let mapview
 
 	if( id ){
-		sql = `SELECT * FROM layers WHERE id=?`
+		sql = `SELECT * FROM mapviews WHERE id=?`
 		res = await pool.queryPromise( sql, id )
 	}else if( uuid ){
-		sql = `SELECT * FROM layers WHERE uuid=?`
+		sql = `SELECT * FROM mapviews WHERE uuid=?`
 		res = await pool.queryPromise( sql, uuid )
 	}else{
-		return log('flag', 'get-layer: not found', {
+		return log('flag', 'get-mapview: not found', {
 			id,
 			uuid,
 		})
 	}
 
-	if( res.error ) return log('flag', 'err get layer', res.error )
+	if( res.error ) return log('flag', 'err get mapview', res.error )
 
 	if( res.results?.length ){
-		return new Layer( res.results[0] )
+		return new MapView( res.results[0] )
 	}else{
-		log('flag', 'no layer found', {
+		log('flag', 'no mapview found', {
 			uuid,
 			id,
 		})
 	}
 
-} // layer
+} // mapview
 
 
 
@@ -157,6 +157,6 @@ const tool = async( args ) => {
 
 export {
 	tool,
-	layer,
+	mapview,
 	user,
 }
