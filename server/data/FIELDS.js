@@ -202,15 +202,18 @@ const MODELS = {
 
 	},
 
-	LayerElement: {
-		layer_key: {
+	MapElement: {
+		user_key: {
 			type: 'number',
 			required: true,
 		},
-		kind: {
-			type: 'string',
-			char_limit: [0,64],
-			view: 'all',
+		view_key: {
+			type: 'number',
+			required: true,
+		},
+		tool_key: {
+			type: 'number',
+			required: true,
 		},
 		name: {
 			type: 'string',
@@ -223,11 +226,6 @@ const MODELS = {
 		},
 		lng: {
 			type: 'number',
-			view: 'all',
-		},
-		icon: {
-			type: 'string',
-			char_limit: [0,255],
 			view: 'all',
 		},
 		data: {
@@ -368,6 +366,7 @@ const FIELDS = {
 		'Chat': 16,
 		'MapView': 8,
 		'LayerElement': 16,
+		'Tool': 16,
 	},
 
 	HAS_PUBLIC: [

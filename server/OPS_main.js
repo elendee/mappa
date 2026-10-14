@@ -41,7 +41,7 @@ const action = async( request ) => {
 	const pool = DB.getPool()
 	let sql, res, pre_res, post_res 
 
-	let value, model, account, err_msg, pub, place, uuid, order, line_item, item, can_edit, req_user, allowed, layer
+	let value, model, account, err_msg, pub, place, uuid, order, line_item, item, can_edit, req_user, allowed, layer, mapview
 
 	const results = []
 	const results_obj = {}
@@ -51,6 +51,33 @@ const action = async( request ) => {
 	}
 
 	switch( action ){
+
+	case 'place_icon':
+		log('flag', 'place-icon', request.body )
+
+		mapview = await GET.mapview({
+			uuid: request.body.mapview_uuid,
+		})
+		if( !mapview ) return lib.return_fail(`failed to find view: ${request.body.mapview_uuid}`, `failed to find view`)
+
+		tool = await GET.tool({
+			uuid: request.body.icon_uuid,
+		})
+		if( !tool ) return lib.return_fail(`failed to find tool: ${request.body.tool_uuid}`, `failed to find tool`)
+
+		value = new MapElement({
+			user_key: user.id,
+			view_key: mapview.id,
+			tool_key: tool.id
+		})
+
+		await value.save()
+
+		log('flag', 'place-icon success - may want some kind of push mechanism here....')
+
+		return {
+			success: true,
+		}
 
 	case 'get_user_layers':
 		if( !user.id ) return lib.return_fail(`must be logged`, `must be logged`)
@@ -396,7 +423,7 @@ const action = async( request ) => {
 	case 'create_layer':
 		if( !lib.is_logged( request ) ) return lib.return_fail(`must be logged in`, `must be logged in`)
 
-		uuid = await lib.get_unique_uuid( DB, 'layers', FIELDS.PERSISTS_UUID.MapView )
+		uuid = await lib.get_unique_uuid( DB, 'mapviews', FIELDS.PERSISTS_UUID.MapView )
 
 		value = new MapView({
 			uuid,
@@ -502,7 +529,9 @@ const action = async( request ) => {
 		item = await get_media_item( request.body.media_slug )
 		if( !item ) return lib.return_fail(`upload not found: ${request.body.media_slug}`, `upload not found`)
 		if( item.user_key !== user.id ) return lib.return_fail(`not your upload`, `you can only use your own uploads`)
+		uuid = await lib.get_unique_uuid( DB, 'tools', FIELDS.PERSISTS_UUID.Tool )
 		value = new Tool({
+			uuid,
 			user_key: user.id,
 			layer_key: layer.id,
 			name: request.body.type,

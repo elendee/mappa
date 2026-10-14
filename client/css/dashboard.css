@@ -621,12 +621,13 @@ body.dashboard.menu-hidden #layer-panel{
 #img-cursor{
 	position: fixed;
 	z-index: 99;
-	border: 2px solid green;
-	padding: 10px;
+	border: 2px solid grey;
+	/* padding: 10px; */
 	width: 100px;
 	height: 100px;
 	overflow: hidden;
 	pointer-events: none;
+	background: white;
 }
 .dragging #img-cursor{
 	display: inline-block;

@@ -6,6 +6,7 @@ import fs from 'fs'
 const required_dir = [
 	'fs/tools',
 	'fs/uploads',
+	'fs/thumbs',
 ]
 const required_env = [
 	'APP_ROOT',

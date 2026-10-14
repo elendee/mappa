@@ -123,6 +123,8 @@ class Mappa extends Model {
 	    this.map.on('load', () => this.__apply_pending_base_layers({caller: 'load'}) )
 	    this.map.on('styledata', () => this.__apply_pending_base_layers({caller: 'styledata'}) )
 
+	    this.map.on('click', on_map_click )
+
 	    return this.map;
 
 	} // init
@@ -226,10 +228,10 @@ class Mappa extends Model {
 		base_layers.append( base_ele )
 		modal.right_panel.append( base_layers )
 
-		const _layer = new MapView( extant_data )
-		_layer.extant_row = extant_row
-		_layer.mappa = this
-		const form = _layer.build_edit_form()
+		const _view = new MapView( extant_data )
+		_view.extant_row = extant_row
+		_view.mappa = this
+		const form = _view.build_edit_form()
 		modal.left_panel.append( form )
 
 		document.body.append( modal.ele )
@@ -412,7 +414,7 @@ class Mappa extends Model {
 			tool_data,
 		} = args
 
-		if( !state ){
+		if( !state || !tool_data ){
 			window.removeEventListener('mousemove', move_img_cursor )
 			window.removeEventListener('click', unset_img_cursor )
 			document.body.classList.remove('dragging')
@@ -420,20 +422,15 @@ class Mappa extends Model {
 			return;
 		}
 
-		let url
-		if( tool_data ){
-			// 
-		}else{
-			IMG_CURSOR.querySelector('img').src = `/resource/tools/${tool_data.slug}.png`
-		}
+		const stamp = tool_data.img_slug.split('_')[0]
+		IMG_CURSOR.querySelector('img').src = `/fs/thumbs/${lib.get_subdir({stamp})}/${tool_data.img_slug}`
+		IMG_CURSOR.setAttribute('data-tool-uuid', tool_data.uuid )
+		IMG_CURSOR.setAttribute('data-mappa-uuid', this.uuid )
 
 		document.body.append( IMG_CURSOR )
 		document.body.classList.add('dragging')
 
 		window.addEventListener('mousemove', move_img_cursor )
-		setTimeout(() => {
-			window.addEventListener('click', unset_img_cursor )
-		}, 100 )
 
 	} // set cursor
 
@@ -654,7 +651,7 @@ const build_tool = args => {
 	} = _build_tool_wrap()
 
 	const img = lib.b('img')
-	img.src = `/fs/uploads/${lib.get_subdir({ slug: tool_data.img_slug })}/${tool_data.img_slug}`
+	img.src = `/fs/thumbs/${lib.get_subdir({ slug: tool_data.img_slug })}/${tool_data.img_slug}`
 	liner.append( img )
 
 	MAP.set( wrap, {
@@ -686,8 +683,13 @@ const set_active_tool = e => {
 
 
 let IMG_CURSOR = lib.b('div', 'img-cursor')
+if( env.EXPOSE ){
+	window.IMG_CURSOR = IMG_CURSOR
+}
+const liner = lib.b('div', false, 'flex-wrapper')
+IMG_CURSOR.append( liner )
 const _img = lib.b('img')
-IMG_CURSOR.append( _img )
+liner.append( _img )
 document.body.append( IMG_CURSOR ) // shows only on classlist drag ging
 
 const move_img_cursor = e => {
@@ -698,9 +700,76 @@ const move_img_cursor = e => {
 const unset_img_cursor = e => {
 	window.removeEventListener('mousemove', move_img_cursor )
 	window.removeEventListener('click', unset_img_cursor )
+	IMG_CURSOR.removeAttribute('data-tool-uuid')
+	IMG_CURSOR.removeAttribute('data-mappa-uuid')
 	IMG_CURSOR.remove()
 }
 
+const on_map_click = ( Nt ) => {
+	const {
+		lngLat,
+		originalEvent,
+		point,
+		target,
+		type,
+	} = Nt
+
+	const {
+		x,y
+	} = point
+
+	const {
+		clientX, clientY
+	} = originalEvent
+
+	const {
+		lat, lng
+	} = lngLat
+
+	if( document.body.classList.contains('dragging') ){
+
+		place_icon({
+			lat,
+			lng,
+		})
+
+	}else{
+
+		//
+
+	}
+
+	setTimeout(()=>{
+		unset_img_cursor()
+	}, 100)
+
+	console.log('on-map-click', {
+		lat, lng
+	})
+
+} // on map click
+
+
+
+const place_icon = args => {
+	const {
+		lat,
+		lng,
+	} = args
+
+	fetch_wrap('/action_main', 'post', {
+		action: 'place_icon',
+		icon_uuid: IMG_CURSOR.getAttribute('data-tool-uuid'),
+		mapview_uuid: IMG_CURSOR.getAttribute('data-mappa-uuid'),
+		lat,
+		lng,
+	})
+	.then( res => {
+		if( !res?.success ) return hal('error', res?.msg || 'error placing', 5000 )
+		hal('success', 'placed icon', 3000 )
+	})
+
+} // place icon
 
 
 
