@@ -71,6 +71,9 @@ const action = async( request ) => {
 		for( const r of res.results ){
 			const item = new MapElement( r )
 			const pub = item.publish( item.get_request_allowed( request ))
+			// ownership follows the parent mapview (not the item placer),
+			// so only the layer owner gets the edit form
+			pub.is_owner = !!( user?.id && mapview.user_key === user.id )
 			// join tool so client can render icon without extra fetch
 			// (tool_key / Tool.id are not published, so attach what client needs)
 			const _tool = await GET.tool({ id: r.tool_key })
@@ -86,6 +89,8 @@ const action = async( request ) => {
 		return {
 			success: true,
 			results,
+			is_owner: !!( user?.id && mapview.user_key === user.id ),
+			mapview_uuid: mapview.uuid,
 		}
 
 	case 'place_icon':
@@ -136,6 +141,7 @@ const action = async( request ) => {
 		item_pub.tool = tool_pub
 		item_pub.tool_uuid = tool_pub.uuid
 		item_pub.img_slug = tool_pub.img_slug
+		item_pub.is_owner = !!( user?.id && mapview.user_key === user.id )
 
 		return {
 			success: true,
@@ -153,6 +159,7 @@ const action = async( request ) => {
 		for( const r of res.results ){
 			const layer = new MapView( r )
 			const pub =layer.publish( layer.get_request_allowed( request ))
+			pub.is_owner = true
 			results.push( pub )
 		}
 

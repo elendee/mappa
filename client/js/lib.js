@@ -1759,4 +1759,5 @@ export {
 	build_select,
 	syntax_types,
 	render_multi_options,
+	build_multi,
 }

@@ -642,6 +642,12 @@ body.dashboard.menu-hidden #layer-panel{
 	margin: 20px 0;
 }
 
+.icon-info .model-form-MapElement{
+	/* background: lightgrey; */
+	border: 2px solid grey;
+	margin-top: 20px;
+}
+
 @media screen and (max-width: 800px){
 	#view-main,
 	#view-p1{

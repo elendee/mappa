@@ -282,6 +282,7 @@ const set_map = e => {
 
 	BROKER.publish('MAPPA_SET_MAPVIEW', {
 		mapview,
+		is_owner: mapview?.is_owner,
 	})
 
 } // set layer

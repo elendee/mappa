@@ -138,7 +138,14 @@ const DATA = {
 	MAP_STYLES: {
 		cat: 1,
 		dog: 2,
-	}
+	},
+
+	ELEMENT_TYPES: {
+		party: 'party',
+		happy_hour: 'happy hour',
+		restaurant: 'restaurant',
+		pop_up: 'pop up',
+	},
 
 }
 

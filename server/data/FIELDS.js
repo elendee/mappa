@@ -221,14 +221,16 @@ const MODELS = {
 			view: 'all',
 		},
 		type: {
-			type: 'string',
-			char_limit: [0,255],
+			type: 'select_multi',
+			// char_limit: [0,255],
+			options: 'ELEMENT_TYPES',
 			view: 'all',
 		},
 		data: {
 			type: 'textarea',
 			is_json: true,
 			view: 'all',
+			no_edit: true,
 		},
 		geojson: {
 			type: 'textarea',

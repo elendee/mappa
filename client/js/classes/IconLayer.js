@@ -135,8 +135,9 @@ class IconLayer {
 		return this._image_promises.get( name )
 	}
 
-	_stage( item, tool ){
+	_stage( item, tool, is_owner ){
 		// validate + stage feature; returns image name or false
+		// is_owner rides along on the entry so Mappa.pop_icon_info can gate the edit form
 		if( !item?.geojson ) return console.warn('map item missing geojson', item )
 		if( item.geojson.type !== 'Point' ) return console.warn('only Point render supported', item.geojson )
 		const coords = item.geojson.coordinates
@@ -147,7 +148,11 @@ class IconLayer {
 
 		const name = this.image_name( tool )
 		this._image_slugs.set( name, tool.img_slug )
-		this._items.set( item.uuid, { item, tool } )
+		this._items.set( item.uuid, {
+			item,
+			tool,
+			is_owner: is_owner ?? item?.is_owner,
+		})
 		this._features.set( item.uuid, {
 			type: 'Feature',
 			geometry: item.geojson,
@@ -168,9 +173,9 @@ class IconLayer {
 		})
 	}
 
-	async upsert( item, tool ){
+	async upsert( item, tool, is_owner ){
 		// single-item path (ex: fresh place_icon)
-		const name = this._stage( item, tool )
+		const name = this._stage( item, tool, is_owner )
 		if( !name ) return false
 		await this._map_ready()
 		this._ensure_layer()
@@ -184,7 +189,7 @@ class IconLayer {
 		return true
 	}
 
-	async render_all( items, resolve_tool ){
+	async render_all( items, resolve_tool, resolve_owner ){
 		// batch path (ex: layer activation) — one readiness wait,
 		// deduped parallel image loads, single setData
 		await this._map_ready()
@@ -197,11 +202,18 @@ class IconLayer {
 				console.warn('skipping element, unknown tool', item?.uuid )
 				continue
 			}
-			const name = this._stage( item, tool )
+			const is_owner = typeof resolve_owner === 'function'
+				? resolve_owner( item )
+				: ( resolve_owner ?? item?.is_owner )
+			const name = this._stage( item, tool, is_owner )
 			if( name ) staged.push([ item, tool, name ])
 		}
 
-		await Promise.all( staged.map( ([ item, tool, name ]) => this._ensure_image( name, tool.img_slug ) ) )
+		// await all images loaded ( http but also loaded to map )
+		const _promises = staged.map( ([ item, tool, name ]) => {
+			return this._ensure_image( name, tool.img_slug ) 
+		})
+		await Promise.all( _promises )
 
 		// drop features whose image failed
 		for( const [ item, tool, name ] of staged ){

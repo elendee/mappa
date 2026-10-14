@@ -12,6 +12,7 @@ import draggable from '../draggable.js'
 import fetch_wrap from '../fetch_wrap.js'
 import hal from '../hal.js'
 import IconLayer from './IconLayer.js'
+import MapElement from './MapElement.js'
 import { xhr_piece } from '../file_handler.js'
 
 
@@ -129,7 +130,10 @@ class Mappa extends Model {
 	    this.map.on('click', on_map_click )
 
 	    this.icons = new IconLayer( this.map, {
-	    	on_icon_click: entry => this.pop_icon_info( entry ),
+	    	on_icon_click: entry => this.pop_icon_info({
+	    		...entry,
+	    		is_owner: entry?.is_owner ?? entry?.item?.is_owner ?? this.is_owner,
+	    	}),
 	    } )
 	    this.map.on('styledata', () => this.icons?.resync?.() )
 
@@ -335,12 +339,14 @@ class Mappa extends Model {
 	set_mapview_active = async( event ) => {
 		const {
 			mapview,
+			is_owner,
 		} = event
 
 		if( event.layer ) throw new Error('stop doing this')
 
 		console.log('LAYERS set-mappa-active', {
 			mapview,
+			is_owner,
 		})
 
 		const {
@@ -356,6 +362,10 @@ class Mappa extends Model {
 		}
 
 		this.uuid = uuid
+		// owner of the active layer gates the icon edit form in pop_icon_info;
+		// prefer explicit event flag, fall back to the mapview pub
+		this.is_owner = is_owner ?? mapview?.is_owner ?? false
+		this.active_mapview = mapview
 
 		this.DOM.toolbox.name.innerText = name
 
@@ -389,35 +399,43 @@ class Mappa extends Model {
 		})
 		if( !res?.success ) return hal('error', res?.msg || 'error fill items', 5000 )
 
-		await this.icons?.render_all( res.results || [], item => this._resolve_item_tool( item ) )
+		// layer-level ownership from server; per-item flag wins when present
+		if( res.is_owner !== undefined ) this.is_owner = res.is_owner
+
+		await this.icons?.render_all(
+			res.results || [],
+			item => this._resolve_item_tool( item ),
+			item => item?.is_owner ?? res.is_owner ?? this.is_owner,
+		)
 
 		console.log('fill-map-items', res )
 
-	}
-
+	} // fill map items
 
 	set_map_item( args ){
 		const {
 			item,
 			mapview_uuid,
-			MapElement,
+			MapElement: MapElementArg,
+			is_owner,
 		} = args
 		if( this.uuid !== mapview_uuid ) return console.warn('invalid map uuid')
 
-		const element = new MapElement( item )
+		const ElementClass = MapElementArg || MapElement
+		const element = new ElementClass( item )
 
 		console.log('set-map-item', {
 			item,
 			geojson: item.geojson,
 			mapview_uuid,
-			MapElement,
+			MapElement: ElementClass,
 		})
 
 		const tool = this._resolve_item_tool( item )
 		if( !tool ) return console.warn('skipping element, unknown tool', item?.uuid )
-		this.icons?.upsert( item, tool )
+		this.icons?.upsert( item, tool, is_owner ?? item?.is_owner ?? this.is_owner )
 
-	}
+	} // set map item
 
 	_resolve_item_tool( item ){
 		if( item?.tool?.uuid && this.tools_by_uuid[ item.tool.uuid ] ){
@@ -431,16 +449,24 @@ class Mappa extends Model {
 			return item.tool
 		}
 		if( item?.tool_uuid && item?.img_slug ){
-			return { uuid: item.tool_uuid, img_slug: item.img_slug }
+			return { 
+				uuid: item.tool_uuid, 
+				img_slug: item.img_slug 
+			}
 		}
 		return false
-	}
+
+	} // resolve item tool
 
 	pop_icon_info( entry ){
 		const {
 			item,
 			tool,
+			is_owner: entry_owner,
 		} = entry || {}
+
+		// ownership threads: IconLayer entry -> item pub -> active layer fallback
+		const is_owner = entry_owner ?? item?.is_owner ?? this.is_owner ?? false
 
 		const modal = new Modal({
 			type: 'icon-info',
@@ -454,7 +480,8 @@ class Mappa extends Model {
 		}
 
 		const rows = []
-		if( tool?.slug ) rows.push([ 'type', tool.slug ])
+		// if( item?.name ) rows.push([ 'name', item.name ])
+		// if( tool?.slug ) rows.push([ 'type', tool.slug ])
 		if( Array.isArray( item?.geojson?.coordinates ) ){
 			const [ lng, lat ] = item.geojson.coordinates
 			rows.push([ 'location', `${Number( lat ).toFixed(5)}, ${Number( lng ).toFixed(5)}` ])
@@ -472,9 +499,34 @@ class Mappa extends Model {
 			modal.content.append( row )
 		}
 
+		if( is_owner && item ){
+			// stringify json fields so the generic form shows editable text, not [object Object]
+			const element = new MapElement({
+				...item,
+				data: typeof item.data === 'object' ? JSON.stringify( item.data ) : item.data,
+				geojson: typeof item.geojson === 'object' ? JSON.stringify( item.geojson ) : item.geojson,
+			})
+			element.mappa = this
+			// keep the rendered icon in sync after an edit save
+			element._post_save = ({ res }) => {
+				if( res?.model ){
+					const updated = {
+						...item,
+						...res.model,
+					}
+					const _tool = this._resolve_item_tool( updated ) || tool
+					if( _tool ) this.icons?.upsert( updated, _tool, is_owner )
+				}
+			}
+			const form = element.build_edit_form()
+			// location is fixed by placement; don't hand-edit raw geojson
+			form.querySelector('.model-detail-geojson')?.remove()
+			modal.content.append( form )
+		}
+
 		document.body.append( modal.ele )
 
-	}
+	} // pop icon info
 
 	set_tool_active = async( event ) => {
 		const {
