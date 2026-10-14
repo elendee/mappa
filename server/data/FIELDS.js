@@ -220,12 +220,9 @@ const MODELS = {
 			char_limit: [0,255],
 			view: 'all',
 		},
-		lat: {
-			type: 'number',
-			view: 'all',
-		},
-		lng: {
-			type: 'number',
+		type: {
+			type: 'string',
+			char_limit: [0,255],
 			view: 'all',
 		},
 		data: {
@@ -365,7 +362,7 @@ const FIELDS = {
 		'User': 8,
 		'Chat': 16,
 		'MapView': 8,
-		'LayerElement': 16,
+		'MapElement': 16,
 		'Tool': 16,
 	},
 

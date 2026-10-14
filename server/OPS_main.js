@@ -12,6 +12,7 @@ import User from './models/User.js'
 import MODELS from './MODELS.js'
 import MediaItem from './models/MediaItem.js'
 import MapView from './models/MapView.js'
+import MapElement from './models/MapElement.js'
 import Tool from './models/Tool.js'
 import Friendship from './models/Friendship.js'
 import FIELDS from './data/FIELDS.js'
@@ -26,7 +27,11 @@ import * as GET from './GET.js'
 
 
 
-const mutex_states = ['ready', 'working', 'canceled']
+const mutex_states = [
+	'ready', 
+	'working', 
+	'canceled'
+]
 
 
 
@@ -41,7 +46,7 @@ const action = async( request ) => {
 	const pool = DB.getPool()
 	let sql, res, pre_res, post_res 
 
-	let value, model, account, err_msg, pub, place, uuid, order, line_item, item, can_edit, req_user, allowed, layer, mapview
+	let value, model, account, err_msg, pub, place, uuid, order, line_item, item, can_edit, req_user, allowed, layer, mapview, geojson
 
 	const results = []
 	const results_obj = {}
@@ -52,7 +57,43 @@ const action = async( request ) => {
 
 	switch( action ){
 
+	case 'get_map_items':
+
+		mapview = await GET.mapview({
+			uuid: request.body.mapview_uuid,
+		})
+		if( !mapview ) return lib.return_fail(`failed to find view: ${request.body.mapview_uuid}`, `failed to find view`)
+
+		sql = `SELECT * FROM map_elements WHERE view_key=?`
+		res = await pool.queryPromise( sql, mapview.id )
+		if( res.error ) return lib.return_fail(res.error, `error getting map-elements`)
+
+		for( const r of res.results ){
+			const item = new MapElement( r )
+			const pub = item.publish( item.get_request_allowed( request ))
+			// join tool so client can render icon without extra fetch
+			// (tool_key / Tool.id are not published, so attach what client needs)
+			const _tool = await GET.tool({ id: r.tool_key })
+			if( _tool ){
+				const tool_pub = _tool.publish( _tool.get_request_allowed( request ))
+				pub.tool = tool_pub
+				pub.tool_uuid = tool_pub.uuid
+				pub.img_slug = tool_pub.img_slug
+			}
+			results.push( pub )
+		}
+
+		return {
+			success: true,
+			results,
+		}
+
 	case 'place_icon':
+		/*
+			focus on tool type and coords only
+			handle user data / customizations as an edit mode
+		*/
+
 		log('flag', 'place-icon', request.body )
 
 		mapview = await GET.mapview({
@@ -60,23 +101,46 @@ const action = async( request ) => {
 		})
 		if( !mapview ) return lib.return_fail(`failed to find view: ${request.body.mapview_uuid}`, `failed to find view`)
 
-		tool = await GET.tool({
+		let tool = await GET.tool({
 			uuid: request.body.icon_uuid,
 		})
 		if( !tool ) return lib.return_fail(`failed to find tool: ${request.body.tool_uuid}`, `failed to find tool`)
 
+		uuid = await lib.get_unique_uuid( DB, 'map_elements', FIELDS.PERSISTS_UUID.MapElement )
+
+		geojson = {
+			type: 'Point',
+			coordinates: [
+				request.body.lng,
+				request.body.lat,
+			]
+		}
+
 		value = new MapElement({
+			uuid,
 			user_key: user.id,
 			view_key: mapview.id,
-			tool_key: tool.id
+			tool_key: tool.id,
+			geojson,
 		})
 
-		await value.save()
+		res = await value.save()
+		value.id = res.id
+		value.created = res.created
+		value.edited = res.edited
 
 		log('flag', 'place-icon success - may want some kind of push mechanism here....')
 
+		const item_pub = value.publish( value.get_request_allowed( request ))
+		const tool_pub = tool.publish( tool.get_request_allowed( request ))
+		item_pub.tool = tool_pub
+		item_pub.tool_uuid = tool_pub.uuid
+		item_pub.img_slug = tool_pub.img_slug
+
 		return {
 			success: true,
+			item: item_pub,
+			mapview_uuid: mapview.uuid,
 		}
 
 	case 'get_user_layers':
@@ -392,8 +456,7 @@ const action = async( request ) => {
 	case 'delete_model':
 		res = await MODELS.remove({
 			request,
-		})//.model, request.body.args )
-		// res = await MODELS.remove( request.body.model, request.body.args )
+		})
 		return res
 
 	case 'model_toggle_viz':
@@ -406,19 +469,19 @@ const action = async( request ) => {
 	// ---------- layers (toolbox target) ----------
 	// TODO authorship/permissions: for now any logged-in user touches only their own user_key rows
 
-	case 'list_layers':
-		if( !lib.is_logged( request ) ) return lib.return_fail(`must be logged in`, `must be logged in`)
-		value = await MapView.list_for_user( user.id )
-		results.length = 0
-		for( const l of value ){
-			results.push( await l.publish_with_items() )
-		}
-		// pseudo future: paginate/lazy by bbox — filter elements by request.body.bounds + zoom here
-		//   els = els.filter(in_bounds) // only viewport-visible features
-		return {
-			success: true,
-			layers: results,
-		}
+	// case 'list_layers':
+	// 	if( !lib.is_logged( request ) ) return lib.return_fail(`must be logged in`, `must be logged in`)
+	// 	value = await MapView.list_for_user( user.id )
+	// 	results.length = 0
+	// 	for( const l of value ){
+	// 		results.push( await l.publish_with_items() )
+	// 	}
+	// 	// pseudo future: paginate/lazy by bbox — filter elements by request.body.bounds + zoom here
+	// 	//   els = els.filter(in_bounds) // only viewport-visible features
+	// 	return {
+	// 		success: true,
+	// 		layers: results,
+	// 	}
 
 	case 'create_layer':
 		if( !lib.is_logged( request ) ) return lib.return_fail(`must be logged in`, `must be logged in`)
@@ -442,25 +505,25 @@ const action = async( request ) => {
 			layer: await value.publish_with_items(),
 		}
 
-	case 'update_layer':
-		if( !lib.is_logged( request ) ) return lib.return_fail(`must be logged in`, `must be logged in`)
-		value = await MapView.get_by_uuid( request.body.layer?.id )
-		if( !value ) return lib.return_fail(`layer not found`, `layer not found`)
-		// TODO: verify value.user_key === user.id (or shared/collab grant)
-		const patch = {}
-		if( request.body.layer?.name !== undefined ) patch.name = request.body.layer.name
-		if( request.body.layer?.visible !== undefined ) patch.visible = request.body.layer.visible
-		if( request.body.layer?.border_image !== undefined ) patch.border_image = request.body.layer.border_image
-		if( request.body.layer?.primary_color !== undefined ) patch.primary_color = request.body.layer.primary_color
-		if( request.body.layer?.secondary_color !== undefined ) patch.secondary_color = request.body.layer.secondary_color
-		if( request.body.layer?.tertiary_color !== undefined ) patch.tertiary_color = request.body.layer.tertiary_color
-		value.hydrate( patch )
-		res = await value.save()
-		if( !res?.success ) return lib.return_fail( res, `error updating layer`)
-		return {
-			success: true,
-			layer: await value.publish_with_items(),
-		}
+	// case 'update_layer':
+	// 	if( !lib.is_logged( request ) ) return lib.return_fail(`must be logged in`, `must be logged in`)
+	// 	value = await MapView.get_by_uuid( request.body.layer?.id )
+	// 	if( !value ) return lib.return_fail(`layer not found`, `layer not found`)
+	// 	// TODO: verify value.user_key === user.id (or shared/collab grant)
+	// 	const patch = {}
+	// 	if( request.body.layer?.name !== undefined ) patch.name = request.body.layer.name
+	// 	if( request.body.layer?.visible !== undefined ) patch.visible = request.body.layer.visible
+	// 	if( request.body.layer?.border_image !== undefined ) patch.border_image = request.body.layer.border_image
+	// 	if( request.body.layer?.primary_color !== undefined ) patch.primary_color = request.body.layer.primary_color
+	// 	if( request.body.layer?.secondary_color !== undefined ) patch.secondary_color = request.body.layer.secondary_color
+	// 	if( request.body.layer?.tertiary_color !== undefined ) patch.tertiary_color = request.body.layer.tertiary_color
+	// 	value.hydrate( patch )
+	// 	res = await value.save()
+	// 	if( !res?.success ) return lib.return_fail( res, `error updating layer`)
+	// 	return {
+	// 		success: true,
+	// 		layer: await value.publish_with_items(),
+	// 	}
 
 	case 'delete_layer':
 		if( !lib.is_logged( request ) ) return lib.return_fail(`must be logged in`, `must be logged in`)
@@ -475,49 +538,49 @@ const action = async( request ) => {
 			success: true,
 		}
 
-	case 'add_layer_element':
-		// client: fetch_wrap('/action_main', 'post', {
-		//   action: 'add_layer_element',
-		//   layer_uuid: '<active layer uuid>',
-		//   element: { kind:'restaurant', name:'...', lat, lng, icon:'restaurant', data:{...} },
-		// }, true)
-		if( !lib.is_logged( request ) ) return lib.return_fail(`must be logged in`, `must be logged in`)
-		value = await MapView.get_by_uuid( request.body.layer_uuid )
-		if( !value ) return lib.return_fail(`layer not found`, `layer not found`)
-		// TODO: verify value.user_key === user.id
-		const el_in = request.body.element || {}
-		if( typeof el_in.lat !== 'number' || typeof el_in.lng !== 'number' ){
-			return lib.return_fail(`element needs lat/lng`, `pick a spot on the map first`)
-		}
-		item = new LayerElement({
-			uuid: lib.random_hex(8),
-			layer_key: value.id,
-			kind: el_in.kind || 'icon',
-			name: el_in.name || '',
-			lat: el_in.lat,
-			lng: el_in.lng,
-			icon: el_in.icon || el_in.kind || 'icon',
-			data: el_in.data || {},
-			geojson: el_in.geojson || null,
-		})
-		res = await item.save()
-		if( !res?.success ) return lib.return_fail( res, `error saving element`)
-		return {
-			success: true,
-			element: item.to_client(),
-		}
+	// case 'add_layer_element':
+	// 	// client: fetch_wrap('/action_main', 'post', {
+	// 	//   action: 'add_layer_element',
+	// 	//   layer_uuid: '<active layer uuid>',
+	// 	//   element: { kind:'restaurant', name:'...', lat, lng, icon:'restaurant', data:{...} },
+	// 	// }, true)
+	// 	if( !lib.is_logged( request ) ) return lib.return_fail(`must be logged in`, `must be logged in`)
+	// 	value = await MapView.get_by_uuid( request.body.layer_uuid )
+	// 	if( !value ) return lib.return_fail(`layer not found`, `layer not found`)
+	// 	// TODO: verify value.user_key === user.id
+	// 	const el_in = request.body.element || {}
+	// 	if( typeof el_in.lat !== 'number' || typeof el_in.lng !== 'number' ){
+	// 		return lib.return_fail(`element needs lat/lng`, `pick a spot on the map first`)
+	// 	}
+	// 	item = new MapElement({
+	// 		uuid: lib.random_hex(8),
+	// 		layer_key: value.id,
+	// 		kind: el_in.kind || 'icon',
+	// 		name: el_in.name || '',
+	// 		lat: el_in.lat,
+	// 		lng: el_in.lng,
+	// 		icon: el_in.icon || el_in.kind || 'icon',
+	// 		data: el_in.data || {},
+	// 		geojson: el_in.geojson || null,
+	// 	})
+	// 	res = await item.save()
+	// 	if( !res?.success ) return lib.return_fail( res, `error saving element`)
+	// 	return {
+	// 		success: true,
+	// 		element: item.to_client(),
+	// 	}
 
-	case 'list_layer_elements':
-		if( !lib.is_logged( request ) ) return lib.return_fail(`must be logged in`, `must be logged in`)
-		value = await MapView.get_by_uuid( request.body.layer_uuid )
-		if( !value ) return lib.return_fail(`layer not found`, `layer not found`)
-		// TODO: verify value.user_key === user.id
-		// pseudo future: WHERE lat BETWEEN ? AND ? AND lng BETWEEN ? AND ? for bbox lazy-load
-		item = await LayerElement.list_for_layer( value.id )
-		return {
-			success: true,
-			elements: item.map( e => e.to_client() ),
-		}
+	// case 'list_layer_elements':
+	// 	if( !lib.is_logged( request ) ) return lib.return_fail(`must be logged in`, `must be logged in`)
+	// 	value = await MapView.get_by_uuid( request.body.layer_uuid )
+	// 	if( !value ) return lib.return_fail(`layer not found`, `layer not found`)
+	// 	// TODO: verify value.user_key === user.id
+	// 	// pseudo future: WHERE lat BETWEEN ? AND ? AND lng BETWEEN ? AND ? for bbox lazy-load
+	// 	item = await MapElement.list_for_layer( value.id )
+	// 	return {
+	// 		success: true,
+	// 		elements: item.map( e => e.to_client() ),
+	// 	}
 
 	case 'save_tool_icon':
 		if( !lib.is_logged( request ) ) return lib.return_fail(`must be logged in`, `must be logged in`)

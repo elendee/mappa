@@ -2,6 +2,7 @@ import ui from '../ui.js'
 import * as lib from '../lib.js'
 import Mappa from '../classes/Mappa.js'
 import MapView from '../classes/MapView.js'
+import MapElement from '../classes/MapElement.js'
 
 
 
@@ -46,8 +47,17 @@ await mappa.refresh_layers({
 })
 
 
+const forward_map_item = event => {
+	mappa.set_map_item({
+		MapElement,
+		...event,
+	})
+}
+
+
 BROKER.subscribe('MAPPA_SET_MAPVIEW', mappa.set_mapview_active )
 BROKER.subscribe('MAPPA_SET_TOOL', mappa.set_tool_active )
+BROKER.subscribe('ADD_MAP_ITEM_DATA', forward_map_item )
 
 await lib.sleep( 100 )
 

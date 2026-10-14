@@ -11,6 +11,7 @@ import {
 import draggable from '../draggable.js'
 import fetch_wrap from '../fetch_wrap.js'
 import hal from '../hal.js'
+import IconLayer from './IconLayer.js'
 import { xhr_piece } from '../file_handler.js'
 
 
@@ -68,6 +69,8 @@ class Mappa extends Model {
 		this._pending_base_mapview = undefined
 
 		this.active_field = 'mappa-active-layer'
+		this.tools_by_uuid = {}
+		this.icons = null
 	}
 
 	async init( args ){
@@ -124,6 +127,11 @@ class Mappa extends Model {
 	    this.map.on('styledata', () => this.__apply_pending_base_layers({caller: 'styledata'}) )
 
 	    this.map.on('click', on_map_click )
+
+	    this.icons = new IconLayer( this.map, {
+	    	on_icon_click: entry => this.pop_icon_info( entry ),
+	    } )
+	    this.map.on('styledata', () => this.icons?.resync?.() )
 
 	    return this.map;
 
@@ -353,24 +361,120 @@ class Mappa extends Model {
 
 		this.DOM.toolbox.content.innerHTML = ''
 
-		this.fill_toolbox({
-			mapview,
-		})
-		.then( res => {
-			if( env.SPOOF.INIT_TOOLBOX ){
-				this.DOM.toolbox.toggle.click()
-			}
-		})
-		.catch( err => {
-			console.error( 'err fill toolbox', err )
-		})
-
 		localStorage.setItem( this.active_field, uuid )
 
 		this.apply_base_layers( mapview, 'set-layer-active' )
 
+		// reset per-layer element state
+		this.icons?.clear()
+		this.tools_by_uuid = {}
+
+		// fill tools first so items can resolve their icon immediately
+		let res = await this.fill_toolbox({
+			mapview,
+		})
+		// fill items
+		res = await this.fill_map_items()
+		if( env.SPOOF.INIT_TOOLBOX ){
+			this.DOM.toolbox.toggle.click()
+		}
+
 	} // set mappa active
 
+
+	async fill_map_items(){
+		let res = await fetch_wrap('/action_main', 'post', {
+			action: 'get_map_items',
+			mapview_uuid: this.uuid,
+		})
+		if( !res?.success ) return hal('error', res?.msg || 'error fill items', 5000 )
+
+		await this.icons?.render_all( res.results || [], item => this._resolve_item_tool( item ) )
+
+		console.log('fill-map-items', res )
+
+	}
+
+
+	set_map_item( args ){
+		const {
+			item,
+			mapview_uuid,
+			MapElement,
+		} = args
+		if( this.uuid !== mapview_uuid ) return console.warn('invalid map uuid')
+
+		const element = new MapElement( item )
+
+		console.log('set-map-item', {
+			item,
+			geojson: item.geojson,
+			mapview_uuid,
+			MapElement,
+		})
+
+		const tool = this._resolve_item_tool( item )
+		if( !tool ) return console.warn('skipping element, unknown tool', item?.uuid )
+		this.icons?.upsert( item, tool )
+
+	}
+
+	_resolve_item_tool( item ){
+		if( item?.tool?.uuid && this.tools_by_uuid[ item.tool.uuid ] ){
+			return this.tools_by_uuid[ item.tool.uuid ]
+		}
+		if( item?.tool_uuid && this.tools_by_uuid[ item.tool_uuid ] ){
+			return this.tools_by_uuid[ item.tool_uuid ]
+		}
+		// server now embeds tool directly; fall back to that if toolbox hasn't loaded it
+		if( item?.tool?.uuid && item?.tool?.img_slug ){
+			return item.tool
+		}
+		if( item?.tool_uuid && item?.img_slug ){
+			return { uuid: item.tool_uuid, img_slug: item.img_slug }
+		}
+		return false
+	}
+
+	pop_icon_info( entry ){
+		const {
+			item,
+			tool,
+		} = entry || {}
+
+		const modal = new Modal({
+			type: 'icon-info',
+			header: tool?.name || item?.name || 'icon',
+		})
+
+		if( tool?.img_slug ){
+			const img = lib.b('img', false, 'icon-info-img')
+			img.src = `/fs/thumbs/${lib.get_subdir({ slug: tool.img_slug })}/${tool.img_slug}`
+			modal.content.append( img )
+		}
+
+		const rows = []
+		if( tool?.slug ) rows.push([ 'type', tool.slug ])
+		if( Array.isArray( item?.geojson?.coordinates ) ){
+			const [ lng, lat ] = item.geojson.coordinates
+			rows.push([ 'location', `${Number( lat ).toFixed(5)}, ${Number( lng ).toFixed(5)}` ])
+		}
+		if( item?.created ) rows.push([ 'placed', new Date( item.created ).toLocaleString() ])
+
+		for( const [ label, value ] of rows ){
+			const row = lib.b('div', false, 'icon-info-row')
+			const _label = lib.b('label')
+			_label.innerText = label
+			row.append( _label )
+			const _value = lib.b('div', false, 'value')
+			_value.innerText = value
+			row.append( _value )
+			modal.content.append( row )
+		}
+
+		document.body.append( modal.ele )
+
+	}
 
 	set_tool_active = async( event ) => {
 		const {
@@ -422,8 +526,7 @@ class Mappa extends Model {
 			return;
 		}
 
-		const stamp = tool_data.img_slug.split('_')[0]
-		IMG_CURSOR.querySelector('img').src = `/fs/thumbs/${lib.get_subdir({stamp})}/${tool_data.img_slug}`
+		IMG_CURSOR.querySelector('img').src = `/fs/thumbs/${lib.get_subdir({ slug: tool_data.img_slug })}/${tool_data.img_slug}`
 		IMG_CURSOR.setAttribute('data-tool-uuid', tool_data.uuid )
 		IMG_CURSOR.setAttribute('data-mappa-uuid', this.uuid )
 
@@ -518,6 +621,7 @@ class Mappa extends Model {
 		}
 
 		for( const tool_data of res.results || [] ){
+			this.tools_by_uuid[ tool_data.uuid ] = tool_data
 			const tool = build_tool({
 				mappa: this,
 				tool_data,
@@ -728,6 +832,9 @@ const on_map_click = ( Nt ) => {
 
 	if( document.body.classList.contains('dragging') ){
 
+		// icon clicks open info instead of placing
+		if( window.mappa?.icons?.hit_test( point ) ) return
+
 		place_icon({
 			lat,
 			lng,
@@ -766,7 +873,17 @@ const place_icon = args => {
 	})
 	.then( res => {
 		if( !res?.success ) return hal('error', res?.msg || 'error placing', 5000 )
+		const {
+			item,
+		} = res
+
 		hal('success', 'placed icon', 3000 )
+
+		BROKER.publish('ADD_MAP_ITEM_DATA', {
+			mapview_uuid: res.mapview_uuid,
+			item,
+		})
+
 	})
 
 } // place icon

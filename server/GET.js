@@ -4,6 +4,7 @@ import log from './log.js'
 import DB from './db.js'
 import User from './models/User.js'
 import MapView from './models/MapView.js'
+import Tool from './models/Tool.js'
 
 
 
@@ -105,41 +106,39 @@ const mapview = async( args ) => {
 
 
 const tool = async( args ) => {
-	// const {
-	// 	id, 
-	// 	uuid,
-	// } = args
+	const {
+		id, 
+		uuid,
+	} = args
 
-	// const pool = DB.getPool()
-	// let sql, res
+	const pool = DB.getPool()
+	let sql, res
 
-	// let tool
+	let tool
 
-	// if( id ){
-	// 	sql = `SELECT * FROM tools WHERE id=?`
-	// 	res = await pool.queryPromise( sql, id )
-	// }else if( uuid ){
-	// 	sql = `SELECT * FROM tools WHERE uuid=?`
-	// 	res = await pool.queryPromise( sql, uuid )
-	// }else{
-	// 	return log('flag', 'get-tool: not found', {
-	// 		id,
-	// 		uuid,
-	// 	})
-	// }
+	if( id ){
+		sql = `SELECT * FROM tools WHERE id=?`
+		res = await pool.queryPromise( sql, id )
+	}else if( uuid ){
+		sql = `SELECT * FROM tools WHERE uuid=?`
+		res = await pool.queryPromise( sql, uuid )
+	}else{
+		return log('flag', 'get-tool: not found', {
+			id,
+			uuid,
+		})
+	}
 
-	// if( res.error ) return log('flag', 'err get tool', res.error )
+	if( res.error ) return log('flag', 'err get tool', res.error )
 
-	// if( res.results?.length ){
-	// 	return new Tool( res.results[0] )
-	// }else{
-	// 	log('flag', 'no tool found', {
-	// 		uuid,
-	// 		id,
-	// 	})
-	// }
-
-	log('flag', 'UNHANDLED GET-TOOL')
+	if( res.results?.length ){
+		return new Tool( res.results[0] )
+	}else{
+		log('flag', 'no tool found', {
+			uuid,
+			id,
+		})
+	}
 
 } // tool
 
