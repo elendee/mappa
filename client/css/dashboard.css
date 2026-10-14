@@ -612,6 +612,7 @@ body.dashboard.menu-hidden #layer-panel{
 }
 .tool-wrap:hover{
 	background: lightgrey;
+	border: 2px solid grey;
 }
 .tool-wrap.selected{
 	border: 2px solid black;
@@ -631,6 +632,14 @@ body.dashboard.menu-hidden #layer-panel{
 	display: inline-block;
 }
 
+.button.add-tool{
+	padding: 14px 24px;
+	font-size: 30px;
+}
+
+.add-tool-pop .expl{
+	margin: 20px 0;
+}
 
 @media screen and (max-width: 800px){
 	#view-main,

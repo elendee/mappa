@@ -100,8 +100,6 @@ const action = async( request ) => {
 			for( const r of res.results || [] ){
 				const tool = new Tool( r )
 				const pub = tool.publish( tool.get_request_allowed( request ))
-				pub.is_custom = true
-				// !!r.user_key
 				results.push( pub )
 			}
 		}
@@ -492,6 +490,30 @@ const action = async( request ) => {
 		return {
 			success: true,
 			elements: item.map( e => e.to_client() ),
+		}
+
+	case 'save_tool_icon':
+		if( !lib.is_logged( request ) ) return lib.return_fail(`must be logged in`, `must be logged in`)
+		layer = await GET.mapview({
+			uuid: request.body.mapview_uuid,
+		})
+		if( !layer ) return lib.return_fail(`layer not found`, `layer not found`)
+		if( layer.user_key !== user.id ) return lib.return_fail(`not your layer`, `you can only add icons to your own layers`)
+		item = await get_media_item( request.body.media_slug )
+		if( !item ) return lib.return_fail(`upload not found: ${request.body.media_slug}`, `upload not found`)
+		if( item.user_key !== user.id ) return lib.return_fail(`not your upload`, `you can only use your own uploads`)
+		value = new Tool({
+			user_key: user.id,
+			layer_key: layer.id,
+			name: request.body.type,
+			slug: ( request.body.type || 'icon' ).trim().replace(/\s+/g, '_').toLowerCase(),
+			img_slug: item.slug,
+		})
+		res = await value.save()
+		if( !res?.success ) return lib.return_fail( res, `error saving icon`)
+		return {
+			success: true,
+			tool: value.publish( value.get_request_allowed( request ) ),
 		}
 
 	default:

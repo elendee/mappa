@@ -58,7 +58,7 @@ import SOCKETS from './server/SOCKETS.js'
 import SETTINGS from './server/SETTINGS.js'
 import * as CRUD from './server/CRUD.js' // subs
 import BROKER from './server/BROKER.js'
-// import file_handler from './server/file_handler.js'
+import file_handler from './server/file_handler.js'
 // import file_processors from './server/file_processors.js'
 import PRIVATE from './server/data/PRIVATE.js'
 import * as GET from './server/GET.js'
@@ -433,7 +433,22 @@ exp.post('/action_account', function( request, response ){
 })
 
 
-exp.use((req, res) => {                                                                                                                                                                                    
+exp.post('/file_handler', uploadDisk.single('upload'), ( request, response ) => {
+	file_handler( request )
+	.then( res => {
+		response.json( res )
+	})
+	.catch( err => {
+		log('flag', 'file_handler err', err )
+		response.json({
+			success: false,
+			msg: 'error uploading',
+		})
+	})
+})
+
+
+exp.use((req, res) => {                                                                                                                                                                                     
   if (req.path.match(/\..*/) || req.path.match(/^\/resource/)) return res.status(404).end()                                                                                                                
   res.status(404).send(render('404', req))                                                                                                                                                                 
 }) 

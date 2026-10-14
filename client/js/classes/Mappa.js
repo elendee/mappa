@@ -11,6 +11,9 @@ import {
 import draggable from '../draggable.js'
 import fetch_wrap from '../fetch_wrap.js'
 import hal from '../hal.js'
+import { xhr_piece } from '../file_handler.js'
+
+
 
 
 const MAP = new Map()
@@ -62,7 +65,6 @@ class Mappa extends Model {
 		init = init || {}
 
 		this.initialized = undefined
-		this.active_mapview = undefined
 		this._pending_base_mapview = undefined
 
 		this.active_field = 'mappa-active-layer'
@@ -343,6 +345,8 @@ class Mappa extends Model {
 			document.body.append( this.DOM.toolbox.wrap )
 		}
 
+		this.uuid = uuid
+
 		this.DOM.toolbox.name.innerText = name
 
 		this.DOM.toolbox.content.innerHTML = ''
@@ -359,8 +363,6 @@ class Mappa extends Model {
 			console.error( 'err fill toolbox', err )
 		})
 
-		this.active_mapview = uuid
-
 		localStorage.setItem( this.active_field, uuid )
 
 		this.apply_base_layers( mapview, 'set-layer-active' )
@@ -371,7 +373,6 @@ class Mappa extends Model {
 	set_tool_active = async( event ) => {
 		const {
 			wrap,
-			is_custom,
 			tool_data,
 		} = event
 
@@ -411,29 +412,28 @@ class Mappa extends Model {
 			tool_data,
 		} = args
 
-		const type = tool_data.slug
-
 		if( !state ){
 			window.removeEventListener('mousemove', move_img_cursor )
 			window.removeEventListener('click', unset_img_cursor )
 			document.body.classList.remove('dragging')
-			document.body.remove( img_cursor )
+			document.body.remove( IMG_CURSOR )
 			return;
 		}
 
 		let url
-		if( tool_data.is_custom ){
+		if( tool_data ){
 			// 
 		}else{
-			img_cursor.querySelector('img').src = `/resource/tools/${tool_data.slug}.png`
+			IMG_CURSOR.querySelector('img').src = `/resource/tools/${tool_data.slug}.png`
 		}
 
-		document.body.append( img_cursor )
-
+		document.body.append( IMG_CURSOR )
 		document.body.classList.add('dragging')
 
-		document.addEventListener('mousemove', move_img_cursor )
-		document.addEventListener('click', unset_img_cursor )
+		window.addEventListener('mousemove', move_img_cursor )
+		setTimeout(() => {
+			window.addEventListener('click', unset_img_cursor )
+		}, 100 )
 
 	} // set cursor
 
@@ -520,17 +520,31 @@ class Mappa extends Model {
 			//
 		}
 
-		for( const data of res.results || [] ){
+		for( const tool_data of res.results || [] ){
 			const tool = build_tool({
 				mappa: this,
-				data,
+				tool_data,
 			})
 			this.DOM.toolbox.content.append( tool )
 		}
 
+		const {
+			wrap,
+			liner,
+		} = _build_tool_wrap()
+
+		const add_tool = lib.b('div', false, 'button', 'add-tool')
+		add_tool.innerHTML = '+'
+		add_tool.addEventListener('click', add_tool_modal )
+		liner.append( add_tool )
+
+		this.DOM.toolbox.content.append( wrap )
+
+		MAP.set( add_tool, {
+			mapview: this,
+		})
+
 	} // fill toolbox
-
-
 
 
 } // Mappa
@@ -538,48 +552,131 @@ class Mappa extends Model {
 
 
 
+const add_tool_modal = e => {
+	const btn = lib.click_parent( e.target, 'add-tool', false, 5 )
+
+	const {
+		mapview,
+	} = MAP.get( btn )
+
+	const modal = new Modal({
+		type: 'add-tool-pop',
+		header: 'add icon',
+	})
+
+	const expl = lib.b('div', false, 'expl')
+	expl.innerText = `An icon is just an image and a type.  You can add specific details to each one you place on the map.`
+	modal.content.append( expl )
+
+	const set_img = lib.b('div', false, 'choose-image')
+	const _img = lib.b('input', false, 'input')
+	_img.type = 'file'
+	set_img.append( _img )
+	modal.content.append( set_img )
+
+	const set_type = lib.b('div', false, 'choose-name')
+	const _type = lib.b('input', false, 'input')
+	_type.type = 'text'
+	_type.placeholder = 'icon type, ex "store", "party"'
+	modal.content.append( set_type )
+
+	const save = lib.b('button', false, 'button', 'save')
+	save.innerHTML = 'save'
+	save.addEventListener('click', save_icon )
+	modal.content.append( lib.b('br') )
+	modal.content.append( save )
+
+	document.body.append( modal.ele )
+
+	MAP.set( save, {
+		input_img: _img,
+		input_type: _type,
+		mapview,
+	})
+
+} // add tool modal
+
+
+const save_icon = async( e ) => {
+	const btn = lib.click_parent( e.target, 'button', false, 5 )
+
+	const {
+		input_img,
+		input_type,
+		mapview,
+	} = MAP.get( btn )
+
+	let res = await xhr_piece({
+		file: input_img.files[0],
+		data: {
+			title: input_type.value.trim(),
+		},
+		hide_spinner: false,
+	})
+	if( !res?.success ) return hal('error', res?.msg || 'error uploading', 5000 )
+
+	res = await fetch_wrap('/action_main', 'post', {
+		action: 'save_tool_icon',
+		mapview_uuid: mapview.uuid,
+		type: input_type.value.trim(),
+		media_slug: res.item?.slug,
+	})
+	if( !res?.success ) return hal('error', res?.msg || 'error creating tool', 5000 )
+
+	hal('success', 'saved icon', 3000 )
+
+} // save icon
+
+
+
+
+const _build_tool_wrap = () => {
+	const wrap = lib.b('div', false, 'tool-wrap', 'ib')
+	const liner = lib.b('div', false, 'tool-liner', 'flex-wrapper')
+	wrap.append( liner )
+	return {
+		wrap,
+		liner,
+	}
+}
+
+
 
 const build_tool = args => {
 	const {
 		mappa,
-		is_custom,
-		data,
+		tool_data,
 	} = args
 
-	const wrap = lib.b('div', false, 'tool-wrap', 'ib')
-
-	console.log('build-tool', {
-		is_custom,
-		data,
-	})
+	const {
+		wrap,
+		liner
+	} = _build_tool_wrap()
 
 	const img = lib.b('img')
-	img.src = `/fs/tools/${data.img_slug}.png`
-	wrap.append( img )
-
-	wrap.addEventListener('click', set_active_tool )
+	img.src = `/fs/uploads/${lib.get_subdir({ slug: tool_data.img_slug })}/${tool_data.img_slug}`
+	liner.append( img )
 
 	MAP.set( wrap, {
 		mappa,
-		is_custom,
-		tool_data: data,
+		tool_data,
 	})
+
+	wrap.addEventListener('click', set_active_tool )
 
 	return wrap
 
-}
+} // build tool
 
 
 
 const set_active_tool = e => {
 	const wrap = lib.click_parent( e.target, 'tool-wrap', false, 5 )
 	const {
-		is_custom,
 		tool_data,
 	} = MAP.get( wrap )
 
 	BROKER.publish('MAPPA_SET_TOOL', {
-		is_custom,
 		tool_data,
 		wrap,
 	})
@@ -588,20 +685,20 @@ const set_active_tool = e => {
 
 
 
-let img_cursor = lib.b('div', 'img-cursor')
+let IMG_CURSOR = lib.b('div', 'img-cursor')
 const _img = lib.b('img')
-img_cursor.append( _img )
-document.body.append( img_cursor ) // shows only on classlist drag ging
+IMG_CURSOR.append( _img )
+document.body.append( IMG_CURSOR ) // shows only on classlist drag ging
 
 const move_img_cursor = e => {
-	img_cursor.style.top = e.clientY + 'px'
-	img_cursor.style.left = e.clientX + 'px'
+	IMG_CURSOR.style.top = e.clientY + 'px'
+	IMG_CURSOR.style.left = e.clientX + 'px'
 }
 
 const unset_img_cursor = e => {
 	window.removeEventListener('mousemove', move_img_cursor )
-	// img_cursor.style.display = 'none'
-	document.body.remove( img_cursor )
+	window.removeEventListener('click', unset_img_cursor )
+	IMG_CURSOR.remove()
 }
 
 
