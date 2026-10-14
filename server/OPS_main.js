@@ -149,6 +149,57 @@ const action = async( request ) => {
 			mapview_uuid: mapview.uuid,
 		}
 
+	case 'update_location':
+		if( !lib.is_logged( request ) ) return lib.return_fail(`must be logged in`, `must be logged in`)
+
+		mapview = await GET.mapview({
+			uuid: request.body.mapview_uuid,
+		})
+		if( !mapview ) return lib.return_fail(`failed to find view: ${request.body.mapview_uuid}`, `failed to find view`)
+		if( mapview.user_key !== user.id ) return lib.return_fail(`not your layer`, `you can only move icons on your own layers`)
+
+		sql = `SELECT * FROM map_elements WHERE uuid=? LIMIT 1`
+		res = await pool.queryPromise( sql, request.body.element_uuid )
+		if( res.error ) return lib.return_fail( res.error, `error finding icon`)
+		if( !res.results?.length ) return lib.return_fail(`icon not found: ${request.body.element_uuid}`, `icon not found`)
+		value = new MapElement( res.results[0] )
+		if( value.view_key !== mapview.id ) return lib.return_fail(`icon does not belong to layer`, `icon does not belong to this layer`)
+
+		const _lat = Number( request.body.lat )
+		const _lng = Number( request.body.lng )
+		if( !Number.isFinite( _lat ) || !Number.isFinite( _lng ) ) return lib.return_fail(`invalid location`, `invalid location`)
+
+		value.geojson = {
+			type: 'Point',
+			coordinates: [
+				_lng,
+				_lat,
+			],
+		}
+
+		try{
+			res = await value.save()
+		}catch( err ){
+			return lib.return_fail( err, `error moving icon`)
+		}
+
+		const _tool = await GET.tool({ id: value.tool_key })
+
+		const moved_pub = value.publish( value.get_request_allowed( request ))
+		if( _tool ){
+			const moved_tool_pub = _tool.publish( _tool.get_request_allowed( request ))
+			moved_pub.tool = moved_tool_pub
+			moved_pub.tool_uuid = moved_tool_pub.uuid
+			moved_pub.img_slug = moved_tool_pub.img_slug
+		}
+		moved_pub.is_owner = true
+
+		return {
+			success: true,
+			item: moved_pub,
+			mapview_uuid: mapview.uuid,
+		}
+
 	case 'get_user_layers':
 		if( !user.id ) return lib.return_fail(`must be logged`, `must be logged`)
 
@@ -604,7 +655,8 @@ const action = async( request ) => {
 			uuid,
 			user_key: user.id,
 			layer_key: layer.id,
-			name: request.body.type,
+			name: request.body.name,
+			type: request.body.type,
 			slug: ( request.body.type || 'icon' ).trim().replace(/\s+/g, '_').toLowerCase(),
 			img_slug: item.slug,
 		})

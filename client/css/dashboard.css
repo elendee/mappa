@@ -609,6 +609,7 @@ body.dashboard.menu-hidden #layer-panel{
 	border: 2px solid #cac9c9;
 	margin: 0 5px;
 	cursor: pointer;
+	overflow:hidden;
 }
 .tool-wrap:hover{
 	background: lightgrey;
@@ -646,6 +647,17 @@ body.dashboard.menu-hidden #layer-panel{
 	/* background: lightgrey; */
 	border: 2px solid grey;
 	margin-top: 20px;
+}
+
+.add-tool-wrap{
+	border-radius: 5px;
+	/* background: green */
+}
+.add-tool-wrap .tool-liner{
+	/* background: green */
+}
+.add-tool-wrap .add-tool{
+	background: green
 }
 
 @media screen and (max-width: 800px){

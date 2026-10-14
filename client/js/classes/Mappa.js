@@ -470,7 +470,7 @@ class Mappa extends Model {
 
 		const modal = new Modal({
 			type: 'icon-info',
-			header: tool?.name || item?.name || 'icon',
+			header: item?.name || 'icon',
 		})
 
 		if( tool?.img_slug ){
@@ -500,6 +500,20 @@ class Mappa extends Model {
 		}
 
 		if( is_owner && item ){
+			const move_btn = lib.b('button', false, 'button', 'move-icon')
+			move_btn.innerText = 'move icon'
+			move_btn.addEventListener('click', () => {
+				const _tool = tool || this._resolve_item_tool( item )
+				if( !_tool ) return hal('error', 'cannot move: unknown icon type', 5000 )
+				modal.close.click()
+				hal('success', 'click map to move icon', 5000 )
+				this.set_cursor({
+					state: true,
+					tool_data: _tool,
+				})
+				IMG_CURSOR.setAttribute('data-element-uuid', item.uuid )
+			})
+			modal.content.append( move_btn )
 			// stringify json fields so the generic form shows editable text, not [object Object]
 			const element = new MapElement({
 				...item,
@@ -686,6 +700,8 @@ class Mappa extends Model {
 			liner,
 		} = _build_tool_wrap()
 
+		wrap.classList.add('add-tool-wrap')
+
 		const add_tool = lib.b('div', false, 'button', 'add-tool')
 		add_tool.innerHTML = '+'
 		add_tool.addEventListener('click', add_tool_modal )
@@ -718,7 +734,7 @@ const add_tool_modal = e => {
 	})
 
 	const expl = lib.b('div', false, 'expl')
-	expl.innerText = `An icon is just an image and a type.  You can add specific details to each one you place on the map.`
+	expl.innerText = `An icon is just an image and a label for your toolbox that you can re-use.`
 	modal.content.append( expl )
 
 	const set_img = lib.b('div', false, 'choose-image')
@@ -727,11 +743,26 @@ const add_tool_modal = e => {
 	set_img.append( _img )
 	modal.content.append( set_img )
 
-	const set_type = lib.b('div', false, 'choose-name')
-	const _type = lib.b('input', false, 'input')
-	_type.type = 'text'
-	_type.placeholder = 'icon type, ex "store", "party"'
-	modal.content.append( set_type )
+	modal.content.append( lib.spacer(30) )
+
+	// const set_type = lib.b('div', false, 'choose-name')
+	// const _type = lib.b('input', false, 'input')
+	// _type.type = 'text'
+	// _type.placeholder = 'icon type, ex "store", "party"'
+	// set_type.append( _type )
+	// modal.content.append( set_type )
+
+	const select = lib.b('select', false, 'input')
+	modal.content.append( select )
+	const options = GLOBAL.ELEMENT_TYPES
+	for( const key in options ){
+		const option = lib.b('option')
+		option.innerText = options[key]
+		option.value = key
+		select.append( option )
+	}
+
+	modal.content.append( lib.spacer(30) )
 
 	const save = lib.b('button', false, 'button', 'save')
 	save.innerHTML = 'save'
@@ -742,8 +773,10 @@ const add_tool_modal = e => {
 	document.body.append( modal.ele )
 
 	MAP.set( save, {
+		modal,
 		input_img: _img,
-		input_type: _type,
+		type: select.value,
+		name: '',
 		mapview,
 	})
 
@@ -754,16 +787,21 @@ const save_icon = async( e ) => {
 	const btn = lib.click_parent( e.target, 'button', false, 5 )
 
 	const {
+		modal,
 		input_img,
-		input_type,
+		// input_type,
+		type,
+		name,
 		mapview,
 	} = MAP.get( btn )
 
+	if( !type ) return hal('error', 'must choose a type', 5000 )
+
 	let res = await xhr_piece({
 		file: input_img.files[0],
-		data: {
-			title: input_type.value.trim(),
-		},
+		// data: {
+		// 	title: input_type.value.trim(),
+		// },
 		hide_spinner: false,
 	})
 	if( !res?.success ) return hal('error', res?.msg || 'error uploading', 5000 )
@@ -771,10 +809,27 @@ const save_icon = async( e ) => {
 	res = await fetch_wrap('/action_main', 'post', {
 		action: 'save_tool_icon',
 		mapview_uuid: mapview.uuid,
-		type: input_type.value.trim(),
+		type, //: input_type.value.trim(),
+		name,
 		media_slug: res.item?.slug,
 	})
 	if( !res?.success ) return hal('error', res?.msg || 'error creating tool', 5000 )
+
+	const tool_data = res.tool
+	if( tool_data ){
+		mapview.tools_by_uuid[ tool_data.uuid ] = tool_data
+		const tool = build_tool({
+			mappa: mapview,
+			tool_data,
+		})
+		const content = mapview.DOM?.toolbox?.content
+		if( content ){
+			if( content.lastElementChild ) content.lastElementChild.before( tool )
+			else content.append( tool )
+		}
+	}
+
+	modal.close.click()
 
 	hal('success', 'saved icon', 3000 )
 
@@ -858,6 +913,7 @@ const unset_img_cursor = e => {
 	window.removeEventListener('click', unset_img_cursor )
 	IMG_CURSOR.removeAttribute('data-tool-uuid')
 	IMG_CURSOR.removeAttribute('data-mappa-uuid')
+	IMG_CURSOR.removeAttribute('data-element-uuid')
 	IMG_CURSOR.remove()
 }
 
@@ -887,10 +943,17 @@ const on_map_click = ( Nt ) => {
 		// icon clicks open info instead of placing
 		if( window.mappa?.icons?.hit_test( point ) ) return
 
-		place_icon({
-			lat,
-			lng,
-		})
+		if( IMG_CURSOR.getAttribute('data-element-uuid') ){
+			move_icon({
+				lat,
+				lng,
+			})
+		}else{
+			place_icon({
+				lat,
+				lng,
+			})
+		}
 
 	}else{
 
@@ -939,6 +1002,38 @@ const place_icon = args => {
 	})
 
 } // place icon
+
+
+
+const move_icon = args => {
+	const {
+		lat,
+		lng,
+	} = args
+
+	fetch_wrap('/action_main', 'post', {
+		action: 'update_location',
+		element_uuid: IMG_CURSOR.getAttribute('data-element-uuid'),
+		mapview_uuid: IMG_CURSOR.getAttribute('data-mappa-uuid'),
+		lat,
+		lng,
+	})
+	.then( res => {
+		if( !res?.success ) return hal('error', res?.msg || 'error moving', 5000 )
+		const {
+			item,
+		} = res
+
+		hal('success', 'moved icon', 3000 )
+
+		BROKER.publish('ADD_MAP_ITEM_DATA', {
+			mapview_uuid: res.mapview_uuid,
+			item,
+		})
+
+	})
+
+} // move icon
 
 
 

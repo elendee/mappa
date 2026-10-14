@@ -356,6 +356,7 @@ textarea.input{
 }
 input[type=file].input{
 	border: 0px;
+	width: auto;
 }
 input[type=checkbox].input{
 	margin: 0px;

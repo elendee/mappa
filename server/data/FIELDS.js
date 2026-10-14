@@ -90,6 +90,10 @@ const MODELS = {
 			type: 'string',
 			view: 'all',
 		},
+		type: {
+			type: 'string',
+			view: 'all',
+		},
 		slug: {
 			type: 'string',
 			view: 'all',
@@ -221,7 +225,7 @@ const MODELS = {
 			view: 'all',
 		},
 		type: {
-			type: 'select_multi',
+			type: 'select',
 			// char_limit: [0,255],
 			options: 'ELEMENT_TYPES',
 			view: 'all',

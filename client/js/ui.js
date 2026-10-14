@@ -71,12 +71,54 @@ const clickoff_popup = e => {
 
 
 
+// -- system dialogue (e.g. native file picker) esc suppression
+// Esc pressed while a native file chooser is open dismisses that dialogue,
+// but the keyup can leak to the page and would otherwise trigger UI_CLOSE
+// (closing modals / toggling the menu). Track the picker state and swallow
+// Escs arriving while it is open or just after it closed.
+let file_dialog_open = false
+let file_dialog_closed_at = 0
+const FILE_DIALOG_ESC_GRACE = 500
+
+const is_file_input = target => target?.matches?.('input[type=file]')
+
+document.addEventListener('click', e => {
+	if( is_file_input( e.target ) ) file_dialog_open = true
+}, true )
+
+document.addEventListener('change', e => {
+	if( !is_file_input( e.target ) ) return
+	file_dialog_open = false
+	file_dialog_closed_at = Date.now()
+}, true )
+
+// 'cancel' fires when the picker is dismissed without choosing a file;
+// it may not bubble, so listen in capture phase on window
+window.addEventListener('cancel', e => {
+	if( !is_file_input( e.target ) ) return
+	file_dialog_open = false
+	file_dialog_closed_at = Date.now()
+}, true )
+
+// fallback for browsers without 'cancel' support: the picker steals window focus
+window.addEventListener('focus', () => {
+	if( !file_dialog_open ) return
+	file_dialog_open = false
+	file_dialog_closed_at = Date.now()
+})
+
+const esc_swallowed_by_system_dialogue = () =>
+	file_dialog_open || ( Date.now() - file_dialog_closed_at < FILE_DIALOG_ESC_GRACE )
+
+
 const ui_close = event => {
 	const { 
 		e, 
 		is_esc, 
 		is_click 
 	} = event
+
+	if( is_esc && esc_swallowed_by_system_dialogue() ) return
 
 	if( is_esc || is_click ){
 
@@ -182,7 +224,8 @@ document.body.addEventListener('click', clickoff_popup )
 
 // esc button closes
 document.body.addEventListener('keyup', e => {
-	if( e.keyCode === 27 ){
+	if( e.keyCode === 27 || e.key === 'Escape' ){
+		if( esc_swallowed_by_system_dialogue() ) return // system dialogue (e.g. file picker) consumed this esc
 		// debugger
 		BROKER.publish('UI_CLOSE', {
 			e: e,

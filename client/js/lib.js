@@ -1670,11 +1670,18 @@ const remove_multi_choice = e => {
 	wrap.remove()
 }
 
+const spacer = height => {
+	const div = b('div', false, 'spacer')
+	div.style.height = ( height || 20 ) + 'px'
+	return div
+}
+
 
 
 
 
 const syntax_types = ['is-code', 'is-ascii', 'is-poetry', 'is-text']
+
 
 export {
 	is_logged,
@@ -1760,4 +1767,5 @@ export {
 	syntax_types,
 	render_multi_options,
 	build_multi,
+	spacer
 }
