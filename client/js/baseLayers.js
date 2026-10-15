@@ -7,49 +7,6 @@ import * as lib from './lib.js'
 
 export const BASE_LAYER_GROUPS = [
 	{
-		id: 'roads',
-		label: 'Roads',
-		desc: 'Streets, highways, minor/major roads, bridges & tunnels',
-		match: /^(road_|tunnel_|bridge_)/,
-		exclude: /(rail|transit)/,
-		defaultVisible: true,
-	},
-	{
-		id: 'transit',
-		label: 'Transit / Rail',
-		desc: 'Subway, rail & tram lines',
-		match: /(rail|transit)/,
-		defaultVisible: true,
-	},
-	{
-		id: 'road_labels',
-		label: 'Road labels',
-		desc: 'Street names & house numbers',
-		match: /^(roadname_|housenumber)/,
-		defaultVisible: true,
-	},
-	{
-		id: 'landmarks',
-		label: 'Landmarks / POI',
-		desc: 'Shops, amenities, transit hubs & airports',
-		match: /^(poi_|airport)/,
-		defaultVisible: true,
-	},
-	{
-		id: 'neighborhoods',
-		label: 'Neighborhood names',
-		desc: 'City, town, village & district labels',
-		match: /^place_/,
-		defaultVisible: true,
-	},
-	{
-		id: 'buildings',
-		label: 'Buildings',
-		desc: 'Building footprints & 3D extrusions',
-		match: /^building/,
-		defaultVisible: true,
-	},
-	{
 		id: 'water',
 		label: 'Water',
 		desc: 'Rivers, lakes, waterways & labels',
@@ -57,11 +14,54 @@ export const BASE_LAYER_GROUPS = [
 		defaultVisible: true,
 	},
 	{
+		id: 'road_labels',
+		label: 'Road labels',
+		desc: 'Street names',
+		match: /^(roadname_|housenumber)/,
+		defaultVisible: true,
+	},
+	{
+		id: 'neighborhoods',
+		label: 'Neighborhood names',
+		desc: 'Neighborhood and city labels',
+		match: /^place_/,
+		defaultVisible: true,
+	},
+	{
+		id: 'buildings',
+		label: 'Buildings',
+		desc: 'Buildings & 3D extrusions',
+		match: /^building/,
+		defaultVisible: true,
+	},
+	{
+		id: 'roads',
+		label: 'Roads',
+		desc: 'Vector lines for every road and highway',
+		match: /^(road_|tunnel_|bridge_)/,
+		exclude: /(rail|transit)/,
+		defaultVisible: false,
+	},
+	{
+		id: 'transit',
+		label: 'Transit / Rail',
+		desc: 'Subway & rail lines',
+		match: /(rail|transit)/,
+		defaultVisible: false,
+	},
+	{
+		id: 'landmarks',
+		label: 'Landmarks / POI',
+		desc: 'Shops, amenities, transit hubs & airports',
+		match: /^(poi_|airport)/,
+		defaultVisible: false,
+	},
+	{
 		id: 'land',
 		label: 'Parks & landuse',
 		desc: 'Parks, forests, grass, sand & landcover',
 		match: /^(park$|park_|landuse_|landcover_|aeroway[-_])/,
-		defaultVisible: true,
+		defaultVisible: false,
 	},
 ]
 
@@ -114,11 +114,16 @@ export const get_default_base_layers = () => {
 export function build_base_layer_form( args ){
 	const {
 		// extant_layer_data,
+		extant_data,
 		selected,
 		onChange,
 	} = args || {}
 
-	const initial = Array.isArray( selected ) ? selected : get_default_base_layers()
+	const is_new = !extant_data?.name
+
+	const use_init = !is_new && Array.isArray( selected )
+
+	const initial = use_init ? selected : get_default_base_layers()
 
 	const wrap = lib.b('div', false, 'base-layer-form')
 	const header = lib.b('div', false, 'base-layer-header')
@@ -126,6 +131,11 @@ export function build_base_layer_form( args ){
 	wrap.append( header )
 
 	const list = lib.b('div', false, 'base-layer-list')
+	if( is_new ){
+		const expl = lib.b('div')
+		expl.innerText = 'Suggested layers are selected'
+		list.append( expl )
+	}
 	wrap.append( list )
 
 	const inputs = new Map()

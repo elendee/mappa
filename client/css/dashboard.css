@@ -660,6 +660,20 @@ body.dashboard.menu-hidden #layer-panel{
 	background: green
 }
 
+.model-form-MapView{
+	padding-top: 0;
+}
+.model-form-MapView .model-detail:first-of-type{
+	margin-top: 0;
+	padding-top: 0;
+}
+
+.model-form-MapView .model-detail-listed,
+.model-form-MapView .model-detail-locked{
+	display: inline-block;
+	width: auto;
+}
+
 @media screen and (max-width: 800px){
 	#view-main,
 	#view-p1{

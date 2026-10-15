@@ -83,7 +83,7 @@ const MODELS = {
 		user_key: {
 			type: 'number',
 		},
-		layer_key: {
+		set_key: {
 			type: 'number',
 		},
 		name: {
@@ -194,7 +194,7 @@ const MODELS = {
 
 		style: {
 			type: 'select_multi',
-			prompt: 'layer style',
+			prompt: 'map style',
 			view: 'all',
 			options: 'MAP_STYLES',
 			// : {

@@ -223,10 +223,10 @@ const action = async( request ) => {
 	case 'get_toolbox':
 
 		// get public tools
-		layer = await GET.mapview({
-			uuid: request.body.mapview_uuid,
-		})
-		if( !layer ) return lib.return_fail(`layer not found`, `layer not found`)
+		// layer = await GET.mapview({
+		// 	uuid: request.body.mapview_uuid,
+		// })
+		// if( !layer ) return lib.return_fail(`layer not found`, `layer not found`)
 
 		// value = PUBLIC.LAYER_STYLES[ layer.style ]
 		// if( !value ){
@@ -239,24 +239,26 @@ const action = async( request ) => {
 		// 	}			
 		// }
 
+		return lib.return_fail('update for toolsets', 'update for toolsets')
+
 
 		// add custom tools
-		sql = `SELECT * FROM tools WHERE layer_key=?`
-		res = await pool.queryPromise( sql, layer.id )
-		if( res.error ){
-			log('flag', 'err get tools', res.error )
-		}else{
-			for( const r of res.results || [] ){
-				const tool = new Tool( r )
-				const pub = tool.publish( tool.get_request_allowed( request ))
-				results.push( pub )
-			}
-		}
+		// sql = `SELECT * FROM tools WHERE set_key=?`
+		// res = await pool.queryPromise( sql, layer.id )
+		// if( res.error ){
+		// 	log('flag', 'err get tools', res.error )
+		// }else{
+		// 	for( const r of res.results || [] ){
+		// 		const tool = new Tool( r )
+		// 		const pub = tool.publish( tool.get_request_allowed( request ))
+		// 		results.push( pub )
+		// 	}
+		// }
 
-		return {
-			success: true,
-			results,
-		}
+		// return {
+		// 	success: true,
+		// 	results,
+		// }
 
 
 	case 'get_other_layers':
@@ -589,7 +591,7 @@ const action = async( request ) => {
 		if( !value ) return lib.return_fail(`layer not found`, `layer not found`)
 		// TODO: verify value.user_key === user.id
 		// pseudo: cascade-delete elements — DELETE FROM layer_elements WHERE layer_key=?
-		sql = `DELETE FROM layer_elements WHERE layer_key=?`
+		sql = `DELETE FROM layer_elements WHERE view_key=?`
 		await pool.queryPromise( sql, value.id )
 		await value.unset()
 		return {
@@ -651,21 +653,24 @@ const action = async( request ) => {
 		if( !item ) return lib.return_fail(`upload not found: ${request.body.media_slug}`, `upload not found`)
 		if( item.user_key !== user.id ) return lib.return_fail(`not your upload`, `you can only use your own uploads`)
 		uuid = await lib.get_unique_uuid( DB, 'tools', FIELDS.PERSISTS_UUID.Tool )
-		value = new Tool({
-			uuid,
-			user_key: user.id,
-			layer_key: layer.id,
-			name: request.body.name,
-			type: request.body.type,
-			slug: ( request.body.type || 'icon' ).trim().replace(/\s+/g, '_').toLowerCase(),
-			img_slug: item.slug,
-		})
-		res = await value.save()
-		if( !res?.success ) return lib.return_fail( res, `error saving icon`)
-		return {
-			success: true,
-			tool: value.publish( value.get_request_allowed( request ) ),
-		}
+
+		return lib.return_fail('update for toolsets', 'update for toolsets')
+
+		// value = new Tool({
+		// 	uuid,
+		// 	user_key: user.id,
+		// 	view_key: layer.id,
+		// 	name: request.body.name,
+		// 	type: request.body.type,
+		// 	slug: ( request.body.type || 'icon' ).trim().replace(/\s+/g, '_').toLowerCase(),
+		// 	img_slug: item.slug,
+		// })
+		// res = await value.save()
+		// if( !res?.success ) return lib.return_fail( res, `error saving icon`)
+		// return {
+		// 	success: true,
+		// 	tool: value.publish( value.get_request_allowed( request ) ),
+		// }
 
 	default:
 		return lib.return_fail( `unhandled action: ${action}`, `unhandled action`)

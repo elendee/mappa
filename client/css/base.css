@@ -576,12 +576,16 @@ button.button{
 	position: relative;
 	padding: 3px 8px;
 	color: lightgrey;
-    background: grey;
+    background: #968674;
 	display: inline-block;
 	border: 1px solid;
 	cursor: pointer;
 	user-select: none;
 	font-size: 1rem;
+
+	border-radius: 5px;
+	/* box-shadow: 1px 1px 5px black; */
+	font-weight: bold;
 }
 .button,
 .button a{

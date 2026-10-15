@@ -225,7 +225,7 @@ class Mappa extends Model {
 		modal.content.prepend( drag )
 
 		const selected = []
-		for( const key in extant_data ){
+		for( const key in extant_data || {} ){
 			if( key.match(/^layer_/)){
 				// const _key = key.replace('layer_', '')
 				if( extant_data[ key] ) selected.push( key.replace('layer_', '') )
@@ -235,6 +235,7 @@ class Mappa extends Model {
 		const base_layers = lib.b('div', false, 'base-layer-wrap')
 		const base_ele = this._build_base_ele({
 			selected,
+			extant_data,
 			// extant_layer_data: extant_data,
 		})
 		base_layers.append( base_ele )
@@ -258,12 +259,14 @@ class Mappa extends Model {
 	_build_base_ele( args ){
 		const {
 			// extant_layer_data,
+			extant_data,
 			selected,
 			onChange,
 		} = args || {}
 
 		return build_base_layer_form({
 			// extant_layer_data,
+			extant_data,
 			selected,
 			onChange,
 		})
