@@ -46,7 +46,7 @@ const action = async( request ) => {
 	const pool = DB.getPool()
 	let sql, res, pre_res, post_res 
 
-	let value, model, account, err_msg, pub, place, uuid, order, line_item, item, can_edit, req_user, allowed, layer, mapview, geojson
+	let value, model, account, err_msg, pub, place, uuid, order, line_item, item, can_edit, req_user, allowed, layer, mapview, geojson, toolset
 
 	const results = []
 	const results_obj = {}
@@ -56,6 +56,23 @@ const action = async( request ) => {
 	}
 
 	switch( action ){
+
+	case 'get_all_toolsets':
+
+		sql = `SELECT * FROM toolsets WHERE is_public=1`
+		res = await pool.queryPromise( sql )
+		if( res.error ) return lib.return_fail( res.error, `error getting toolsets`)
+
+		for( const r of res.results ){
+			const set = new Toolset( r )
+			const pub = set.publish( set.get_request_allowed( request ) )
+			results.push( pub )
+		}
+
+		return {
+			success: true,
+			results,
+		}
 
 	case 'get_map_items':
 
@@ -220,45 +237,32 @@ const action = async( request ) => {
 		}
 
 
-	case 'get_toolbox':
+	case 'get_view_toolset':
 
-		// get public tools
-		// layer = await GET.mapview({
-		// 	uuid: request.body.mapview_uuid,
-		// })
-		// if( !layer ) return lib.return_fail(`layer not found`, `layer not found`)
+		// get mapview
+		value = await GET.mapview({
+			uuid: request.body.mapview_uuid,
+		})
+		if( !value ) return lib.return_fail(`mapview not found ${request.body.mapview_uuid}`, `mapview not found`)
 
-		// value = PUBLIC.LAYER_STYLES[ layer.style ]
-		// if( !value ){
-		// 	log('flag', 'layer public style not found', layer.style )
-		// }else{
-		// 	for( const data of value.tools || [] ){
-		// 		const tool = new Tool( data )
-		// 		const pub = tool.publish( tool.get_request_allowed( request ))
-		// 		results.push( pub )
-		// 	}			
-		// }
+		// get toolset if exists
+		toolset = await GET.toolset({
+			id: value.toolset_key,
+		})
+		if( !toolset ){
+			return {
+				success: true,
+				toolset: undefined,
+			}
+		}
 
-		return lib.return_fail('update for toolsets', 'update for toolsets')
+		// pub
+		value = toolset.publish( toolset.get_request_allowed( request ) )
 
-
-		// add custom tools
-		// sql = `SELECT * FROM tools WHERE set_key=?`
-		// res = await pool.queryPromise( sql, layer.id )
-		// if( res.error ){
-		// 	log('flag', 'err get tools', res.error )
-		// }else{
-		// 	for( const r of res.results || [] ){
-		// 		const tool = new Tool( r )
-		// 		const pub = tool.publish( tool.get_request_allowed( request ))
-		// 		results.push( pub )
-		// 	}
-		// }
-
-		// return {
-		// 	success: true,
-		// 	results,
-		// }
+		return {
+			success: true,
+			toolset: value,
+		}
 
 
 	case 'get_other_layers':

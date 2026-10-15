@@ -146,6 +146,49 @@ const tool = async( args ) => {
 
 
 
+const toolset = async( args ) => {
+	const {
+		id, 
+		uuid,
+		view_key,
+	} = args
+
+	const pool = DB.getPool()
+	let sql, res
+
+	let tool
+
+	if( id ){
+		sql = `SELECT * FROM toolsets WHERE id=?`
+		res = await pool.queryPromise( sql, id )
+	}else if( uuid ){
+		sql = `SELECT * FROM toolsets WHERE uuid=?`
+		res = await pool.queryPromise( sql, uuid )
+	}else{
+		return log('flag', 'get-toolsets: not found', {
+			id,
+			uuid,
+		})
+	}
+
+	if( res.error ) return log('flag', 'err get toolset', res.error )
+
+	if( res.results?.length ){
+		const first = res.results[0]
+		return new Toolset( first )
+	}else{
+		log('flag', 'no toolset found', {
+			uuid,
+			id,
+			view_key
+		})
+	}
+
+} // tool
+
+
+
+
 
 
 
@@ -158,4 +201,5 @@ export {
 	tool,
 	mapview,
 	user,
+	toolset
 }

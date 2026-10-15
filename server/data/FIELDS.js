@@ -79,6 +79,24 @@ const MODELS = {
 		},
 	},
 
+	Toolset: {
+		user_key: {
+			type: 'number',
+		},
+		name: {
+			type: 'string',
+			view: 'all'
+		},
+		description: {
+			type: 'textarea',
+			view: 'all'
+		},
+		is_public: {
+			type: 'boolean',
+			view: 'all',
+		}
+	},
+
 	Tool: {
 		user_key: {
 			type: 'number',
@@ -112,6 +130,10 @@ const MODELS = {
 			type: 'string',
 			required: true,
 			char_limit: [0,255],
+			view: 'all',
+		},
+		toolset_key: {
+			type: 'number',
 			view: 'all',
 		},
 		listed: {
@@ -370,10 +392,12 @@ const FIELDS = {
 		'MapView': 8,
 		'MapElement': 16,
 		'Tool': 16,
+		'Toolset': 12,
 	},
 
 	HAS_PUBLIC: [
-		//
+		'Toolset',
+		// 'MediaItem',// ??
 	],
 
 	STANDARD: {

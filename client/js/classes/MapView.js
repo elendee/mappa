@@ -1,6 +1,7 @@
 import Model from './Model.js'
 import * as lib from '../lib.js'
 import GLOBAL from '../GLOBAL.js'
+import fetch_wrap from '../fetch_wrap.js'
 
 
 
@@ -10,7 +11,9 @@ const MAP = new Map()
 
 
 class MapView extends Model {
+
 	constructor( init ){
+
 		super( init )
 		init = init || {}
 
@@ -171,7 +174,7 @@ const choose_layer_style = e => {
 	})
 
 	const expl = lib.b('div', false, 'modal-expl')
-	expl.innerText = `Each style comes with different icons and tools available.`
+	expl.innerText = `Choose a set of icons or make your own.`
 	modal.content.append( expl )
 
 	for( const type in GLOBAL.LAYER_STYLES ){
@@ -188,7 +191,61 @@ const choose_layer_style = e => {
 
 	document.body.append( modal.ele )
 
+	fetch_wrap('/action_main', 'post', {
+		action: 'get_all_toolsets',
+	}, false, modal.content )
+	.then( res => {
+		if( !res?.success ) return hal('error', res?.msg || 'failed to get toolsets', 5000 )
+		for( const r of res.results ){
+			// const set = new Toolset( r )
+			const picker = build_set_picker_row({
+				data: r,
+				load_images,
+			})
+			modal.content.append( picker )
+		}
+	})
+
 } // choose layer style
+
+
+
+const build_set_picker_row = args => {
+	const {
+		data,
+		load_images,
+	} = args
+
+	const wrap = lib.b('div', false, 'set-picker-row')
+	wrap.setAttribute('data-uuid', data.uuid)
+
+	const name = lib.b('div', false, 'set-name')
+	name.innerText = data.name
+	wrap.append( name )
+
+	const tools = lib.b('div', false, 'set-tools')
+	wrap.append( tools )
+
+	if( !load_images ){
+		console.warn('skip load-images for picker')
+	}else{
+		fetch_wrap('/action_main', 'post', {
+			action: 'get_set_tools',
+		}, true )
+		.then( res => {
+			if( !res?.success ) return hal('error', res?.msg || 'error get tools', 5000 )
+			for( const r of res.results ){
+				const wrap = lib.b('div', false, 'set-tool')
+				wrap.innerText = r.name
+				wrap.setAttribute('data-tool-uuid', r.uuid )
+				tools.append( wrap )
+			}
+		})
+	}
+
+	return wrap
+
+}
 
 
 

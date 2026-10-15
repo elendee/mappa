@@ -386,6 +386,7 @@ class Mappa extends Model {
 		let res = await this.fill_toolbox({
 			mapview,
 		})
+		console.log('fill-toolbox', res )
 		// fill items
 		res = await this.fill_map_items()
 		if( env.SPOOF.INIT_TOOLBOX ){
@@ -675,11 +676,11 @@ class Mappa extends Model {
 		this.DOM.toolbox.content.innerText = ''
 
 		let res = await fetch_wrap('/action_main', 'post', {
-			action: 'get_toolbox',
+			action: 'get_view_toolset',
 			mapview_uuid: mapview.uuid,
 		})
 
-		console.log('fill toolbox', {
+		console.log('get-toolbox', {
 			res,
 		})
 
@@ -715,6 +716,11 @@ class Mappa extends Model {
 		MAP.set( add_tool, {
 			mapview: this,
 		})
+
+		return {
+			wrap,
+			liner,
+		}
 
 	} // fill toolbox
 
