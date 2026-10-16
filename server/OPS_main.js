@@ -189,6 +189,7 @@ const action = async( request ) => {
 			user_key: user.id,
 			view_key: mapview.id,
 			tool_key: tool.id,
+			type: tool.type,
 			geojson,
 		})
 
@@ -304,9 +305,9 @@ const action = async( request ) => {
 
 		// pub
 		value = toolset.publish( toolset.get_request_allowed( request ) )
+		value.tools = []
 
 		const tools = await toolset.get_tools()
-
 		for( const data of tools || []){
 			const tool = new Tool( data )
 			const pub = tool.publish( tool.get_request_allowed( request))

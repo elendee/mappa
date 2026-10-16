@@ -246,12 +246,12 @@ const MODELS = {
 			char_limit: [0,255],
 			view: 'all',
 		},
-		type: {
-			type: 'select',
-			// char_limit: [0,255],
-			options: 'ELEMENT_TYPES',
-			view: 'all',
-		},
+		// type: {
+		// 	type: 'select',
+		// 	// char_limit: [0,255],
+		// 	options: 'ELEMENT_TYPES',
+		// 	view: 'all',
+		// },
 		data: {
 			type: 'textarea',
 			is_json: true,

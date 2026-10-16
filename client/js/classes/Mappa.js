@@ -99,6 +99,7 @@ class Mappa extends Model {
 				wrap: lib.b('div', 'toolbox'),
 				content: lib.b('div', false, 'toolbox-content'),
 				name: lib.b('div', false, 'toolbox-name'),
+				set_name: lib.b('div', false, 'toolbox-set-name'),
 				toggle: lib.b('div', false, 'toolbox-toggle'),
 			},
 
@@ -149,11 +150,13 @@ class Mappa extends Model {
 		const {
 			wrap,
 			name,
+			set_name,
 			content,
 			toggle,
 		} = toolbox
 
 		wrap.append( name )
+		wrap.append( set_name )
 		wrap.append( content )
 		wrap.append( toggle )
 
@@ -163,6 +166,9 @@ class Mappa extends Model {
 			wrap.classList.toggle('toggled')
 		})
 		this.DOM.toolbox.name.addEventListener('click', e => {
+			wrap.classList.toggle('toggled')
+		})
+		this.DOM.toolbox.set_name.addEventListener('click', e => {
 			wrap.classList.toggle('toggled')
 		})
 
@@ -485,7 +491,8 @@ class Mappa extends Model {
 
 		const rows = []
 		// if( item?.name ) rows.push([ 'name', item.name ])
-		// if( tool?.slug ) rows.push([ 'type', tool.slug ])
+		const _tool = tool ?? item?.tool
+		if( _tool?.type ) rows.push([ 'type', _tool.type ])
 		if( Array.isArray( item?.geojson?.coordinates ) ){
 			const [ lng, lat ] = item.geojson.coordinates
 			rows.push([ 'location', `${Number( lat ).toFixed(5)}, ${Number( lng ).toFixed(5)}` ])
@@ -494,11 +501,11 @@ class Mappa extends Model {
 
 		for( const [ label, value ] of rows ){
 			const row = lib.b('div', false, 'icon-info-row')
-			const _label = lib.b('label')
-			_label.innerText = label
-			row.append( _label )
+			// const _label = lib.b('label')
+			// _label.innerText = label
+			// row.append( _label )
 			const _value = lib.b('div', false, 'value')
-			_value.innerText = value
+			_value.innerText = `${label}: ${value}`
 			row.append( _value )
 			modal.content.append( row )
 		}
@@ -695,8 +702,14 @@ class Mappa extends Model {
 		} = res
 
 		const {
+			created,
+			edited,
+			is_public,
+			name,
 			tools
 		} = toolset || {}
+
+		this.DOM.toolbox.set_name.innerText = name || 'unnamed'
 
 		const has_toolset = toolset?.uuid
 		if( !has_toolset ){
