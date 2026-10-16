@@ -5,6 +5,7 @@ import DB from './db.js'
 import User from './models/User.js'
 import MapView from './models/MapView.js'
 import Tool from './models/Tool.js'
+import Toolset from './models/Toolset.js'
 
 
 

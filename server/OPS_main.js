@@ -58,6 +58,26 @@ const action = async( request ) => {
 
 	switch( action ){
 
+	case 'set_toolset':
+		mapview = await GET.mapview({
+			uuid: request.body.mapview_uuid,
+		})
+		if( !mapview ) return lib.return_fail( `map not found: ${request.body.mapview_uuid}`, `map not found`)
+
+		// get tool-set
+		toolset = await GET.toolset({
+			uuid: request.body.uuid,
+		})
+		if( !toolset ) return lib.return_fail( `set not found: ${request.body.uuid}`, `icon set not found`)
+
+		mapview.toolset_key = toolset.id
+
+		await mapview.save()
+
+		return {
+			success: true,
+		}
+
 	case 'create_set':
 
 		if( !lib.is_logged( request )){

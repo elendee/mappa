@@ -858,7 +858,7 @@ const set_toolset = e => {
 	const wrap = lib.click_parent( e.target, 'toolset', false, 5 )
 	const {
 		mappa,
-	} = wrap
+	} = MAP.get( wrap )
 
 	const uuid = wrap.getAttribute('data-uuid')
 
