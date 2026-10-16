@@ -674,6 +674,24 @@ body.dashboard.menu-hidden #layer-panel{
 	width: auto;
 }
 
+.choose-tools .create-wrap{
+	width: 300px;
+	margin: 20px;
+}
+
+.choose-tools .toolset{
+	border: 1px solid;
+	padding: 10px;
+	border-radius: 5px;
+	cursor: pointer;
+}
+.choose-tools .toolset:hover{
+	background: lightgrey;
+}
+.avbl-sets{
+	margin: 20px 0;
+}
+
 @media screen and (max-width: 800px){
 	#view-main,
 	#view-p1{

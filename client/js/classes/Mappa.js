@@ -690,42 +690,190 @@ class Mappa extends Model {
 			//
 		}
 
-		for( const tool_data of res.results || [] ){
-			this.tools_by_uuid[ tool_data.uuid ] = tool_data
-			const tool = build_tool({
-				mappa: this,
-				tool_data,
-			})
-			this.DOM.toolbox.content.append( tool )
-		}
+		const {
+			toolset,
+		} = res
 
 		const {
-			wrap,
-			liner,
-		} = _build_tool_wrap()
+			tools
+		} = toolset || {}
 
-		wrap.classList.add('add-tool-wrap')
+		const has_toolset = toolset?.uuid
+		if( !has_toolset ){
 
-		const add_tool = lib.b('div', false, 'button', 'add-tool')
-		add_tool.innerHTML = '+'
-		add_tool.addEventListener('click', add_tool_modal )
-		liner.append( add_tool )
+			// button to initialize toolset for mappa:
 
-		this.DOM.toolbox.content.append( wrap )
+			const pick_set = lib.b('div', false, 'button', 'pick-toolset')
+			pick_set.innerText = 'Choose Icons'
+			pick_set.addEventListener('click', choose_tools )
+			this.DOM.toolbox.content.append( pick_set )
 
-		MAP.set( add_tool, {
-			mapview: this,
-		})
+			MAP.set( pick_set, {
+				mappa: this,
+			})
 
-		return {
-			wrap,
-			liner,
+			return;
+
+		}else{
+
+			// fill existing tools:
+
+			for( const tool_data of tools || [] ){
+				this.tools_by_uuid[ tool_data.uuid ] = tool_data
+				const tool = build_tool({
+					mappa: this,
+					tool_data,
+				})
+				this.DOM.toolbox.content.append( tool )
+			}
+
+			const {
+				wrap,
+				liner,
+			} = _build_tool_wrap()
+
+			wrap.classList.add('add-tool-wrap')
+
+			const add_tool = lib.b('div', false, 'button', 'add-tool')
+			add_tool.innerHTML = '+'
+			add_tool.addEventListener('click', add_tool_modal )
+			liner.append( add_tool )
+
+			this.DOM.toolbox.content.append( wrap )
+
+			MAP.set( add_tool, {
+				mapview: this,
+			})
+
+			return {
+				wrap,
+				liner,
+			}
+
 		}
 
 	} // fill toolbox
 
 
 } // Mappa
+
+
+
+
+const choose_tools = e => {
+	const btn = lib.click_parent( e.target, 'button', false, 5 )
+	const modal = new Modal({
+		type: 'choose-tools',
+		header: 'Choose icon set'
+	})
+
+	const {
+		mappa,
+	} = MAP.get( btn )
+
+	const expl = lib.b('div')
+	expl.innerText = `Choose an existing, public icon set, or create a new one.`
+	modal.content.append( expl )
+
+	// create new
+	const _create = lib.b('div', false, 'create-wrap')
+	const label = lib.b('label')
+	label.innerText = 'Create New Icon Set'
+	_create.append( label )
+	const input = lib.b('input', false, 'input')
+	input.type = 'text'
+	input.placeholder = 'Icon set name'
+	_create.append( input )
+	const save = lib.b('div', false, 'button', 'create-set')
+	save.innerHTML = 'create set'
+	save.addEventListener('click', create_set )
+	_create.append( save )
+	modal.content.append( _create )
+
+	MAP.set( save, {
+		input,
+		mappa,
+	})
+
+	// get available
+	const expl_avl = lib.b('div', false, 'avbl-sets')
+	expl_avl.innerText = `Choose from existing sets:`
+	modal.content.append( expl_avl )
+
+	const extant_sets = lib.b('div', false, 'extant-sets')
+	modal.content.append( extant_sets )
+
+	fetch_wrap('/action_main', 'post', {
+		action: 'get_all_toolsets',
+	}, false, modal.content )
+	.then( res => {
+		if( !res?.success ) return hal('error', res?.msg || 'error getting tools', 5000 )
+		for( const r of res.results ){
+			const wrap = lib.b('div', false, 'toolset', 'ib')
+			wrap.setAttribute('data-uuid', r.uuid )
+			const name = lib.b('div', false, 'set-name')
+			name.innerText = r.name || '-'
+			wrap.append( name )
+			const desc = lib.b('div', false, 'set-desc')
+			desc.innerText = r.description || '-'
+			wrap.append( desc )
+			wrap.addEventListener('click', set_toolset )
+			extant_sets.append( wrap )
+			MAP.set( wrap, {
+				mappa,
+			})
+		}
+	})
+
+	document.body.append( modal.ele )
+
+} // choose tools
+
+
+
+const create_set = e => {
+	const btn = lib.click_parent( e.target, 'button', false, 4 )
+	const {
+		mappa,
+		input,
+	} = MAP.get( btn )
+
+	fetch_wrap('action_main', 'post', {
+		action: 'create_set',
+		name: input.value.trim(),
+	})
+	.then( res => {
+		if( !res?.success ) return hal('error', res?.msg || 'error creating', 5000 )
+		hal('success', 'success', 10 * 1000 )
+		location.reload()
+	})
+
+} // create set
+
+
+
+
+
+const set_toolset = e => {
+	const wrap = lib.click_parent( e.target, 'toolset', false, 5 )
+	const {
+		mappa,
+	} = wrap
+
+	const uuid = wrap.getAttribute('data-uuid')
+
+	fetch_wrap('/action_main', 'post', {
+		action: 'set_toolset',
+		uuid,
+		mapview_uuid: mappa.uuid,
+	})
+	.then( res => {
+		if( !res?.success ) return hal('error', res?.msg || 'error setting', 5000 )
+		hal('success', 'set', 5000 )
+
+	})
+
+} // set toolset
 
 
 
@@ -753,13 +901,6 @@ const add_tool_modal = e => {
 	modal.content.append( set_img )
 
 	modal.content.append( lib.spacer(30) )
-
-	// const set_type = lib.b('div', false, 'choose-name')
-	// const _type = lib.b('input', false, 'input')
-	// _type.type = 'text'
-	// _type.placeholder = 'icon type, ex "store", "party"'
-	// set_type.append( _type )
-	// modal.content.append( set_type )
 
 	const select = lib.b('select', false, 'input')
 	modal.content.append( select )
@@ -790,6 +931,8 @@ const add_tool_modal = e => {
 	})
 
 } // add tool modal
+
+
 
 
 const save_icon = async( e ) => {
@@ -859,6 +1002,7 @@ const _build_tool_wrap = () => {
 
 
 
+
 const build_tool = args => {
 	const {
 		mappa,
@@ -887,6 +1031,7 @@ const build_tool = args => {
 
 
 
+
 const set_active_tool = e => {
 	const wrap = lib.click_parent( e.target, 'tool-wrap', false, 5 )
 	const {
@@ -898,7 +1043,9 @@ const set_active_tool = e => {
 		wrap,
 	})
 
-}
+} // set active tool
+
+
 
 
 

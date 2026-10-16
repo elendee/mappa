@@ -13,6 +13,7 @@ import MODELS from './MODELS.js'
 import MediaItem from './models/MediaItem.js'
 import MapView from './models/MapView.js'
 import MapElement from './models/MapElement.js'
+import Toolset from './models/Toolset.js'
 import Tool from './models/Tool.js'
 import Friendship from './models/Friendship.js'
 import FIELDS from './data/FIELDS.js'
@@ -57,10 +58,35 @@ const action = async( request ) => {
 
 	switch( action ){
 
+	case 'create_set':
+
+		if( !lib.is_logged( request )){
+			return lib.return_fail(`must be logged`, `must be logged`)
+		}
+
+		uuid = await lib.get_unique_uuid( DB, 'toolsets', FIELDS.PERSISTS_UUID.Toolset )
+
+		if( typeof request.body.name != 'string' || request.body.name.length > 50 ){
+			return lib.return_fail(`invalid set name`, `invalid set name`)
+		}
+
+		value = new Toolset({
+			user_key: user.id,
+			uuid,
+			name: request.body.name,
+			// is_public: 1,
+		})
+
+		await value.save()
+
+		return {
+			success: true,
+		}
+
 	case 'get_all_toolsets':
 
-		sql = `SELECT * FROM toolsets WHERE is_public=1`
-		res = await pool.queryPromise( sql )
+		sql = `SELECT * FROM toolsets WHERE is_public=1 OR user_key=?`
+		res = await pool.queryPromise( sql, [ user.id ] )
 		if( res.error ) return lib.return_fail( res.error, `error getting toolsets`)
 
 		for( const r of res.results ){
@@ -258,6 +284,14 @@ const action = async( request ) => {
 
 		// pub
 		value = toolset.publish( toolset.get_request_allowed( request ) )
+
+		const tools = await toolset.get_tools()
+
+		for( const data of tools || []){
+			const tool = new Tool( data )
+			const pub = tool.publish( tool.get_request_allowed( request))
+			value.tools.push( pub )
+		}
 
 		return {
 			success: true,
@@ -502,6 +536,13 @@ const action = async( request ) => {
 
 	case 'update_model':
 
+		// validate
+		res = await allow_update({
+			request,
+		})
+		if( !res?.success ) return res;
+
+		// business logic
 		res = await MODELS.update( request )
 		if( !res?.success ) return res
 
@@ -835,7 +876,27 @@ const get_media_item = async( slug ) => {
 
 
 
+const allow_update = async( args ) => {
+	const {
+		request,
+	} = args
 
+	if( request.body.type === 'MapView' ){
+		if( !lib.is_logged( request ) ) return lib.return_fail(`must be logged in`, `must be logged in`)
+		let mapview = await GET.mapview({
+			uuid: request.body.model?.uuid,
+		})
+		if( !mapview ) return lib.return_fail(`failed to find view: ${request.body.model?.uuid}`, `layer not found`)
+		if( !lib.is_admin( request ) && mapview.user_key !== user.id ){
+			return lib.return_fail(`not your layer`, `you can only edit your own layers`)
+		}
+	}
+
+	return {
+		success: true,
+	}
+
+}
 
 
 
