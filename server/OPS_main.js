@@ -106,7 +106,7 @@ const action = async( request ) => {
 
 	case 'get_all_toolsets':
 
-		sql = `SELECT * FROM toolsets WHERE is_public=1 OR user_key=?`
+		sql = `SELECT * FROM toolsets WHERE is_public=1 OR user_key=? ORDER BY created DESC`
 		res = await pool.queryPromise( sql, [ user.id ] )
 		if( res.error ) return lib.return_fail( res.error, `error getting toolsets`)
 

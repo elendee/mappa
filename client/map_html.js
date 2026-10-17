@@ -1,8 +1,6 @@
-// const cache = ''
 import log from '../server/log.js'
 import lib from '../server/lib.js'
 import env from '../server/.env.js'
-// import CACHE from '../server/CACHE.js'
 import PUBLIC from '../server/data/PUBLIC.js'
 import PRIVATE from '../server/data/PRIVATE.js'
 import SVGS from '../server/data/SVGS.js'

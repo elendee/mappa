@@ -98,9 +98,6 @@ class MapView extends Model {
 		} = edit_args
 
 		const choose_icons = mappa.build_tool_picker()
-		// lib.b('div', false, 'choose-icons', 'button')
-		// choose_icons.innerText = 'choose icons'
-		// choose_icons.addEventListener('click', choose_view_icons )
 		form.append( choose_icons )
 
 		/*

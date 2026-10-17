@@ -685,19 +685,46 @@ class Mappa extends Model {
 	} // --apply pending base layers
 
 
+	get_toolset_icon_src(){
+		const stamp = this.toolset?.img_slug?.split('_')[0]
+		if( stamp ){
+			 return `/fs/toolsets/${lib.get_subdir(stamp)}/${this.toolset.img_slug}`
+		}else{
+			return `/resource/media/pin.png`
+		}
+	}
+
+
+	build_toolset_preview(){
+
+		const preview = lib.b('div', false, 'icon-preview')
+
+		const preview_img = lib.b('img', false, 'icon-preview-img')
+		preview_img.src = this.get_toolset_icon_src() 
+		preview.append( preview_img )
+
+		const preview_name = lib.b('div', false, 'icon-preview-name')
+		preview_name.innerText = this.toolset?.name || '-'
+		preview.append( preview_name )
+
+		return {
+			preview,
+			preview_img,
+			preview_name,
+		}
+
+	}
+
+
 	build_tool_picker(){
 
 		const wrap = lib.b('div', false, 'icon-preview-wrap')
 
-		const preview = lib.b('div', false, 'icon-preview')
-		wrap.append( preview )
-
-		const preview_img = lib.b('img', false, 'icon-preview-img')
-		preview_img.src = `/resource/media/pin.png`
-		preview.append( preview_img )
-
-		const preview_name = lib.b('div', false, 'icon-preview-name')
-		preview.append( preview_name )
+		const {
+			preview,
+			preview_img,
+			preview_name,
+		} = this.build_toolset_preview()
 
 		const pick_set = lib.b('div', false, 'button', 'pick-toolset')
 		pick_set.innerText = 'Choose Icons'
@@ -744,6 +771,8 @@ class Mappa extends Model {
 			toolset,
 		} = res
 
+		this.toolset = toolset
+
 		const {
 			created,
 			edited,
@@ -761,12 +790,14 @@ class Mappa extends Model {
 
 			const pick_set = mappa.build_tool_picker()
 			this.DOM.toolbox.content.append( pick_set )
+			this.DOM.toolbox.wrap.classList.add('is-picker')
 
 			return;
 
 		}else{
 
 			// fill existing tools:
+			this.DOM.toolbox.wrap.classList.remove('is-picker')
 
 			for( const tool_data of tools || [] ){
 				this.tools_by_uuid[ tool_data.uuid ] = tool_data
@@ -844,6 +875,8 @@ const choose_tools = e => {
 	modal.right_panel.append( _create )
 
 	MAP.set( save, {
+		origin_btn: btn,
+		modal,
 		input,
 		mappa,
 	})
@@ -891,6 +924,8 @@ const choose_tools = e => {
 const create_set = e => {
 	const btn = lib.click_parent( e.target, 'button', false, 4 )
 	const {
+		origin_btn,
+		modal,
 		mappa,
 		input,
 	} = MAP.get( btn )
@@ -899,10 +934,14 @@ const create_set = e => {
 		action: 'create_set',
 		name: input.value.trim(),
 	})
-	.then( res => {
+	.then( async( res ) => {
 		if( !res?.success ) return hal('error', res?.msg || 'error creating', 5000 )
 		hal('success', 'success', 10 * 1000 )
-		location.reload()
+
+		modal.close.click()
+		await lib.sleep(100)
+		origin_btn.click()
+
 	})
 
 } // create set
@@ -936,12 +975,8 @@ const set_toolset = e => {
 		if( modal.parentElement ){
 			close.click()
 		}
-		const stamp = res.toolset?.img_slug?.split('_')[0]
-		if( stamp ){
-			preview_img.src = `/fs/toolsets/${lib.get_subdir(stamp)}/${res.toolset.img_slug}`
-		}else{
-			preview_img.src = `/resource/media/pin.png`
-		}
+		this.toolset = res.toolset
+		preview_img.src = this.get_toolset_icon_src()
 		preview_name.innerText = res.toolset.name
 	})
 

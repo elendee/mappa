@@ -542,9 +542,15 @@ body.dashboard.menu-hidden #layer-panel{
 	transition: .3s;
 	background: white;
 	border: 1px solid grey;
+	height: 150px;
+}
+#toolbox.is-picker{
 	height: 220px;
 }
 #toolbox.toggled{
+	top: calc( 100vh - 150px );
+}
+#toolbox.toggled.is-picker{
 	top: calc( 100vh - 220px );
 }
 .toolbox-toggle{
