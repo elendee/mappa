@@ -76,6 +76,7 @@ const action = async( request ) => {
 
 		return {
 			success: true,
+			toolset: toolset.publish( toolset.get_request_allowed( request ) )
 		}
 
 	case 'create_set':

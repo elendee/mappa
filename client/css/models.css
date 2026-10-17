@@ -192,6 +192,18 @@ a.model-listing{
 	right: 0px;
 }
 
+.model-form{
+	padding-bottom: 40px;
+	position: relative;
+}
+.modal .model-form input.button[type=submit],
+.model-form input.button[type=submit]{
+	position: absolute;
+	bottom: 10px;
+	right: 10px;
+	left: auto;
+}
+
 @media screen and (max-width: 800px){
 	.modal-content .model-form{
 		padding: 10px 0;

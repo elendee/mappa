@@ -7,6 +7,7 @@ const required_dir = [
 	'fs/tools',
 	'fs/uploads',
 	'fs/thumbs',
+	'fs/toolsets',
 ]
 const required_env = [
 	'APP_ROOT',

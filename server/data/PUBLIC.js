@@ -135,11 +135,6 @@ const DATA = {
 
 	DEFAULT_STYLE: 'sketch',
 
-	MAP_STYLES: {
-		cat: 1,
-		dog: 2,
-	},
-
 	ELEMENT_TYPES: {
 		party: 'party',
 		happy_hour: 'happy hour',

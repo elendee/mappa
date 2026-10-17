@@ -181,6 +181,12 @@
 	user-select: none;
 }
 
+.modal{
+	pointer-events: none;
+}
+.modal-content{
+	pointer-events: initial;
+}
 
 
 @media screen and (max-width: 800px){

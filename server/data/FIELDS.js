@@ -94,6 +94,10 @@ const MODELS = {
 		is_public: {
 			type: 'boolean',
 			view: 'all',
+		},
+		img_slug: {
+			type: 'string',
+			view: 'all'
 		}
 	},
 
@@ -212,18 +216,6 @@ const MODELS = {
 			type: 'boolean',
 			view: 'all',
 			no_edit: true,
-		},
-
-		style: {
-			type: 'select_multi',
-			prompt: 'map style',
-			view: 'all',
-			options: 'MAP_STYLES',
-			// : {
-			// 	dog: 1,
-			// 	cat: 'two',
-			// }
-			// no_edit: true,
 		},
 
 	},

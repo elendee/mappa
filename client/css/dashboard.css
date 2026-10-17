@@ -542,10 +542,10 @@ body.dashboard.menu-hidden #layer-panel{
 	transition: .3s;
 	background: white;
 	border: 1px solid grey;
-	height: 150px;
+	height: 220px;
 }
 #toolbox.toggled{
-	top: calc( 100vh - 150px );
+	top: calc( 100vh - 220px );
 }
 .toolbox-toggle{
 	position: absolute;
@@ -557,15 +557,21 @@ body.dashboard.menu-hidden #layer-panel{
 	font-size: 3rem;
 	color: black;
 	cursor: pointer;
-	transform-origin: 50% 50%;
-	border: 1px solid blue;
+	/* border: 1px solid blue; */
 	width: 50px;
 	height: 50px;
 	user-select: none;
+	transform-origin: 50% 50%;
+	transform: scaleY( 1 );
+	transition: .5s;
 }
 #toolbox.toggled .toolbox-toggle{
-	transform: rotate( 180deg );
-	transition: .3s;
+	transform: scaleY( -1 );
+}
+.toolbox-toggle,
+.toolbox-name,
+.toolbox-set-name{
+	cursor: pointer;
 }
 .toolbox-name{
 	display: inline-block;
@@ -687,12 +693,27 @@ body.dashboard.menu-hidden #layer-panel{
 	padding: 10px;
 	border-radius: 5px;
 	cursor: pointer;
+	margin: 2px;
 }
 .choose-tools .toolset:hover{
 	background: lightgrey;
 }
 .avbl-sets{
 	margin: 20px 0;
+}
+.icon-preview-wrap{
+	border: 1px solid var(--faint-line);
+	display: inline-block;
+	padding: 10px;
+	text-align: center;
+}
+.icon-preview-img{
+	display: inline-block;
+	max-width: 70px;
+}
+.icon-preview-name{
+	font-weight: bold;
+	margin: 5px 0;
 }
 
 @media screen and (max-width: 800px){

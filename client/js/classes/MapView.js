@@ -93,26 +93,41 @@ class MapView extends Model {
 			edit_args,
 		} = args
 
-		const select = form.querySelector('select[name=style]')
-		select.style.display = 'none'
+		const {
+			mappa,
+		} = edit_args
 
-		const preview = lib.b('div', false, 'layer-style-preview')
-		const label = lib.b('label')
-		label.innerText = this.style
-		preview.append( label )
-		const img = lib.b('img')
-		img.src = `/resource/layer_styles/${this.style}.jpg`
-		preview.append( img )
-		select.parentElement.insertBefore( preview, select )
+		const choose_icons = mappa.build_tool_picker()
+		// lib.b('div', false, 'choose-icons', 'button')
+		// choose_icons.innerText = 'choose icons'
+		// choose_icons.addEventListener('click', choose_view_icons )
+		form.append( choose_icons )
 
-		preview.addEventListener('click', choose_layer_style )
+		/*
 
-		MAP.set( preview, {
-			form,
-			select,
-			layer: this,
-			edit_args,
-		})
+			old map style picker
+
+			const select = form.querySelector('select[name=style]')
+			select.style.display = 'none'
+
+			const preview = lib.b('div', false, 'layer-style-preview')
+			const label = lib.b('label')
+			label.innerText = this.style
+			preview.append( label )
+			const img = lib.b('img')
+			img.src = `/resource/layer_styles/${this.style}.jpg`
+			preview.append( img )
+			select.parentElement.insertBefore( preview, select )
+
+			preview.addEventListener('click', choose_layer_style )
+
+			MAP.set( preview, {
+				form,
+				select,
+				layer: this,
+				edit_args,
+			})
+		*/
 
 	} // custom post form
 
@@ -159,6 +174,16 @@ class MapView extends Model {
 
 
 
+const choose_view_icons = e => {
+	const btn = lib.click_parent( e.target, 'button', false, 5 )
+
+	hal('standard', 'choose..', 3000 )
+
+}
+
+
+
+
 const choose_layer_style = e => {
 
 	const preview = lib.click_parent( e.target, 'layer-style-preview', false, 5 )
@@ -201,7 +226,7 @@ const choose_layer_style = e => {
 			// const set = new Toolset( r )
 			const picker = build_set_picker_row({
 				data: r,
-				load_images,
+				load_images: true,
 			})
 			modal.content.append( picker )
 		}

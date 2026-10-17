@@ -36,6 +36,8 @@
 	--ready-green: #007300;
 	--ready-green-dark: #0da00d;
 	--canceled-red: #901e1e;
+	--faint-line: rgba(0, 0, 0, .3);
+	--faint-line-white: rgba(255, 255, 255, .3);
 }
 
 /*@font-face {
