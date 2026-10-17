@@ -295,7 +295,7 @@ class Mappa extends Model {
 		})
 
 		find_btn.addEventListener('click', e => {
-			console.log('find')
+			hal('standard', '(in dev)', 5000 )
 		})
 
 	} // bind nav
@@ -543,11 +543,18 @@ class Mappa extends Model {
 					const _tool = this._resolve_item_tool( updated ) || tool
 					if( _tool ) this.icons?.upsert( updated, _tool, is_owner )
 				}
+				// modal.close.click()
 			}
 			const form = element.build_edit_form()
 			// location is fixed by placement; don't hand-edit raw geojson
 			form.querySelector('.model-detail-geojson')?.remove()
 			modal.content.append( form )
+
+			BROKER.publish('MAKE_DRAGGABLE', {
+				ele: modal.content,
+				storage_key: 'mappa-edit-icon',
+			})
+
 		}
 
 		document.body.append( modal.ele )
