@@ -14,6 +14,7 @@ import hal from '../hal.js'
 import IconLayer from './IconLayer.js'
 import MapElement from './MapElement.js'
 import { xhr_piece } from '../file_handler.js'
+import GLOBAL from '../GLOBAL.js'
 
 
 
