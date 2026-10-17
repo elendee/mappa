@@ -234,7 +234,6 @@ class Mappa extends Model {
 		const selected = []
 		for( const key in extant_data || {} ){
 			if( key.match(/^layer_/)){
-				// const _key = key.replace('layer_', '')
 				if( extant_data[ key] ) selected.push( key.replace('layer_', '') )
 			}
 		}
@@ -243,7 +242,6 @@ class Mappa extends Model {
 		const base_ele = this._build_base_ele({
 			selected,
 			extant_data,
-			// extant_layer_data: extant_data,
 		})
 		base_layers.append( base_ele )
 		modal.right_panel.append( base_layers )
@@ -251,6 +249,9 @@ class Mappa extends Model {
 		const _view = new MapView( extant_data )
 		_view.extant_row = extant_row
 		_view.mappa = this
+		_view._post_save = e => {
+			hal('standard', 'party', 3000 )
+		}
 		const form = _view.build_edit_form()
 		modal.left_panel.append( form )
 
