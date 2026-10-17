@@ -685,22 +685,33 @@ class Mappa extends Model {
 	} // --apply pending base layers
 
 
-	get_toolset_icon_src(){
-		const stamp = this.toolset?.img_slug?.split('_')[0]
+	get_toolset_icon_src( args ){
+		const {
+			toolset,
+		} = args
+
+		const _toolset = toolset || this.toolset
+
+		const stamp = _toolset?.img_slug?.split('_')[0]
 		if( stamp ){
-			 return `/fs/toolsets/${lib.get_subdir(stamp)}/${this.toolset.img_slug}`
+			 return `/fs/toolsets/${lib.get_subdir(stamp)}/${_toolset.img_slug}`
 		}else{
 			return `/resource/media/pin.png`
 		}
 	}
 
 
-	build_toolset_preview(){
+	build_toolset_preview( args ){
+		const {
+			toolset,
+		} = args
 
 		const preview = lib.b('div', false, 'icon-preview')
 
 		const preview_img = lib.b('img', false, 'icon-preview-img')
-		preview_img.src = this.get_toolset_icon_src() 
+		preview_img.src = this.get_toolset_icon_src({
+			toolset,
+		}) 
 		preview.append( preview_img )
 
 		const preview_name = lib.b('div', false, 'icon-preview-name')
@@ -716,7 +727,10 @@ class Mappa extends Model {
 	}
 
 
-	build_tool_picker(){
+	build_tool_picker( args ){
+		const {
+			toolset,
+		} = args
 
 		const wrap = lib.b('div', false, 'icon-preview-wrap')
 
@@ -724,7 +738,11 @@ class Mappa extends Model {
 			preview,
 			preview_img,
 			preview_name,
-		} = this.build_toolset_preview()
+		} = this.build_toolset_preview({
+			toolset,
+		})
+
+		wrap.append( preview )
 
 		const pick_set = lib.b('div', false, 'button', 'pick-toolset')
 		pick_set.innerText = 'Choose Icons'
@@ -788,7 +806,9 @@ class Mappa extends Model {
 
 			// button to initialize toolset for mappa:
 
-			const pick_set = mappa.build_tool_picker()
+			const pick_set = mappa.build_tool_picker({
+				toolset,
+			})
 			this.DOM.toolbox.content.append( pick_set )
 			this.DOM.toolbox.wrap.classList.add('is-picker')
 
@@ -897,16 +917,26 @@ const choose_tools = e => {
 		for( const r of res.results ){
 			const wrap = lib.b('div', false, 'toolset', 'ib')
 			wrap.setAttribute('data-uuid', r.uuid )
-			const name = lib.b('div', false, 'set-name')
-			name.innerText = r.name || '-'
-			wrap.append( name )
-			const desc = lib.b('div', false, 'set-desc')
-			desc.innerText = r.description || 'an icon set'
-			wrap.append( desc )
-			wrap.addEventListener('click', set_toolset )
-			extant_sets.append( wrap )
+
+			const {
+				preview,
+				preview_img,
+				preview_name,
+			} = mappa.build_toolset_preview({
+				toolset: r,
+			})
+			wrap.append( preview )
+
+			// const name = lib.b('div', false, 'set-name')
+			// name.innerText = r.name || '-'
+			// wrap.append( name )
+			// const desc = lib.b('div', false, 'set-desc')
+			// desc.innerText = r.description || 'an icon set'
+			// wrap.append( desc )
+			// wrap.addEventListener('click', set_toolset )
+			// extant_sets.append( wrap )
 			MAP.set( wrap, {
-				preview_wrap,
+				preview_wrap: wrap,
 				preview,
 				preview_img,
 				preview_name,
@@ -918,7 +948,7 @@ const choose_tools = e => {
 	document.body.append( modal.ele )
 
 } // choose tools
-
+something in this func ^^
 
 
 const create_set = e => {
@@ -976,7 +1006,9 @@ const set_toolset = e => {
 			close.click()
 		}
 		this.toolset = res.toolset
-		preview_img.src = this.get_toolset_icon_src()
+		preview_img.src = this.get_toolset_icon_src({
+			toolset: this.toolset,
+		})
 		preview_name.innerText = res.toolset.name
 	})
 
