@@ -234,7 +234,7 @@ class Mappa extends Model {
 
 		const selected = []
 		for( const key in extant_data || {} ){
-			if( key.match(/^layer_/)){
+			if( key.match(/^layer_/) ){
 				if( extant_data[ key] ) selected.push( key.replace('layer_', '') )
 			}
 		}
@@ -248,11 +248,41 @@ class Mappa extends Model {
 		modal.left_panel.append( base_layers )
 
 		const _view = new MapView( extant_data )
-		_view.extant_row = extant_row
-		// _view.mappa = this
-		_view._post_save = e => {
-			if( env.LOCAL ) hal('standard', 'mapview form post-save', 3000 )
-		}
+
+		_view._post_save = ( args ) => {
+			const {
+				form,
+				edit_args,
+				res,
+			} = args
+			const {
+				// extant_row,
+			} = edit_args || {}
+			const {
+				success,
+				model,
+			} = res || {}
+
+			if( extant_row ){
+				const layer = new MapView( model )
+				const new_row = layer.build_row({
+					mappa,
+					data: _view,
+				})
+				extant_row.parentElement.insertBefore( new_row, extant_row )
+				extant_row.remove()
+				const modal = lib.click_parent( form, 'modal', false, 10 )
+				const close = modal ? modal.querySelector('.modal-close') : undefined
+				if( close ) close.click()
+			}else{
+				console.warn('should have extant row for layer')
+			}
+
+			mappa.fill_toolbox({
+				mapview: _view,
+			})
+
+		} // post save
 
 		const form = _view.build_edit_form({ // xyz
 			mappa: this,
@@ -341,7 +371,6 @@ class Mappa extends Model {
 			const extant = container.querySelector('.mappa-row[data-layer-uuid="' + layer.uuid + '"]')
 			if( extant ) continue;
 			const mapview = new MapView( layer )
-			// mapview.mappa = this
 			const _new = mapview.build_row({
 				mappa: this,
 				data: layer,
@@ -538,7 +567,7 @@ class Mappa extends Model {
 				data: typeof item.data === 'object' ? JSON.stringify( item.data ) : item.data,
 				geojson: typeof item.geojson === 'object' ? JSON.stringify( item.geojson ) : item.geojson,
 			})
-			element.mappa = this
+			// element.mappa = this
 			// keep the rendered icon in sync after an edit save
 			element._post_save = ({ res }) => {
 				if( res?.model ){
@@ -1247,7 +1276,7 @@ const on_map_click = ( Nt ) => {
 	if( document.body.classList.contains('dragging') ){
 
 		// icon clicks open info instead of placing
-		if( window.mappa?.icons?.hit_test( point ) ) return
+		if( window.mappa?.icons?.hit_test( point ) ) return;
 
 		if( IMG_CURSOR.getAttribute('data-element-uuid') ){
 			move_icon({
