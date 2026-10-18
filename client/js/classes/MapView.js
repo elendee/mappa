@@ -68,8 +68,8 @@ class MapView extends Model {
 
 		if( this.extant_row ){
 			const layer = new MapView( model )
-			layer.mappa = this.mappa
 			const new_row = layer.build_row({
+				mappa,
 				data: this,
 			})
 			this.extant_row.parentElement.insertBefore( new_row, this.extant_row )
@@ -137,6 +137,9 @@ class MapView extends Model {
 			mappa,
 			data,
 		} = args
+
+		if( !mappa ) throw new Error('must provide mappa')
+
 
 		const wrap = lib.b('div', false, 'mappa-row')
 		wrap.setAttribute('data-layer-uuid', this.uuid )
@@ -380,7 +383,9 @@ const edit_layer = e => {
 		mappa,
 	} = MAP.get( btn )
 
-	layer.mappa.pop_edit_layer({
+	debugger
+
+	mappa.pop_edit_layer({
 		extant_row: row,
 		extant_data: layer_data,
 		is_edit: true,

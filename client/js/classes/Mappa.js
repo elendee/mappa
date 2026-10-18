@@ -249,11 +249,12 @@ class Mappa extends Model {
 
 		const _view = new MapView( extant_data )
 		_view.extant_row = extant_row
-		_view.mappa = this
+		// _view.mappa = this
 		_view._post_save = e => {
-			hal('standard', 'party', 3000 )
+			if( env.LOCAL ) hal('standard', 'mapview form post-save', 3000 )
 		}
-		const form = _view.build_edit_form({
+
+		const form = _view.build_edit_form({ // xyz
 			mappa: this,
 		})
 		modal.right_panel.append( form )
@@ -339,9 +340,10 @@ class Mappa extends Model {
 		for( const layer of res.results || [] ){
 			const extant = container.querySelector('.mappa-row[data-layer-uuid="' + layer.uuid + '"]')
 			if( extant ) continue;
-			const _layer = new MapView( layer )
-			_layer.mappa = this
-			const _new = _layer.build_row({
+			const mapview = new MapView( layer )
+			// mapview.mappa = this
+			const _new = mapview.build_row({
+				mappa: this,
 				data: layer,
 			})
 			container.append( _new )
@@ -549,7 +551,7 @@ class Mappa extends Model {
 				}
 				// modal.close.click()
 			}
-			const form = element.build_edit_form()
+			const form = element.build_edit_form() // xyz
 			// location is fixed by placement; don't hand-edit raw geojson
 			form.querySelector('.model-detail-geojson')?.remove()
 			modal.content.append( form )
@@ -699,7 +701,8 @@ class Mappa extends Model {
 		}else{
 			return `/resource/media/pin.png`
 		}
-	}
+
+	} // get toolset icon src
 
 
 	build_toolset_preview( args ){
@@ -725,7 +728,7 @@ class Mappa extends Model {
 			preview_name,
 		}
 
-	}
+	} // build toolset preview
 
 
 	build_tool_picker( args ){
@@ -874,9 +877,9 @@ const choose_tools = e => {
 
 	const {
 		wrap: preview_wrap,
-		preview,
-		preview_img,
-		preview_name,
+		preview: og_preview,
+		preview_img: og_preview_img,
+		preview_name: og_preview_name,
 		mappa,
 	} = MAP.get( btn )
 
@@ -896,7 +899,7 @@ const choose_tools = e => {
 		btn.click()
 	}
 
-	const form = set.build_edit_form()
+	const form = set.build_edit_form() // xyz
 	_create.append( form )
 
 	modal.right_panel.append( _create )
@@ -925,6 +928,7 @@ const choose_tools = e => {
 		action: 'get_all_toolsets',
 	}, false, modal.left_panel )
 	.then( res => {
+
 		if( !res?.success ) return hal('error', res?.msg || 'error getting tools', 5000 )
 
 		for( const key in res.results_obj ){
@@ -953,6 +957,9 @@ const choose_tools = e => {
 				}				
 
 				MAP.set( wrap, {
+					og_preview,
+					og_preview_img,
+					og_preview_name,
 					preview_wrap: wrap,
 					preview,
 					preview_img,
@@ -979,6 +986,9 @@ const set_toolset = e => {
 	const close = modal.querySelector('.modal-close')
 	const {
 		mappa,
+		og_preview,
+		og_preview_img,
+		og_preview_name,
 		preview_wrap,
 		preview_img,
 		preview_name,
@@ -998,11 +1008,19 @@ const set_toolset = e => {
 		if( modal.parentElement ){
 			close.click()
 		}
+		// update state
 		mappa.toolset = res.toolset
-		preview_img.src = mappa.get_toolset_icon_src({
+
+		// update the origin toolset
+		og_preview_img.src = mappa.get_toolset_icon_src({
 			toolset: mappa.toolset,
 		})
-		preview_name.innerText = res.toolset.name
+		og_preview_name.innerText = mappa.toolset.name
+
+		// update other DOM toolsets...
+
+
+
 	})
 
 } // set toolset
