@@ -12,6 +12,7 @@ import draggable from '../draggable.js'
 import fetch_wrap from '../fetch_wrap.js'
 import hal from '../hal.js'
 import IconLayer from './IconLayer.js'
+import Toolset from './Toolset.js'
 import MapElement from './MapElement.js'
 import { xhr_piece } from '../file_handler.js'
 import GLOBAL from '../GLOBAL.js'
@@ -886,28 +887,19 @@ const choose_tools = e => {
 	const label = lib.b('label')
 	label.innerText = 'Create New Icon Set'
 	_create.append( label )
-	// const input = lib.b('input', false, 'input')
-	// input.type = 'text'
-	// input.placeholder = 'Icon set name'
-	// _create.append( input )
-	// const save = lib.b('div', false, 'button', 'create-set')
-	// save.innerHTML = 'create set'
-	// save.addEventListener('click', create_set )
-	// _create.append( save )
 
 	const set = new Toolset()
+
+	set._post_save = async( e ) => {
+		modal.close.click()
+		await lib.sleep(100)
+		btn.click()
+	}
+
 	const form = set.build_edit_form()
 	_create.append( form )
 
 	modal.right_panel.append( _create )
-
-	MAP.set( save, { // 0zx9c78
-		origin_btn: btn,
-		modal,
-		input,
-		mappa,
-		// is_public
-	})
 
 	// get available
 	const expl_avl = lib.b('div', false, 'avbl-sets')
@@ -917,34 +909,60 @@ const choose_tools = e => {
 	const extant_sets = lib.b('div', false, 'extant-sets')
 	modal.left_panel.append( extant_sets )
 
+	const sect_user = lib.build_result_section({
+		type: 'blocks',
+		label: 'your sets',
+	})
+	const sect_other = lib.build_result_section({
+		type: 'blocks',
+		label: 'other sets',
+	})
+
+	modal.left_panel.append( sect_user.wrap )
+	modal.left_panel.append( sect_other.wrap )
+
 	fetch_wrap('/action_main', 'post', {
 		action: 'get_all_toolsets',
 	}, false, modal.left_panel )
 	.then( res => {
 		if( !res?.success ) return hal('error', res?.msg || 'error getting tools', 5000 )
-		for( const r of res.results ){
-			const wrap = lib.b('div', false, 'toolset', 'ib')
-			wrap.setAttribute('data-uuid', r.uuid )
 
-			const {
-				preview,
-				preview_img,
-				preview_name,
-			} = mappa.build_toolset_preview({
-				toolset: r,
-			})
-			wrap.append( preview )
-			modal.left_panel.append( wrap )
-			wrap.addEventListener('click', set_toolset )
+		for( const key in res.results_obj ){
 
-			MAP.set( wrap, {
-				preview_wrap: wrap,
-				preview,
-				preview_img,
-				preview_name,
-				mappa,
-			})
+			const set = res.results_obj[key]
+
+			for( const r of set ){
+
+				const wrap = lib.b('div', false, 'toolset', 'ib')
+				wrap.setAttribute('data-uuid', r.uuid )
+
+				const {
+					preview,
+					preview_img,
+					preview_name,
+				} = mappa.build_toolset_preview({
+					toolset: r,
+				})
+				wrap.append( preview )
+				wrap.addEventListener('click', set_toolset )
+
+				if( key == 'user_sets' ){
+					sect_user.content.append( wrap )
+				}else if( key == 'other_sets' ){
+					sect_other.content.append( wrap )
+				}				
+
+				MAP.set( wrap, {
+					preview_wrap: wrap,
+					preview,
+					preview_img,
+					preview_name,
+					mappa,
+				})
+			}
+
 		}
+
 	})
 
 	document.body.append( modal.ele )
@@ -952,55 +970,6 @@ const choose_tools = e => {
 } // choose tools
 
 
-const create_set = e => {
-	const btn = lib.click_parent( e.target, 'button', false, 4 )
-	const { // 0zx9c78
-		origin_btn,
-		modal,
-		mappa,
-		input,
-		is_public,
-	} = MAP.get( btn )
-
-	fetch_wrap('action_main', 'post', {
-		action: 'create_set',
-		name: input.value.trim(),
-		is_public: is_public.checked,
-	})
-	.then( async( res ) => {
-		if( !res?.success ) return hal('error', res?.msg || 'error creating', 5000 )
-		hal('success', 'success', 10 * 1000 )
-
-		modal.close.click()
-		await lib.sleep(100)
-		origin_btn.click()
-
-	})
-
-} // create set
-
-
-
-
-// const choose_icon_set = e => {
-// 	const btn = lib.click_parent( e.target, 'toolset', false, 5 )
-// 	const {
-// 		preview_wrap,
-// 		preview,
-// 		preview_img,
-// 		preview_name,
-// 		mappa,
-// 	} = MAP.get( btn )
-
-// 	console.log({
-// 		preview_wrap,
-// 		preview,
-// 		preview_img,
-// 		preview_name,
-// 		mappa,
-// 	})
-
-// }
 
 
 

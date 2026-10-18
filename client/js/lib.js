@@ -1677,7 +1677,32 @@ const spacer = height => {
 }
 
 
+const build_result_section = args => {
+	const {
+		type, // 'rows' / 'blocks'
+		label: _label,
+	} = args
 
+	if( type !== 'rows' && type !== 'blocks' ){
+		console.warn('choose either rows or blocks for result-section')
+	}
+
+	const wrap = b('div', false, 'result-section', type )
+
+	const label = b('label')
+	label.innerText = _label
+	wrap.append( label )
+
+	const content = b('div', false, 'contents')
+	wrap.append( content )
+
+	return {
+		wrap,
+		label,
+		content,
+	}
+
+}
 
 
 const syntax_types = ['is-code', 'is-ascii', 'is-poetry', 'is-text']
@@ -1764,6 +1789,7 @@ export {
 	build_checkbox,
 	build_text_input,
 	build_select,
+	build_result_section,
 	syntax_types,
 	render_multi_options,
 	build_multi,

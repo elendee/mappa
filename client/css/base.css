@@ -1739,6 +1739,10 @@ body.key-handling .key{
 	left: 100px;
 }
 
+.result-section label{
+	font-weight: bold;
+}
+
 @media screen and ( max-width: 800px ){
 	.dark #header .menu-item a{
 		/* color: var(--dark-text); */

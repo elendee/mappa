@@ -704,6 +704,9 @@ body.dashboard.menu-hidden #layer-panel{
 .choose-tools .toolset:hover{
 	background: lightgrey;
 }
+.choose-tools .result-section .contents{
+	min-height: 40px;
+}
 .avbl-sets{
 	margin: 20px 0;
 }
@@ -714,6 +717,7 @@ body.dashboard.menu-hidden #layer-panel{
 }
 .icon-preview{
 	text-align: center;
+	max-width: 150px;
 }
 .icon-preview-img{
 	display: inline-block;

@@ -106,6 +106,10 @@ const action = async( request ) => {
 
 	case 'get_all_toolsets':
 
+		results_obj.user_sets = []
+		results_obj.other_sets = []
+
+		// get user sets
 		sql = `SELECT * FROM toolsets WHERE is_public=1 AND user_key=? ORDER BY created DESC`
 		res = await pool.queryPromise( sql, [ user.id ] )
 		if( res.error ) return lib.return_fail( res.error, `error getting toolsets`)
@@ -113,12 +117,16 @@ const action = async( request ) => {
 		for( const r of res.results ){
 			const set = new Toolset( r )
 			const pub = set.publish( set.get_request_allowed( request ) )
-			results.push( pub )
+			if( set.user_key === user.id ){
+				results_obj.user_sets.push( pub )
+			}else{
+				results_obj.other_sets.push( pub )
+			}
 		}
 
 		return {
 			success: true,
-			results,
+			results_obj,
 		}
 
 	case 'get_map_items':

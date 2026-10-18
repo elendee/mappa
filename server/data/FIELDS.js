@@ -97,7 +97,8 @@ const MODELS = {
 		},
 		img_slug: {
 			type: 'string',
-			view: 'all'
+			view: 'all',
+			no_edit: true,
 		}
 	},
 
