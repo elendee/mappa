@@ -715,7 +715,7 @@ class Mappa extends Model {
 		preview.append( preview_img )
 
 		const preview_name = lib.b('div', false, 'icon-preview-name')
-		preview_name.innerText = this.toolset?.name || '-'
+		preview_name.innerText = toolset?.name || '-'
 		preview.append( preview_name )
 
 		return {
@@ -861,6 +861,8 @@ class Mappa extends Model {
 
 
 
+
+
 const choose_tools = e => {
 	const btn = lib.click_parent( e.target, 'button', false, 5 )
 
@@ -884,21 +886,27 @@ const choose_tools = e => {
 	const label = lib.b('label')
 	label.innerText = 'Create New Icon Set'
 	_create.append( label )
-	const input = lib.b('input', false, 'input')
-	input.type = 'text'
-	input.placeholder = 'Icon set name'
-	_create.append( input )
-	const save = lib.b('div', false, 'button', 'create-set')
-	save.innerHTML = 'create set'
-	save.addEventListener('click', create_set )
-	_create.append( save )
+	// const input = lib.b('input', false, 'input')
+	// input.type = 'text'
+	// input.placeholder = 'Icon set name'
+	// _create.append( input )
+	// const save = lib.b('div', false, 'button', 'create-set')
+	// save.innerHTML = 'create set'
+	// save.addEventListener('click', create_set )
+	// _create.append( save )
+
+	const set = new Toolset()
+	const form = set.build_edit_form()
+	_create.append( form )
+
 	modal.right_panel.append( _create )
 
-	MAP.set( save, {
+	MAP.set( save, { // 0zx9c78
 		origin_btn: btn,
 		modal,
 		input,
 		mappa,
+		// is_public
 	})
 
 	// get available
@@ -926,15 +934,9 @@ const choose_tools = e => {
 				toolset: r,
 			})
 			wrap.append( preview )
+			modal.left_panel.append( wrap )
+			wrap.addEventListener('click', set_toolset )
 
-			// const name = lib.b('div', false, 'set-name')
-			// name.innerText = r.name || '-'
-			// wrap.append( name )
-			// const desc = lib.b('div', false, 'set-desc')
-			// desc.innerText = r.description || 'an icon set'
-			// wrap.append( desc )
-			// wrap.addEventListener('click', set_toolset )
-			// extant_sets.append( wrap )
 			MAP.set( wrap, {
 				preview_wrap: wrap,
 				preview,
@@ -948,21 +950,22 @@ const choose_tools = e => {
 	document.body.append( modal.ele )
 
 } // choose tools
-something in this func ^^
 
 
 const create_set = e => {
 	const btn = lib.click_parent( e.target, 'button', false, 4 )
-	const {
+	const { // 0zx9c78
 		origin_btn,
 		modal,
 		mappa,
 		input,
+		is_public,
 	} = MAP.get( btn )
 
 	fetch_wrap('action_main', 'post', {
 		action: 'create_set',
 		name: input.value.trim(),
+		is_public: is_public.checked,
 	})
 	.then( async( res ) => {
 		if( !res?.success ) return hal('error', res?.msg || 'error creating', 5000 )
@@ -977,6 +980,27 @@ const create_set = e => {
 } // create set
 
 
+
+
+// const choose_icon_set = e => {
+// 	const btn = lib.click_parent( e.target, 'toolset', false, 5 )
+// 	const {
+// 		preview_wrap,
+// 		preview,
+// 		preview_img,
+// 		preview_name,
+// 		mappa,
+// 	} = MAP.get( btn )
+
+// 	console.log({
+// 		preview_wrap,
+// 		preview,
+// 		preview_img,
+// 		preview_name,
+// 		mappa,
+// 	})
+
+// }
 
 
 
@@ -1005,9 +1029,9 @@ const set_toolset = e => {
 		if( modal.parentElement ){
 			close.click()
 		}
-		this.toolset = res.toolset
-		preview_img.src = this.get_toolset_icon_src({
-			toolset: this.toolset,
+		mappa.toolset = res.toolset
+		preview_img.src = mappa.get_toolset_icon_src({
+			toolset: mappa.toolset,
 		})
 		preview_name.innerText = res.toolset.name
 	})
