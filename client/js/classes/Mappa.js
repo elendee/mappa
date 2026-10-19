@@ -248,7 +248,9 @@ class Mappa extends Model {
 		modal.left_panel.append( base_layers )
 
 		const _view = new MapView( extant_data )
-
+		const form = _view.build_edit_form({ // xyz
+			mappa: this,
+		})
 		_view._post_save = ( args ) => {
 			const {
 				form,
@@ -283,10 +285,6 @@ class Mappa extends Model {
 			})
 
 		} // post save
-
-		const form = _view.build_edit_form({ // xyz
-			mappa: this,
-		})
 		modal.right_panel.append( form )
 
 		document.body.append( modal.ele )
@@ -897,6 +895,7 @@ class Mappa extends Model {
 
 
 const choose_tools = e => {
+	
 	const btn = lib.click_parent( e.target, 'button', false, 5 )
 
 	const modal = new Modal({

@@ -543,6 +543,7 @@ body.dashboard.menu-hidden #layer-panel{
 	background: white;
 	border: 1px solid grey;
 	height: 150px;
+	padding-right: 20px;
 }
 #toolbox.is-picker{
 	height: 220px;
