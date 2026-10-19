@@ -58,6 +58,49 @@ const action = async( request ) => {
 
 	switch( action ){
 
+	case 'search_maps':
+		
+		switch( request.body.type ){
+
+		// case 'user':
+		// 	sql = `SELECT * FROM users WHERE handle LIKE ? OR uuid=?`
+		// 	res = await pool.queryPromise( sql, [
+		// 		`%${request.body.value}%`,
+		// 		`%${request.body.value}%`,
+		// 	])
+		// 	if( res.error ) return lib.return_fail( res.error, `error searching`)
+
+		// 	return {
+		// 		success: true,
+		// 	}
+
+		case 'name':
+			sql = `SELECT * FROM mapviews WHERE is_public=1 AND name LIKE ?`
+			res = await pool.queryPromise( sql, `%${request.body.value}%`)
+			if( res.error ) return lib.return_fail( res.error, `error searching`)
+			break;
+
+		case 'id':
+			sql = `SELECT * FROM mapviews WHERE uuid=?`
+			res = await pool.queryPromise( sql, request.body.value )
+			if( res.error ) return lib.return_fail( res.error, `error searching`)
+			break;
+
+		default:
+			return lib.return_fail(`invalid search map: ${request.body.type}`, `invalid search`)
+		}
+
+		// name / id
+		for( const r of res.results || [] ){
+			const mapview = new MapView( r )
+			const pub = mapview.publish( mapview.get_request_allowed( request ) )
+			results.push( pub )
+		}
+
+		return {
+			success: true,
+		}
+
 	case 'set_toolset':
 		mapview = await GET.mapview({
 			uuid: request.body.mapview_uuid,

@@ -1,3 +1,4 @@
+import env from '../env.js'
 import * as lib from '../lib.js'
 
 
@@ -31,6 +32,10 @@ class IconLayer {
 		this._image_promises = new Map() // image_name -> inflight load promise
 		this._ready = null
 		this._click_bound = false
+		this._map_loaded = false
+		if( this.map && typeof this.map.once === 'function' ){
+			this.map.once('load', () => { this._map_loaded = true })
+		}
 	}
 
 	clear(){
@@ -56,11 +61,10 @@ class IconLayer {
 
 	async _map_ready(){
 		if( !this.map ) return false
-		if( typeof this.map.isStyleLoaded !== 'function' || this.map.isStyleLoaded() ) return true
-		if( !this._ready ){
-			this._ready = new Promise( resolve => this.map.once('load', resolve ) )
-		}
-		await this._ready
+		if( typeof this.map.isStyleLoaded !== 'function' || this.map.isStyleLoaded() ){ this._map_loaded = true; return true }
+		if( this._map_loaded ) return true
+		await new Promise( resolve => this.map.once('load', resolve ) )
+		this._map_loaded = true
 		return true
 	}
 
@@ -190,10 +194,15 @@ class IconLayer {
 	}
 
 	async render_all( items, resolve_tool, resolve_owner ){
+
+		if( env.LOCAL ) console.log(' RENDER-ALL; icon-layer render-all')
+
 		// batch path (ex: layer activation) — one readiness wait,
 		// deduped parallel image loads, single setData
 		await this._map_ready()
 		this._ensure_layer()
+
+		if( env.LOCAL ) console.log(' RENDER-ALL; map is-ready')
 
 		const staged = []
 		for( const item of items || [] ){
@@ -209,6 +218,8 @@ class IconLayer {
 			if( name ) staged.push([ item, tool, name ])
 		}
 
+		if( env.LOCAL ) console.log(' RENDER-ALL; ensuring icon images')
+
 		// await all images loaded ( http but also loaded to map )
 		const _promises = staged.map( ([ item, tool, name ]) => {
 			return this._ensure_image( name, tool.img_slug ) 
@@ -223,7 +234,10 @@ class IconLayer {
 			}
 		}
 
+		if( env.LOCAL ) console.log(' RENDER-ALL; should be done render all')
+
 		this.commit()
+
 		return true
 	}
 

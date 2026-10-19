@@ -419,20 +419,23 @@ const b_label = ( text ) => {
 
 
 
-const make_debounce = ( fn, time, immediate, context_args ) => {
+const make_debounce = ( fn, time, immediate, parent_scope_args ) => {
     let buffer
-    return ( args ) => {
-        if( !buffer && immediate ) fn( args, context_args )
-        if( context_args?.exec_steady ){
+    return ( arg1, arg2 ) => {
+    	/*
+			arg1 is often 'e'/vent in client
+    	*/
+        if( !buffer && immediate ) fn( arg1, parent_scope_args, arg2 )
+        if( parent_scope_args?.exec_steady ){
         	if( buffer ) return;
 	        buffer = setTimeout(() => {
-	            fn( args, context_args )
+	            fn( arg1, parent_scope_args, arg2 )
 	            buffer = false
 	        }, time )
         }else{
 	        clearTimeout( buffer )
 	        buffer = setTimeout(() => {
-	            fn( args, context_args )
+	            fn( arg1, parent_scope_args, arg2 )
 	            buffer = false
 	        }, time )
         }
@@ -940,6 +943,8 @@ const copy_content = e => {
 	const code = pre.querySelector('code')
 	if( code ){
 		copyToClipboard( code, btn )
+	}else{
+		console.warn('no code ele for copy')
 	}
 
 }
@@ -965,14 +970,16 @@ const add_select_code = node => {
 }
 
 
-const add_copy_code = node => {
+const gen_copy_button = node => {
 
-	const parent = node.parentElement
 	const btn = b('button', false, 'button', 'copy')
+	btn.type = 'button'
 	btn.innerText = 'copy'
 	btn.addEventListener('click', copy_content )
 
-	parent.append( btn )
+	return {
+		btn,
+	}
 
 }
 
@@ -1057,6 +1064,8 @@ const build_help = args => {
 		header,
 		btn_text,
 	} = args
+
+	if( expl && html ) console.warn('choose text / html for build-help')
 
 	const help = b('div', false, 'button', 'help')
 	help.innerText = btn_text || '?'
@@ -1758,7 +1767,7 @@ export {
 
 	handle_markdown,
 	add_option,
-	add_copy_code,
+	gen_copy_button,
 	add_select_code,
 	charcode,
 	auto_date,

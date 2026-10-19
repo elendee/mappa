@@ -478,7 +478,7 @@ class Model {
 
 		return wrap
 
-	}
+	} // build edit details
 
 
 	build_edit_detail( key, display_data ){
@@ -492,7 +492,6 @@ class Model {
 		}
 		const label = lib.b('label')
 		label.innerHTML = display_data?.prompt || key.replace(/_/g, ' ') || '-'
-		// console.log('adding...', display_data )
 		wrap.append( label )
 
 		let input, img_preview, icon_preview
@@ -604,6 +603,17 @@ class Model {
 
 		const val = this[ key ]
 
+		if( display_data.expl ){
+			const expl = lib.build_help({
+				Modal,
+				expl: display_data.expl,
+				// html,
+				// header,
+				// btn_text,
+			})
+			wrap.append( expl )
+		}
+
 		if( display_data.type === 'price' ){
 			// already appended
 		}else{
@@ -684,12 +694,11 @@ class Model {
 		}catch(err){
 			console.error( err )
 		}
-	}
+	} // set custom field
 
 
 
 	publish(){
-		// publish only designated keys, not client obj keys
 		const pub = {}
 		for( const key in this.FIELDS ){
 			pub[ key ] = this[ key ]
@@ -698,7 +707,7 @@ class Model {
 			pub[ key ] = this[ key ]
 		}
 		return pub
-	}
+	} // publish
 
 
 	generate_preview( args ){
@@ -851,7 +860,7 @@ const save_model = e => {
 		action,
 		model: model_data,
 		type: _type,
-		args,
+		// args, // - used to send 'why not', but its often loaded with circular client data
 		pre_data,
 	})
 	.then( res => {

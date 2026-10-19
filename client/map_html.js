@@ -312,7 +312,7 @@ const render = ( type, request, data ) => {
 								<div id='other-layers-section' class='nav-section'>
 									<div id='layer-panel-header'>
 										<button class='panel-toggle'>-</button>
-										<h4>Other Maps</h4>
+										<h4>Joined Maps</h4>
 										<button class='info-btn' data-info='other'>?</button>
 									</div>
 									<div id='find-mappa-row'>

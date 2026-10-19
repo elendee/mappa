@@ -144,39 +144,14 @@ const MODELS = {
 		listed: {
 			type: 'boolean',
 			view: 'all',
-		},
-		locked: {
-			type: 'boolean',
-			view: 'all',
+			expl: 'Allow users to find the map in public listings'
 		},
 
-		// index_layer: {
-		// 	type: 'number',
-		// 	view: 'all',
-		// },
-		// border_image: {
-		// 	type: 'string',
-		// 	char_limit: [0,500],
-		// 	view: 'all',
-		// },
-		// primary_color: {
-		// 	type: 'string',
-		// 	char_limit: [0,32],
-		// 	view: 'all',
-		// 	default: '#ff3366',
-		// },
-		// secondary_color: {
-		// 	type: 'string',
-		// 	char_limit: [0,32],
-		// 	view: 'all',
-		// 	default: '#3388ff',
-		// },
-		// tertiary_color: {
-		// 	type: 'string',
-		// 	char_limit: [0,32],
-		// 	view: 'all',
-		// 	default: '#33cc99',
-		// },
+		hidden: {
+			type: 'boolean',
+			view: 'all',
+			expl: 'Only map editors can see the map; the map URL is entirely disabled for others'
+		},
 
 		layer_roads: {
 			type: 'boolean',

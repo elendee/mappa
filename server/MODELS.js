@@ -105,7 +105,7 @@ const update = async( request ) => {
 	const {
 		model,
 		type,
-		args,
+		// args,
 		pre_data
 	} = request.body
 

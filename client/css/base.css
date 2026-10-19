@@ -129,9 +129,12 @@ body.dark,
 }
 
 code, code *{
-	font-family: sourcecode;
+	/* font-family: sourcecode; */
 	font-size: .9rem;
 	line-height: 1.2rem;
+	background: rgba(0, 0, 0, .1);
+	padding: 5px;
+	border-radius: 4px;
 }
 .expl{
 	font-style: italic;

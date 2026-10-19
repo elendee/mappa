@@ -556,17 +556,14 @@ body.dashboard.menu-hidden #layer-panel{
 }
 .toolbox-toggle{
 	position: absolute;
-	top: 0;
+	top: -5px;
 	left: 0;
-	padding: 10px 10px;
-	line-height: 30px;
-	background: white;
-	font-size: 3rem;
-	color: black;
+	padding: 2px;
 	cursor: pointer;
 	/* border: 1px solid blue; */
 	width: 50px;
 	height: 50px;
+	opacity: .9;
 	user-select: none;
 	transform-origin: 50% 50%;
 	transform: scaleY( 1 );
@@ -593,6 +590,7 @@ body.dashboard.menu-hidden #layer-panel{
 }
 .toolbox-content{
 	padding: 20px 10px 10px 10px;
+	text-align: right;
 }
 
 .layer-style-preview{
@@ -685,9 +683,10 @@ body.dashboard.menu-hidden #layer-panel{
 }
 
 .model-form-MapView .model-detail-listed,
-.model-form-MapView .model-detail-locked{
+.model-form-MapView .model-detail-hidden{
 	display: inline-block;
 	width: auto;
+	margin: 0 10px;
 }
 
 .choose-tools .create-wrap{
@@ -727,6 +726,24 @@ body.dashboard.menu-hidden #layer-panel{
 .icon-preview-name{
 	font-weight: bold;
 	margin: 5px 0;
+}
+
+.find-mapview .results{
+	height: calc( 90vh - 180px );
+}
+
+.edit-layer .model-detail-listed .help,
+.edit-layer .model-detail-hidden .help{
+	margin-top: 28px;
+}
+
+.mapview-uuid{
+	position: absolute;
+	top: 20px;
+	right: 50px;
+}
+.mapview-uuid .button{
+	margin-left: 10px;
 }
 
 @media screen and (max-width: 800px){

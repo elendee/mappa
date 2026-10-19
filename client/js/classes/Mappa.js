@@ -162,7 +162,7 @@ class Mappa extends Model {
 		wrap.append( content )
 		wrap.append( toggle )
 
-		toggle.innerHTML = '^'
+		toggle.innerHTML = `<img src='/resource/icons/arrow.png'>`
 
 		toggle.addEventListener('click', e => {
 			wrap.classList.toggle('toggled')
@@ -213,6 +213,80 @@ class Mappa extends Model {
 		return style
 	}
 
+
+	pop_find_mapview(){
+		const modal = new Modal({
+			type: 'find-mapview',
+		})
+
+		const search_maps = async( e, scope_args, passed_args ) => {
+			const {
+				type,
+			} = passed_args
+
+			const input = e.target
+
+			hal('success', 'searching ' + type, 2000 )
+
+			let res = await fetch_wrap('/action_main', 'post', {
+				action: 'search_maps',
+				type,
+				value: input.value.trim(),
+			})
+			if( !res?.success ) return hal('error', res?.msg || 'error searching', 5000 )
+
+		} // search maps
+		const debounced_map_search = lib.make_debounce( search_maps, 500, false, {})
+
+		const build_search_box = args => {
+			const {
+				type,
+				desc,
+			} = args
+
+			const wrap = lib.b('div', false, 'search-wrap', 'column', 'column-3')
+			const label = lib.b('label')
+			label.innerText = `${desc||type}`
+			wrap.append( label )
+			const input = lib.b('input', false, 'input')
+			input.placeholder = 'enter a value..'
+			wrap.append( input )
+
+			input.addEventListener('keyup', e => {
+				debounced_map_search( e, {
+					type,
+				})
+			})
+
+			return wrap
+
+		} // build search box
+
+		// build nav
+		const nav = lib.b('div', false, 'search-nav', 'row')
+		const expl = lib.b('div', false, 'column')
+		expl.innerText = `Search by either value`
+		nav.append( expl )
+		modal.content.append( nav )
+		const boxes = {
+			name: build_search_box({ type: 'name', desc: 'Map name' }),
+			// user: build_search_box({ type: 'user' }),
+			uuid: build_search_box({ type: 'id', desc: 'Map id (uuid)' }),
+		}
+		for( const key in boxes ){
+			const box = boxes[key]
+			nav.append( box )
+		}
+
+		// results area
+		const results = lib.b('div', false, 'results')
+		modal.content.append( results )
+
+		document.body.append( modal.ele )
+
+	}
+
+
 	pop_edit_layer( args ){
 		const {
 			extant_row,
@@ -251,6 +325,9 @@ class Mappa extends Model {
 		const form = _view.build_edit_form({ // xyz
 			mappa: this,
 		})
+		// _view._pre_save_action = e => {
+		// 	debugger
+		// }
 		_view._post_save = ( args ) => {
 			const {
 				form,
@@ -287,7 +364,18 @@ class Mappa extends Model {
 		} // post save
 		modal.right_panel.append( form )
 
+		// allow map uuid
+		const uuid = lib.b('div', false, 'mapview-uuid')
+		uuid.innerHTML = `map id: <code>${extant_data.uuid}</code>`
+		const {
+			btn,
+		} = lib.gen_copy_button( uuid )
+		uuid.append( btn )
+		modal.content.append( uuid )
+
 		document.body.append( modal.ele )
+
+		modal.ele.classList.add('clickthrough')
 
 		BROKER.publish('MAKE_DRAGGABLE', {
 			ele: modal.content,
@@ -328,7 +416,7 @@ class Mappa extends Model {
 		})
 
 		find_btn.addEventListener('click', e => {
-			hal('standard', '(in dev)', 5000 )
+			this.pop_find_mapview()
 		})
 
 	} // bind nav
@@ -339,7 +427,10 @@ class Mappa extends Model {
 			MapView,
 			type,
 			silent,
+			init_uuid,
 		} = args
+
+		// hal('standard', 'REFRESH-LAYERS ' + init_uuid )
 
 		let res, action, container
 
@@ -363,17 +454,45 @@ class Mappa extends Model {
 			action,
 		}, true )
 
-		if( !res?.success ) return silent || hal('error', res?.msg || 'error getting layers', 5000 )
+		if( !res?.success ){
+			return silent || hal('error', res?.msg || 'error getting layers', 5000 )
+		}
 
+		console.log('REFRESH-LAYERS', {
+			args,
+			res,
+		})
+
+
+		let init_row
 		for( const layer of res.results || [] ){
 			const extant = container.querySelector('.mappa-row[data-layer-uuid="' + layer.uuid + '"]')
-			if( extant ) continue;
+			if( extant ){
+				console.warn('already got row', layer.uuid )
+				continue;
+			}
 			const mapview = new MapView( layer )
 			const _new = mapview.build_row({
 				mappa: this,
 				data: layer,
 			})
+
+			if( init_uuid === layer.uuid ){
+				init_row = _new
+			}
 			container.append( _new )
+		}
+
+		if( init_row ){
+			setTimeout(() => {
+				init_row.click()
+			}, 500 )
+			return {
+				init_uuid,
+			}
+		}
+		return {
+			//
 		}
 
 	} // refresh-layers
@@ -426,9 +545,10 @@ class Mappa extends Model {
 		let res = await this.fill_toolbox({
 			mapview,
 		})
-		console.log('fill-toolbox', res )
+
 		// fill items
 		res = await this.fill_map_items()
+
 		if( env.SPOOF.INIT_TOOLBOX ){
 			this.DOM.toolbox.toggle.click()
 		}
@@ -443,16 +563,17 @@ class Mappa extends Model {
 		})
 		if( !res?.success ) return hal('error', res?.msg || 'error fill items', 5000 )
 
+		console.log('fill-map-items', res )
+
 		// layer-level ownership from server; per-item flag wins when present
 		if( res.is_owner !== undefined ) this.is_owner = res.is_owner
+
 
 		await this.icons?.render_all(
 			res.results || [],
 			item => this._resolve_item_tool( item ),
 			item => item?.is_owner ?? res.is_owner ?? this.is_owner,
 		)
-
-		console.log('fill-map-items', res )
 
 	} // fill map items
 
@@ -582,6 +703,8 @@ class Mappa extends Model {
 			// location is fixed by placement; don't hand-edit raw geojson
 			form.querySelector('.model-detail-geojson')?.remove()
 			modal.content.append( form )
+
+			modal.ele.classList.add('clickthrough')
 
 			BROKER.publish('MAKE_DRAGGABLE', {
 				ele: modal.content,
@@ -831,6 +954,7 @@ class Mappa extends Model {
 		} = toolset || {}
 
 		this.DOM.toolbox.set_name.innerText = name || 'unnamed'
+		this.DOM.toolbox.wrap.setAttribute('data-active-set', this.toolset?.uuid )
 
 		const has_toolset = toolset?.uuid
 		if( !has_toolset ){
@@ -1030,9 +1154,12 @@ const set_toolset = e => {
 		uuid,
 		mapview_uuid: mappa.uuid,
 	})
-	.then( res => {
+	.then( async( res ) => {
+
 		if( !res?.success ) return hal('error', res?.msg || 'error setting', 5000 )
-		hal('success', 'set', 5000 )
+
+		hal('success', 'saved toolset', 5000 )
+
 		if( modal.parentElement ){
 			close.click()
 		}
@@ -1046,8 +1173,12 @@ const set_toolset = e => {
 		og_preview_name.innerText = mappa.toolset.name
 
 		// update other DOM toolsets...
+		// mappa.DOM.toolbox.set_name.innerText = mappa.toolset.name
+		// mappa.DOM.toolbox.wrap.setAttribute('data-active-set', mappa.toolset.uuid )
 
-
+		await mappa.fill_toolbox({
+			mapview: mappa.active_mapview,
+		})
 
 	})
 
