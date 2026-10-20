@@ -18,6 +18,35 @@ class MapView extends Model {
 
 	}
 
+	async can_view( request ){
+		const user = request.session.USER
+
+		if( user?.id === this.user_key ) return true;
+		if( !this.hidden ) return true;
+
+		// look for any valid join
+		const pool = DB.getPool()
+		let sql, res 
+		sql = `SELECT * FROM map_joins WHERE user_key=? AND view_key=?`
+		res = await pool.queryPromise( sql, [ user.id, this.id ])
+		if( res.error ) return log('flag', 'err query join', res.error )
+		if( !res.results?.length ){
+			return false;
+		}
+		const join = res.results[0]
+		if( join ){ // any join can -view-.  -edit- is another method
+			return true;
+		}
+
+	}
+
+	async can_edit_map( request ){
+		const user = request.session?.USER
+		if( user?.id && this.user_key === user.id ) return true;
+		log('flag', 'skipping role-edits ....')
+		return false
+	}
+
 	async _handle_post_save( request, pre_data, Classes ){
 		const {
 			layers,

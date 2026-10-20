@@ -298,7 +298,6 @@ const render = ( type, request, data ) => {
 									<div id='layer-panel-header'>
 										<button class='panel-toggle'>-</button>
 										<h4>Your Maps</h4>
-										<button class='info-btn' data-info='user'>?</button>
 									</div>
 									<div id='add-mappa-row'>
 										<button id='add-layer' class='button prime'>+ create map</button>
@@ -313,7 +312,6 @@ const render = ( type, request, data ) => {
 									<div id='layer-panel-header'>
 										<button class='panel-toggle'>-</button>
 										<h4>Joined Maps</h4>
-										<button class='info-btn' data-info='other'>?</button>
 									</div>
 									<div id='find-mappa-row'>
 										<button id='find-layer' class='button prime'>+ find map</button>

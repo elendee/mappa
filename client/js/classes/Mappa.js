@@ -14,6 +14,7 @@ import hal from '../hal.js'
 import IconLayer from './IconLayer.js'
 import Toolset from './Toolset.js'
 import MapElement from './MapElement.js'
+import MapView from './MapView.js'
 import { xhr_piece } from '../file_handler.js'
 import GLOBAL from '../GLOBAL.js'
 
@@ -235,6 +236,19 @@ class Mappa extends Model {
 			})
 			if( !res?.success ) return hal('error', res?.msg || 'error searching', 5000 )
 
+			console.log('search', res )
+
+			results.innerHTML = ''
+			for( const r of res.results || []){
+				const view = new MapView( r )
+				view.user = r.user
+				const row = view.output_summary()
+				const link = lib.b('a')
+				link.href = `/?m=${view.uuid}`
+				link.append( row )
+				results.append( link )
+			}
+
 		} // search maps
 		const debounced_map_search = lib.make_debounce( search_maps, 500, false, {})
 
@@ -265,7 +279,7 @@ class Mappa extends Model {
 		// build nav
 		const nav = lib.b('div', false, 'search-nav', 'row')
 		const expl = lib.b('div', false, 'column')
-		expl.innerText = `Search by either value`
+		expl.innerText = `Search for public maps by either value.`
 		nav.append( expl )
 		modal.content.append( nav )
 		const boxes = {
@@ -322,12 +336,15 @@ class Mappa extends Model {
 		modal.left_panel.append( base_layers )
 
 		const _view = new MapView( extant_data )
+		_view.can_edit = extant_data.can_edit
+		_view.is_owner = extant_data.is_owner
+		if( !extant_data ){ // new map defaults
+			_view.listed = 1
+		}
 		const form = _view.build_edit_form({ // xyz
 			mappa: this,
 		})
-		// _view._pre_save_action = e => {
-		// 	debugger
-		// }
+
 		_view._post_save = ( args ) => {
 			const {
 				form,
@@ -344,6 +361,8 @@ class Mappa extends Model {
 
 			if( extant_row ){
 				const layer = new MapView( model )
+				layer.can_edit = _view.can_edit
+				layer.is_owner = _view.is_owner
 				const new_row = layer.build_row({
 					mappa,
 					data: _view,
@@ -359,19 +378,24 @@ class Mappa extends Model {
 
 			mappa.fill_toolbox({
 				mapview: _view,
+				caller: 'pop-edit-layer'
 			})
 
 		} // post save
 		modal.right_panel.append( form )
 
 		// allow map uuid
-		const uuid = lib.b('div', false, 'mapview-uuid')
-		uuid.innerHTML = `map id: <code>${extant_data.uuid}</code>`
-		const {
-			btn,
-		} = lib.gen_copy_button( uuid )
-		uuid.append( btn )
-		modal.content.append( uuid )
+		if( extant_data?.uuid ){
+
+			const uuid = lib.b('div', false, 'mapview-uuid', 'ib')
+			uuid.innerHTML = `map id: <pre class='ib'>${extant_data.uuid}</pre> link: <code class='ib'>${env.PUBLIC_URL}?m=${extant_data.uuid}</code>`
+			const {
+				btn,
+			} = lib.gen_copy_button( uuid )
+			uuid.append( btn )
+			modal.content.append( uuid )
+
+		}
 
 		document.body.append( modal.ele )
 
@@ -422,7 +446,7 @@ class Mappa extends Model {
 	} // bind nav
 
 
-	async refresh_layers( args ){
+	async refresh_mapviews( args ){
 		const {
 			MapView,
 			type,
@@ -437,12 +461,12 @@ class Mappa extends Model {
 		switch( type ){
 
 		case 'user':
-			action = 'get_user_layers'
+			action = 'get_user_maps'
 			container = this.DOM.user_list
 			break;
 
 		case 'others':
-			action = 'get_other_layers'
+			action = 'get_joined_maps'
 			container = this.DOM.other_list
 			break;
 
@@ -500,8 +524,10 @@ class Mappa extends Model {
 
 	set_mapview_active = async( event ) => {
 		const {
+			can_edit,
 			mapview,
 			is_owner,
+			caller,
 		} = event
 
 		if( event.layer ) throw new Error('stop doing this')
@@ -509,6 +535,7 @@ class Mappa extends Model {
 		console.log('LAYERS set-mappa-active', {
 			mapview,
 			is_owner,
+			caller,
 		})
 
 		const {
@@ -519,9 +546,14 @@ class Mappa extends Model {
 			mappa, // ( should be this )
 		} = mapview
 
-		if( !this.DOM.toolbox.wrap.parent ){
-			document.body.append( this.DOM.toolbox.wrap )
+		if( is_owner || can_edit ){
+			if( !this.DOM.toolbox.wrap.parent ){
+				document.body.append( this.DOM.toolbox.wrap )
+			}
+		}else{
+			this.DOM.toolbox.wrap.remove()
 		}
+
 
 		this.uuid = uuid
 		// owner of the active layer gates the icon edit form in pop_icon_info;
@@ -544,6 +576,7 @@ class Mappa extends Model {
 		// fill tools first so items can resolve their icon immediately
 		let res = await this.fill_toolbox({
 			mapview,
+			caller: 'set-mappa-active'
 		})
 
 		// fill items
@@ -920,7 +953,12 @@ class Mappa extends Model {
 	async fill_toolbox( args ){
 		const {
 			mapview,
+			caller,
 		} = args
+
+		console.log('fill-toolbox', {
+			caller,
+		})
 
 		this.DOM.toolbox.content.innerText = ''
 
@@ -1172,12 +1210,10 @@ const set_toolset = e => {
 		})
 		og_preview_name.innerText = mappa.toolset.name
 
-		// update other DOM toolsets...
-		// mappa.DOM.toolbox.set_name.innerText = mappa.toolset.name
-		// mappa.DOM.toolbox.wrap.setAttribute('data-active-set', mappa.toolset.uuid )
-
+		// update toolbox
 		await mappa.fill_toolbox({
 			mapview: mappa.active_mapview,
+			caller: 'set-toolset'
 		})
 
 	})

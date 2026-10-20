@@ -41,7 +41,7 @@ mappa._bind_nav({
 
 let joined
 
-let res = await mappa.refresh_layers({
+let res = await mappa.refresh_mapviews({
 	MapView,
 	type: 'user',
 	silent: true,
@@ -49,7 +49,7 @@ let res = await mappa.refresh_layers({
 })
 if( res.init_uuid ) joined = res.init_uuid
 
-res = await mappa.refresh_layers({
+res = await mappa.refresh_mapviews({
 	MapView,
 	type: 'others',
 	silent: true,
@@ -58,8 +58,35 @@ res = await mappa.refresh_layers({
 if( res.init_uuid ) joined = res.init_uuid
 
 if( init_uuid ){
+
 	if( !joined ){
-		hal('error', `failed to join init map: ${init_uuid}`, 10 * 1000 )
+
+		console.log('JOINING', {
+			init_uuid,
+		})
+
+		fetch_wrap('/action_main', 'post', {
+			action: 'view_map',
+			mapview_uuid: init_uuid,
+		})
+		.then( res => {
+			if( !res?.success ) return hal('error', res?.msg || 'error joining', 10 * 1000 )
+
+			hal('success', 'joined: ' + init_uuid , 2000 )
+
+			const view = new MapView( res.mapview )
+			view.can_edit = res.mapview.can_edit
+			view.is_owner = res.mapview.is_owner
+
+			BROKER.publish('MAPPA_SET_MAPVIEW', {
+				mapview: view,
+				is_owner: view.is_owner,
+				can_edit: view.can_edit,
+				caller: 'init-param-join',
+			})
+
+		})
+
 	}
 }
 
@@ -76,50 +103,4 @@ BROKER.subscribe('MAPPA_SET_MAPVIEW', mappa.set_mapview_active )
 BROKER.subscribe('MAPPA_SET_TOOL', mappa.set_tool_active )
 BROKER.subscribe('ADD_MAP_ITEM_DATA', forward_map_item )
 
-// await lib.sleep( 100 )
 
-// handle an incoming map uuid via query param (?m=<uuid>)
-// clicks the matching map row once it is present in the DOM.
-// returns { state:'activated', uuid } when the param map was clicked,
-// { state:'not_found', uuid } when the param map uuid has no matching row,
-// { state:'absent' } when no 'm' param was provided.
-// const activate_map_param = async () => {
-
-// 	if( !uuid ) return { state: 'absent', uuid: null }
-
-// 	let button
-// 	for( let i = 0; i < 50; i++ ){
-// 		button = mappa.DOM.panel.querySelector( `.mappa-row[data-layer-uuid='${uuid}']` )
-// 		if( button ) break
-// 		await lib.sleep( 100 )
-// 	}
-
-// 	if( button ){
-// 		button.click()
-// 		return { state: 'activated', uuid }
-// 	}
-
-// 	return { state: 'not_found', uuid }
-// }
-
-// const { state, uuid } = await activate_map_param()
-
-// // 'm' param given but no matching row yet: ask the server to join/reserve it.
-// // server-side handling for 'join_map' added later; just send the action for now.
-// if( state === 'not_found' ){
-// 	await fetch_wrap('/action_main', 'post', { action: 'join_map', mapview_uuid: uuid })
-// 	hal( 'error', `Map not found: ${uuid}`, 5000 )
-// }
-
-// // no 'm' param: join a map session, then fall back to the last-active map row.
-// if( state === 'absent' ){
-// 	await fetch_wrap('/action_main', 'post', { action: 'join_map' })
-
-// 	const active_uuid = localStorage.getItem( mappa.active_field )
-// 	if( active_uuid ){
-// 		const button = mappa.DOM.panel.querySelector( `.mappa-row[data-layer-uuid='${active_uuid}']` )
-// 		if( button ){
-// 			button.click()
-// 		}
-// 	}
-// }

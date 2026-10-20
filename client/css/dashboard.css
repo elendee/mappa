@@ -27,6 +27,7 @@
     vertical-align: top;
     font-size: .9rem;
 }
+
 .pop-item .model-summary{
     display: inline-block;
     width: auto;
@@ -742,8 +743,25 @@ body.dashboard.menu-hidden #layer-panel{
 	top: 20px;
 	right: 50px;
 }
+.mapview-uuid *{
+	vertical-align: middle;
+}
+.mapview-uuid pre{
+	/* padding: 0; */
+	margin: 0;
+	/* vertical-align: middle; */
+}
 .mapview-uuid .button{
 	margin-left: 10px;
+}
+
+.find-mapview .model-summary:hover{
+	background: lightgrey;
+	cursor: pointer;
+}
+
+.panel-toggle{
+	display: none;
 }
 
 @media screen and (max-width: 800px){

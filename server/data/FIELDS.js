@@ -42,6 +42,18 @@ const MODELS = {
 		},
 	},
 
+	MapJoin: {
+		user_key: {
+			type: 'number',
+		},
+		view_key: {
+			type: 'number',
+		},
+		role: {
+			type: 'string',
+		},
+	},
+
 	Notification: {
 		user_key: { // (receiver)
 			type: 'boolean',

@@ -24,6 +24,26 @@ class MapView extends Model {
 
 	}
 
+	_fill_summary( args ){
+		const {
+			wrap,
+		} = args
+
+		wrap.classList.add('row')
+
+		const size = 2
+
+		const name = lib.b('div', false, 'view-name', 'column', 'column-' + size )
+		name.innerText = this.name
+
+		const user = lib.b('div', false, 'view-user', 'column', 'column-' + size )
+		user.innerHTML = `<div data-user-uuid='"${this.user?.uuid}"'>${this.user?.handle}</div>`
+
+		wrap.append( name )
+		wrap.append( user )
+
+	}
+
 
 	_pre_save_data( args, ...more ){
 		const {
@@ -49,7 +69,7 @@ class MapView extends Model {
 
 		return data
 
-	}
+	} // pre save
 
 
 	_custom_post_form( args ){
@@ -104,7 +124,6 @@ class MapView extends Model {
 		} = args
 
 		if( !mappa ) throw new Error('must provide mappa')
-
 
 		const wrap = lib.b('div', false, 'mappa-row')
 		wrap.setAttribute('data-layer-uuid', this.uuid )
@@ -333,6 +352,8 @@ const set_map = e => {
 	BROKER.publish('MAPPA_SET_MAPVIEW', {
 		mapview,
 		is_owner: mapview?.is_owner,
+		can_edit: mapview?.can_edit,
+		caller: 'set-map',
 	})
 
 } // set layer

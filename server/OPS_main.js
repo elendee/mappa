@@ -58,6 +58,31 @@ const action = async( request ) => {
 
 	switch( action ){
 
+	case 'view_map':
+
+		mapview = await GET.mapview({
+			uuid: request.body.mapview_uuid,
+		})
+		if( !mapview ) return lib.return_fail(`map not found: ${request.body.mapview_uuid}`, `map not found`)
+
+		allowed = await mapview.can_view( request )
+		if( !allowed ){
+			return lib.return_fail({
+				msg: 'block map',
+				user_id: user.id,
+				map_uuid: request.body.mapview_uuid,
+			}, `you are unable to view this map`)
+		}
+
+		value = mapview.publish( mapview.get_request_allowed( request ) )
+		value.can_edit = await mapview.can_edit_map( request )
+		value.is_owner = mapview.user_key === user.id
+
+		return {
+			success: true,
+			mapview: value
+		}
+
 	case 'search_maps':
 		
 		switch( request.body.type ){
@@ -75,13 +100,25 @@ const action = async( request ) => {
 		// 	}
 
 		case 'name':
-			sql = `SELECT * FROM mapviews WHERE is_public=1 AND name LIKE ?`
+			sql = {
+				sql: `
+				SELECT * FROM mapviews m
+				LEFT JOIN users u ON m.user_key=u.id
+				WHERE m.listed=1 AND ( m.hidden=0 OR m.hidden IS NULL ) AND m.name LIKE ?`,
+				nestTables: true,
+			}
 			res = await pool.queryPromise( sql, `%${request.body.value}%`)
 			if( res.error ) return lib.return_fail( res.error, `error searching`)
 			break;
 
 		case 'id':
-			sql = `SELECT * FROM mapviews WHERE uuid=?`
+			sql = {
+				sql: `
+				SELECT * FROM mapviews m
+				LEFT JOIN users u ON m.user_key=u.id
+				WHERE m.uuid=? AND hidden=0`,
+				nestTables: true,
+			}
 			res = await pool.queryPromise( sql, request.body.value )
 			if( res.error ) return lib.return_fail( res.error, `error searching`)
 			break;
@@ -91,14 +128,21 @@ const action = async( request ) => {
 		}
 
 		// name / id
+		allowed = new User().get_request_allowed( request )
 		for( const r of res.results || [] ){
-			const mapview = new MapView( r )
+			const mapview = new MapView( r.m )
 			const pub = mapview.publish( mapview.get_request_allowed( request ) )
+			if( r.u?.id ){
+				const user = new User( r.u )
+				const upub = user.publish( allowed )
+				pub.user = upub
+			}
 			results.push( pub )
 		}
 
 		return {
 			success: true,
+			results,
 		}
 
 	case 'set_toolset':
@@ -221,6 +265,11 @@ const action = async( request ) => {
 		})
 		if( !mapview ) return lib.return_fail(`failed to find view: ${request.body.mapview_uuid}`, `failed to find view`)
 
+		allowed = await mapview.can_edit_map( request )
+		if( !allowed ){
+			return lib.return_fail(`not allowed to edit`, `not allowed to edit`)
+		}
+
 		let tool = await GET.tool({
 			uuid: request.body.icon_uuid,
 		})
@@ -316,7 +365,7 @@ const action = async( request ) => {
 			mapview_uuid: mapview.uuid,
 		}
 
-	case 'get_user_layers':
+	case 'get_user_maps':
 		if( !user.id ) return lib.return_fail(`must be logged`, `must be logged`)
 
 		sql = `SELECT * FROM mapviews WHERE user_key=?`
@@ -325,8 +374,9 @@ const action = async( request ) => {
 
 		for( const r of res.results ){
 			const layer = new MapView( r )
-			const pub =layer.publish( layer.get_request_allowed( request ))
+			const pub = layer.publish( layer.get_request_allowed( request ))
 			pub.is_owner = true
+			pub.can_edit = true
 			results.push( pub )
 		}
 
@@ -372,8 +422,30 @@ const action = async( request ) => {
 		}
 
 
-	case 'get_other_layers':
+	case 'get_joined_maps':
 
+		if( !lib.is_logged( request )) return lib.return_fail(`must be logged`, `must be logged`)
+
+		sql = {
+			sql: `SELECT * FROM map_joins mj
+			LEFT JOIN mapviews m ON m.id=mj.view_key
+			WHERE mj.user_key=?
+			ORDER BY mj.created DESC LIMIT 500`,
+			nestTables: true,
+		}
+
+		res = await pool.queryPromise( sql, user.id )
+		if( res.error ) return lib.return_fail( res.error, `error getting map joins`)
+
+		for( const r of res.results ){
+			if( r.m?.id ){
+				const view = new MapView( r.m )
+				const pub = view.publish( view.get_request_allowed( request ) )
+				pub.can_edit = await view.can_edit_map( request )
+				pub.is_owner = view.user_key === user.id // should always be false here...
+				results.push( pub )
+			}
+		}
 
 		return {
 			success: true,
