@@ -343,8 +343,8 @@ class Mappa extends Model {
 		modal.left_panel.append( base_layers )
 
 		const _view = new MapView( extant_data )
-		_view.can_edit = extant_data.can_edit
-		_view.is_owner = extant_data.is_owner
+		_view.can_edit = extant_data?.can_edit
+		_view.is_owner = extant_data?.is_owner
 		if( !extant_data ){ // new map defaults
 			_view.listed = 1
 		}
@@ -444,6 +444,11 @@ class Mappa extends Model {
 		const find_btn = nav.querySelector('#find-layer')
 
 		create_btn.addEventListener('click', e => {
+			const extant = document.querySelector('.modal.edit-layer')
+			if( extant ){
+				const close = extant.querySelector('.modal-close')
+				if( close ) close.click()
+			}
 			this.pop_edit_layer({
 				MapView,
 			})
@@ -723,6 +728,15 @@ class Mappa extends Model {
 				IMG_CURSOR.setAttribute('data-element-uuid', item.uuid )
 			})
 			modal.content.append( move_btn )
+
+			const rm_btn = lib.b('button', false, 'button', 'rm')
+			rm_btn.innerText = 'remove icon'
+			rm_btn.addEventListener('click', remove_icon )
+			modal.content.append( rm_btn )
+			MAP.set( rm_btn, {
+				mappa: this,
+				item,
+			})
 			// stringify json fields so the generic form shows editable text, not [object Object]
 			const element = new MapElement({
 				...item,
@@ -1548,6 +1562,36 @@ const move_icon = args => {
 
 } // move icon
 
+
+const remove_icon = e => {
+	const btn = lib.click_parent( e.target, 'button', false, 5 )
+	const {
+		item,
+		mappa,
+	} = MAP.get( btn )
+
+	console.log('rm', {
+		item,
+		mappa,
+	})
+
+	if( !confirm('Permanently remove ' + (item.name || 'item') + '?' ) ){
+		return;
+	}
+
+	fetch_wrap('/action_main', 'post', {
+		action: 'remove_icon',
+		uuid: item.uuid,
+		mapview_uuid: mappa.map.uuid,
+	})
+	.then( res => {
+		if( !res?.success ) return hal('error', res?.msg || 'error removing', 5000 )
+
+		// mappa.map = maplibre.map, so:
+		// mappa.map remove-item : item 
+	})
+
+}
 
 
 

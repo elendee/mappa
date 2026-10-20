@@ -177,6 +177,7 @@
 
 .modal.clickthrough{
 	pointer-events: none;
+	background: transparent;
 }
 .clickthrough .modal-content{
 	pointer-events: initial;

@@ -58,6 +58,29 @@ const action = async( request ) => {
 
 	switch( action ){
 
+
+	case 'remove_icon':
+
+		if( !lib.is_logged( request ) ) return lib.return_fail(`must be logged`, `must be logged`)
+
+		mapview = await GET.mapview({
+			uuid: request.body.mapview_uuid,
+		})
+		if( !mapview ) return lib.return_fail(`map not found: ${request.body.mapview_uuid}`, `map not found`)
+
+		allowed = await mapview.can_edit_map( request )
+		if( !allowed ) return lib.return_fail(`invalid permission`, `invalid permission`)
+
+		item = await GET.item({
+			uuid: request.body.uuid,
+		})
+		if( !item ) return lib.return_fail(`item not found: ${request.body.uuid}`, `item not found`)
+
+
+		return {
+			success: true,
+		}
+
 	case 'view_map':
 
 		mapview = await GET.mapview({
@@ -146,6 +169,8 @@ const action = async( request ) => {
 		}
 
 	case 'set_toolset':
+		if( !lib.is_logged( request )) return lib.return_fail(`must be logged`, `must be logged`)
+
 		mapview = await GET.mapview({
 			uuid: request.body.mapview_uuid,
 		})
