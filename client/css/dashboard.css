@@ -764,6 +764,10 @@ body.dashboard.menu-hidden #layer-panel{
 	padding-top: 20px;
 }
 
+.icon-info .button.rm{
+	float: right;
+}
+
 @media screen and (max-width: 800px){
 	#view-main,
 	#view-p1{

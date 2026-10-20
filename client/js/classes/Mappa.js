@@ -704,11 +704,8 @@ class Mappa extends Model {
 
 		for( const [ label, value ] of rows ){
 			const row = lib.b('div', false, 'icon-info-row')
-			// const _label = lib.b('label')
-			// _label.innerText = label
-			// row.append( _label )
 			const _value = lib.b('div', false, 'value')
-			_value.innerText = `${label}: ${value}`
+			_value.innerHTML = `<b>${label}</b>: ${value}`
 			row.append( _value )
 			modal.content.append( row )
 		}
@@ -730,10 +727,11 @@ class Mappa extends Model {
 			modal.content.append( move_btn )
 
 			const rm_btn = lib.b('button', false, 'button', 'rm')
-			rm_btn.innerText = 'remove icon'
+			rm_btn.innerText = 'remove'
 			rm_btn.addEventListener('click', remove_icon )
 			modal.content.append( rm_btn )
 			MAP.set( rm_btn, {
+				modal,
 				mappa: this,
 				item,
 			})
@@ -1566,6 +1564,7 @@ const move_icon = args => {
 const remove_icon = e => {
 	const btn = lib.click_parent( e.target, 'button', false, 5 )
 	const {
+		modal,
 		item,
 		mappa,
 	} = MAP.get( btn )
@@ -1582,13 +1581,15 @@ const remove_icon = e => {
 	fetch_wrap('/action_main', 'post', {
 		action: 'remove_icon',
 		uuid: item.uuid,
-		mapview_uuid: mappa.map.uuid,
+		mapview_uuid: mappa.uuid,
 	})
 	.then( res => {
 		if( !res?.success ) return hal('error', res?.msg || 'error removing', 5000 )
 
-		// mappa.map = maplibre.map, so:
-		// mappa.map remove-item : item 
+		mappa.icons?.remove( item.uuid )
+
+		modal.close.click()
+
 	})
 
 }

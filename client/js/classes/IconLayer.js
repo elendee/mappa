@@ -94,7 +94,7 @@ class IconLayer {
 				'icon-allow-overlap': true,
 				'text-field': ['get', 'label'],
 				'text-font': [ this._label_font() ],
-				'text-size': 20,
+				'text-size': 18,
 				'text-anchor': 'top',
 				'text-offset': [0, 1],
 				'text-max-width': 10,
@@ -196,6 +196,14 @@ class IconLayer {
 			type: 'FeatureCollection',
 			features: [...this._features.values()],
 		})
+	}
+
+	remove( uuid ){
+		if( !uuid ) return false
+		this._features.delete( uuid )
+		this._items.delete( uuid )
+		this.commit()
+		return true
 	}
 
 	async upsert( item, tool, is_owner ){

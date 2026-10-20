@@ -6,6 +6,7 @@ import User from './models/User.js'
 import MapView from './models/MapView.js'
 import Tool from './models/Tool.js'
 import Toolset from './models/Toolset.js'
+import MapElement from './models/MapElement.js'
 
 
 
@@ -191,6 +192,48 @@ const toolset = async( args ) => {
 
 
 
+const map_element = async( args ) => {
+	const {
+		id, 
+		uuid,
+	} = args
+
+	const pool = DB.getPool()
+	let sql, res
+
+	let tool
+
+	if( id ){
+		sql = `SELECT * FROM map_elements WHERE id=?`
+		res = await pool.queryPromise( sql, id )
+	}else if( uuid ){
+		sql = `SELECT * FROM map_elements WHERE uuid=?`
+		res = await pool.queryPromise( sql, uuid )
+	}else{
+		return log('flag', 'get-map-element: not found', {
+			id,
+			uuid,
+		})
+	}
+
+	if( res.error ) return log('flag', 'err get map-element', res.error )
+
+	if( res.results?.length ){
+		const first = res.results[0]
+		return new MapElement( first )
+	}else{
+		log('flag', 'no map-element found', {
+			uuid,
+			id,
+		})
+	}
+
+} // tool
+
+
+
+
+
 
 
 
@@ -202,5 +245,6 @@ export {
 	tool,
 	mapview,
 	user,
-	toolset
+	toolset,
+	map_element,
 }

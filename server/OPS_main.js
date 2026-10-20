@@ -71,14 +71,16 @@ const action = async( request ) => {
 		allowed = await mapview.can_edit_map( request )
 		if( !allowed ) return lib.return_fail(`invalid permission`, `invalid permission`)
 
-		item = await GET.item({
+		item = await GET.map_element({
 			uuid: request.body.uuid,
 		})
 		if( !item ) return lib.return_fail(`item not found: ${request.body.uuid}`, `item not found`)
 
+		await item.unset()
 
 		return {
 			success: true,
+			item: item.publish( item.get_request_allowed( request ) )
 		}
 
 	case 'view_map':
@@ -409,6 +411,9 @@ const action = async( request ) => {
 			success: true,
 			results,
 		}
+
+
+
 
 
 	case 'get_view_toolset':

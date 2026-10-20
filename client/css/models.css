@@ -152,12 +152,11 @@ a.model-listing{
 
 
 .button.rm{
-	position: absolute;
+	/* position: absolute; */
 	z-index: 9;
 	top: 0px;
 	right: 0px;
     margin-top: 0px;
-	border: 1px solid maroon;
 }
 
 .icon-select .modal-content .icon-wrap{

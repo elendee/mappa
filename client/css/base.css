@@ -8,7 +8,7 @@
 	--reading: #caffcc;
 	--admin: blueviolet;
 	--admin-dark: #711dbf;
-	--alert-red: #db2e2e;
+	--alert-red: #a55b5b;
 	--alert-red-dark: #fc6262;
 	--body-bg: rgb(40, 40, 40);
 	--local-line: rgb(120, 90, 50);
@@ -1095,7 +1095,6 @@ button.button{
 
 .button.rm{
 	background: var(--alert-red);
-	padding: 0px 8px 7px 8px;
 }
 .button.rm:hover{
 	background: #8d0000;
@@ -1103,13 +1102,6 @@ button.button{
 .dark .button.rm{
 	background: var(--alert-red-dark);
 }
-.button.rm{
-    box-shadow: 0 2px 3px rgba(0, 0, 0, .5), inset 0 -3px 0px rgba(0,0, 0, .35);
-}
-.dark .button.rm:hover{
-	background: #fe8585;
-}
-
 
 
 
