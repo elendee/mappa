@@ -43,7 +43,9 @@ const drag_ele = e => {
 
 
 const remove_dragging = e => {
-	window.removeEventListener('mousemove', drag_ele )
+	window.removeEventListener('pointermove', drag_ele )
+	window.removeEventListener('pointerup', remove_dragging )
+	window.removeEventListener('pointercancel', remove_dragging )
 }
 
 const set_drag_position = () => {
@@ -67,7 +69,8 @@ const make_draggable = ( event ) => {
 		storage_key,
 	})
 	ele.classList.add('draggable')
-	ele.addEventListener('mousedown', handle_draggable_mousedown )
+	ele.style.touchAction = 'none'
+	ele.addEventListener('pointerdown', handle_draggable_pointerdown )
 
 	const extant = localStorage.getItem( storage_key )
 
@@ -92,9 +95,10 @@ const make_draggable = ( event ) => {
 
 
 
-const handle_draggable_mousedown = e => {
+const handle_draggable_pointerdown = e => {
 
 	const ele = lib.click_parent( e.target, 'draggable', false, 10 )
+	if( !ele ) return
 	const {
 		storage_key,
 	} = DRAG_MAP.get( ele )
@@ -106,8 +110,9 @@ const handle_draggable_mousedown = e => {
 	lastX = memX = e.clientX
 	lastY = memY = e.clientY
 
-	window.addEventListener('mousemove', drag_ele )
-	window.addEventListener('mouseup', remove_dragging )
+	window.addEventListener('pointermove', drag_ele )
+	window.addEventListener('pointerup', remove_dragging )
+	window.addEventListener('pointercancel', remove_dragging )
 
 } // handle draggable
 
@@ -117,7 +122,7 @@ const remove_draggable = event => {
 		ele,
 	} = event
 
-	ele.removeEventListener( 'mousedown', handle_draggable_mousedown )
+	ele.removeEventListener( 'pointerdown', handle_draggable_pointerdown )
 	ele.style.left = '0px'
 	ele.style.top = '0px'
 }

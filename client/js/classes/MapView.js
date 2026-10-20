@@ -34,9 +34,11 @@ class MapView extends Model {
 		const size = 2
 
 		const name = lib.b('div', false, 'view-name', 'column', 'column-' + size )
+		name.title = 'map name'
 		name.innerText = this.name
 
 		const user = lib.b('div', false, 'view-user', 'column', 'column-' + size )
+		user.title = 'map owner'
 		user.innerHTML = `<div data-user-uuid='"${this.user?.uuid}"'>${this.user?.handle}</div>`
 
 		wrap.append( name )

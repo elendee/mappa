@@ -204,7 +204,14 @@
 		margin-top: 1vh;
 	}
 	.left-panel{
-		border: 1px solid;
+		/* border: 1px solid; */
 		border-radius: 4px;
+	}
+	.modal.has-columns .modal-content{
+		overflow-y: auto;
+	}
+	.modal .left-panel,
+	.modal .right-panel{
+		overflow-y: auto;
 	}
 }

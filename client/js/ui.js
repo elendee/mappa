@@ -44,7 +44,7 @@ const clickoff_popup = e => {
 
 	}else if( window.innerWidth < 800 && !document.body.classList.contains('menu-hidden') ){ // check for close menu
 
-		if( click_parent( e.target, false, 'header', 10 ) ){
+		if( click_parent( e.target, false, 'layer-panel', 10 ) ){
 
 			//
 
@@ -55,7 +55,7 @@ const clickoff_popup = e => {
 		}else{
 
 			BROKER.publish('UI_CLOSE', {
-				e: e,
+				e,
 				is_click: true
 			})
 

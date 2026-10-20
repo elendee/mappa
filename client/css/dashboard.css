@@ -467,25 +467,22 @@ body.dashboard.menu-hidden #layer-panel{
 .base-layer-list label{
 	width: 100%;
 	margin: 10px 0;
-	/* border: 2px solid; */
 }
 .base-layer-list input[type=checkbox]{
-	/* max-width: auto; */
 	width: 30px;
 	height: 30px;
 }
 
-.edit-layer .model-form-Layer{
-	padding-top: 0;
+.edit-layer .model-form-Mapview{
+	background: rgba(0,0,0,.1);
+	border-radius: 5px;
 }
-.edit-layer .model-form-Layer .boolean{
+.edit-layer .model-form-Mapview .boolean{
 	display: inline-block;
-	/* border: 1px solid; */
 	width: auto;
 	margin-right: 10px;
-	/* margin: 0 5px; */
 }
-.edit-layer .model-form-Layer .boolean label{
+.edit-layer .model-form-Mapview .boolean label{
 	padding: 2px 0;
 }
 .edit-layer .model-form{
@@ -731,6 +728,7 @@ body.dashboard.menu-hidden #layer-panel{
 
 .find-mapview .results{
 	height: calc( 90vh - 180px );
+	overflow-y: auto;
 }
 
 .edit-layer .model-detail-listed .help,
@@ -795,7 +793,7 @@ body.dashboard.menu-hidden #layer-panel{
 		height: calc(100vh - 40px);
 	}
 	#map{
-		height: 60vh;
+		height: 100vh;
 		flex: none;
 	}
 	#layer-panel{
@@ -803,11 +801,51 @@ body.dashboard.menu-hidden #layer-panel{
 		height: 40vh;
 		border-left: none;
 		border-top: 1px solid #ccc;
+		position: fixed;
+		width: 80vw;
+		height: 100vh;
+		right: 0;
+		border-left: 2px solid grey;
+		z-index: 999;
+		overflow-y: auto;
 	}
 	body.dashboard #content,
 	body.dashboard.menu-hidden #content{
 		padding-left: 0;
 		padding-top: 40px;
+	}
+
+	.nav-section{
+		/* border-radius: 8px;
+		padding: 10px 10px 8px;
+		margin-bottom: 10px;
+		margin-top: 30px;
+		box-shadow: 0 1px 3px rgba(0,0,0,0.09);
+		border: 1px solid #dee2e6; */
+	}
+	.layer-list{
+		max-height: 1000px;
+	}
+	.search-wrap{
+		padding: 5px;
+		max-width: 50% !important;
+	}
+
+	.find-mapview .view-user{
+		font-size: .9rem;
+		padding-left: 20px;
+		padding-top: 0px;
+	}
+	.edit-layer .modal-expl{
+		padding-top: 50px;
+	}
+	.edit-layer .mapview-uuid{
+		right: 0;
+		left: auto;
+		width: 90%;
+	}
+	.edit-layer .model-form-Mapview{
+		margin-top:40px;
 	}
 }
 

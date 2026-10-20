@@ -254,11 +254,14 @@ class Mappa extends Model {
 
 		const build_search_box = args => {
 			const {
+				size,
 				type,
 				desc,
 			} = args
 
-			const wrap = lib.b('div', false, 'search-wrap', 'column', 'column-3')
+			const _size = size || 2
+
+			const wrap = lib.b('div', false, 'search-wrap', 'column', 'column-' + _size )
 			const label = lib.b('label')
 			label.innerText = `${desc||type}`
 			wrap.append( label )
@@ -283,9 +286,9 @@ class Mappa extends Model {
 		nav.append( expl )
 		modal.content.append( nav )
 		const boxes = {
-			name: build_search_box({ type: 'name', desc: 'Map name' }),
+			name: build_search_box({ type: 'name', desc: 'Map name', size: 2 }),
 			// user: build_search_box({ type: 'user' }),
-			uuid: build_search_box({ type: 'id', desc: 'Map id (uuid)' }),
+			uuid: build_search_box({ type: 'id', desc: 'Map id (uuid)', size: 2 }),
 		}
 		for( const key in boxes ){
 			const box = boxes[key]
@@ -316,9 +319,13 @@ class Mappa extends Model {
 
 		modal.make_columns()
 
-		const drag = lib.b('div', false, 'drag-icon')
-		drag.innerHTML = `<img src='/resource/icons/drag.png'>`
-		modal.content.prepend( drag )
+		if( window.innerWidth > 800 ){
+			const drag = lib.b('div', false, 'drag-icon')
+			drag.innerHTML = `<img src='/resource/icons/drag.png'>`
+			modal.content.prepend( drag )			
+		}else{
+			modal.content.prepend( modal.right_panel )
+		}
 
 		const selected = []
 		for( const key in extant_data || {} ){
@@ -401,10 +408,13 @@ class Mappa extends Model {
 
 		modal.ele.classList.add('clickthrough')
 
-		BROKER.publish('MAKE_DRAGGABLE', {
-			ele: modal.content,
-			storage_key: 'mappa-edit-layer',
-		})
+		if( window.innerWidth > 800 ){
+			BROKER.publish('MAKE_DRAGGABLE', {
+				ele: modal.content,
+				storage_key: 'mappa-edit-layer',
+			})			
+		}
+
 
 	} // pop edit layer
 
@@ -739,10 +749,12 @@ class Mappa extends Model {
 
 			modal.ele.classList.add('clickthrough')
 
-			BROKER.publish('MAKE_DRAGGABLE', {
-				ele: modal.content,
-				storage_key: 'mappa-edit-icon',
-			})
+			if( window.innerWidth > 800 ){
+				BROKER.publish('MAKE_DRAGGABLE', {
+					ele: modal.content,
+					storage_key: 'mappa-edit-icon',
+				})
+			}
 
 		}
 
