@@ -44,7 +44,9 @@ const clickoff_popup = e => {
 
 	}else if( window.innerWidth < 800 && !document.body.classList.contains('menu-hidden') ){ // check for close menu
 
-		if( click_parent( e.target, false, 'layer-panel', 10 ) ){
+		const panel = click_parent( e.target, false, 'layer-panel', 20 )
+
+		if( panel ){
 
 			//
 
@@ -226,9 +228,8 @@ document.body.addEventListener('click', clickoff_popup )
 document.body.addEventListener('keyup', e => {
 	if( e.keyCode === 27 || e.key === 'Escape' ){
 		if( esc_swallowed_by_system_dialogue() ) return // system dialogue (e.g. file picker) consumed this esc
-		// debugger
 		BROKER.publish('UI_CLOSE', {
-			e: e,
+			e,
 			is_esc: true,
 		})
 	}

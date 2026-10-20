@@ -11,7 +11,7 @@ if( document.getElementById('redirect') ){
 	if( location.href.match(/localhost/) ){
 		document.body.innerText = 'redirecting to: ' + loc + '\nin 20s\n'
 		const button = document.createElement('a')
-		button.href = '/'+loc
+		button.href = loc.match(/^http/) ? loc : '/'+loc
 		button.innerText = 'or click'
 		document.body.append( button )
 		await new Promise( resolve => {

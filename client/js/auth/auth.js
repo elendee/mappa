@@ -37,6 +37,7 @@ const openLogin = () => {
 		fetch_wrap('/login', 'post', {
 			email: email.value.trim(),
 			password: pw.value.trim(),
+			return_map: window.mappa?.uuid,
 		})
 		.then( res => {
 			if( !res?.success ) return hal('error', res?.msg || 'error signing in', 5000 )
@@ -78,7 +79,7 @@ const openLogin = () => {
 
 
 
-const openRegister = () => {
+const openRegister = args => {
 	const modal = new Modal({
 		type: 'register',
 		header: 'register',
@@ -107,6 +108,7 @@ const openRegister = () => {
 	submit.addEventListener('click', e => {
 		fetch_wrap('/register', 'post', {
 			email: email.value.trim(),
+			return_map: window.mappa?.uuid,
 		})
 		.then( res => {
 			if( !res?.success ) return hal('error', res?.msg || 'error registering', 5000 )

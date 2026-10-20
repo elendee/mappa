@@ -6,6 +6,7 @@ import Mappa from '../classes/Mappa.js'
 import MapView from '../classes/MapView.js'
 import MapElement from '../classes/MapElement.js'
 import BROKER from '../EventBroker.js'
+import USER from '../USER.js'
 
 
 

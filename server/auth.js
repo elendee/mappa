@@ -173,9 +173,15 @@ const send_confirm = async( args ) => {
 	})
 	await code.save()
 
+	const {
+		return_map
+	} = request.body
+
+	let add_return = return_map ? `?return=${return_map}` : ''
+
 	const body_html = `${ action } account:<br><br>
 	Click this link (or paste the URL) to automatically confirm your account:<br>
-	<a href="${ env.SITE_URL }/confirm_code/${ code.code }" target="_blank">${ env.SITE_TITLE } confirmation</a>.<br>`
+	<a href="${ env.SITE_URL }/confirm_code/${ code.code }${add_return}" target="_blank">${ env.SITE_TITLE } confirmation</a>.<br>`
 	const body_text = lib.user_data( body_html, {
 		new_lines: true,
 		strip_html: true,
@@ -313,7 +319,7 @@ const logout = async( request ) => {
 const confirm_code = async( request ) => {
 
 	// const code = request.params[0]?.replace('/', '')
-
+	
 	const code = request.params?.code
 
 	if( typeof code !== 'string' || !code ) return lib.return_fail('no confirm code: ' + code, 'no confirm code')

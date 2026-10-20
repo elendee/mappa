@@ -14,27 +14,27 @@ const spinner = new Spinner({
 
 const content = document.querySelector('#content')
 
-const form = document.createElement("form")
+const form = document.createElement('form')
 form.id = 'reset'
 form.autocomplete = true
-content.appendChild( form )
+content.append( form )
 
 const email = document.createElement('input')
 email.type = 'email'
 email.name = 'email'
 email.classList.add('input')
 email.placeholder = 'email'
-form.appendChild( email )
+form.append( email )
 
 const br = document.createElement('br')
-form.appendChild( br )
+form.append( br )
 
 const submit = document.createElement('input')
 submit.classList.add('button')
 submit.type = 'submit'
 submit.value = 'submit'
 
-form.appendChild( submit )
+form.append( submit )
 
 form.onsubmit = e => {
 

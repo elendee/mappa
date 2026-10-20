@@ -142,6 +142,18 @@ const DATA = {
 		pop_up: 'pop up',
 	},
 
+	ROLES: {
+		visitor: {
+			slug: 'visitor',
+		},
+		editor: {
+			slug: 'editor',
+		},
+		owner: {
+			slug: 'owner',
+		},
+	},
+
 }
 
 

@@ -389,7 +389,7 @@ const is_admin = ( request, user ) => {
 
 const is_logged = ( request, user ) => {
 	const id = request?.session?.USER?.id || user?.id
-	if( typeof id === 'number' && request.session?.USER?.confirmed ) return true
+	if( typeof id === 'number' ) return true // && request.session?.USER?.confirmed
 	return false
 }
 

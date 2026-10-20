@@ -50,12 +50,10 @@ const global_data = () => {
 
 
 const links_main = request => {
-
 	return `
-		<div id='dark-toggle' class='menu-item svg'>
-			${ SVGS.dark_mode }
-		</div>`
-
+	<div id='dark-toggle' class='menu-item svg'>
+		${ SVGS.dark_mode }
+	</div>`
 }
 
 // standalone cluster — outside nav/panel, state rendered server-side.
@@ -164,6 +162,7 @@ const build_header = function( type, request, header ){
 	</div>` : '' }`
 	
 } // build header
+
 
 
 

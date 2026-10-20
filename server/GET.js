@@ -105,6 +105,48 @@ const mapview = async( args ) => {
 
 
 
+const map_join = async( args ) => {
+	const {
+		id,
+		user_key,
+		view_key,
+	} = args
+
+	const pool = DB.getPool()
+	let sql, res
+
+	let tool
+
+	if( id ){
+		sql = `SELECT * FROM map_joins WHERE id=?`
+		res = await pool.queryPromise( sql, id )
+	}else if( view_key && user_key ){
+		sql = `SELECT * FROM map_joins WHERE user_key=? AND view_key=?`
+		res = await pool.queryPromise( sql, [ user_key, view_key ])
+	}else{
+		return log('flag', 'get-map-join: not found', {
+			id,
+			user_key,
+			view_key
+		})
+	}
+
+	if( res.error ) return log('flag', 'err get mapjoin', res.error )
+
+	if( res.results?.length ){
+		return new MapJoin( res.results[0] )
+	}else{
+		log('flag', 'no mapjoin found', {
+			user_key,
+			view_key,
+			id,
+		})
+	}
+
+} // map join
+
+
+
 
 
 const tool = async( args ) => {
@@ -247,4 +289,5 @@ export {
 	user,
 	toolset,
 	map_element,
+	map_join,
 }

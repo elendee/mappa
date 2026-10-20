@@ -23,6 +23,11 @@ import GLOBAL from '../GLOBAL.js'
 
 const MAP = new Map()
 
+const storage_keys = window.storage_keys = {
+	// return_map: 'mappa-pending-join',
+	edit_layer: 'mappa-edit-layer',
+}
+
 // const MAPLIBRE_CSS = 'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css'
 
 // const MAPLIBRE_CSS = '/resource/inc/maplibre-gl.css'
@@ -163,8 +168,14 @@ class Mappa extends Model {
 			save_btn,
 		} = social_tab
 
+		wrap.style.display = 'none' // one-time set
+
 		save_btn.innerText = lib.is_logged ? 'save map' : 'login to save map'
 		save_btn.addEventListener('click', e => {
+			if( !lib.is_logged ){
+				document.querySelector('.menu-item.login').click()
+				return;
+			}
 			fetch_wrap('/action_main', 'post', {
 				action: 'save_map',
 				mapview_uuid: this.uuid,
@@ -172,12 +183,25 @@ class Mappa extends Model {
 			.then( res => {
 				if( !res?.success ) return hal('error', res?.msg || 'error saving', 5000 )
 				hal('success', 'success', 5000 )
+				console.log('why unnamed..', res )
+				const view = new MapView( res.mapview )
+				const row = view.build_row({
+					mappa: this,
+					data: view,
+				})
+				this.DOM.other_list.prepend( row )
 			})
 		})
 
 		wrap.append( link )
 		save_wrap.append( save_btn )
 		wrap.append( save_wrap )
+
+		if( window.innerWidth < 800 ){
+
+			this.DOM.panel.prepend( this.DOM.social_tab.wrap )
+
+		}
 
 	} // init social tab
 
@@ -448,7 +472,7 @@ class Mappa extends Model {
 		if( window.innerWidth > 800 ){
 			BROKER.publish('MAKE_DRAGGABLE', {
 				ele: modal.content,
-				storage_key: 'mappa-edit-layer',
+				storage_key: storage_keys.edit_layer,
 			})			
 		}
 
@@ -609,7 +633,6 @@ class Mappa extends Model {
 			this.DOM.toolbox.wrap.remove()
 		}
 
-
 		this.uuid = uuid
 		// owner of the active layer gates the icon edit form in pop_icon_info;
 		// prefer explicit event flag, fall back to the mapview pub
@@ -638,7 +661,12 @@ class Mappa extends Model {
 		res = await this.fill_map_items()
 
 		if( env.SPOOF.INIT_TOOLBOX ){
-			this.DOM.toolbox.toggle.click()
+			if( this.DOM.toolbox.wrap.classList.contains('toggled') ){
+
+			}else{
+				this.DOM.toolbox.wrap.classList.toggle('toggled')
+				// toggle.click()
+			}
 		}
 
 	} // set mappa active
@@ -833,18 +861,10 @@ class Mappa extends Model {
 
 		this.active_tool = tool_data.slug
 
-		if( window.innerWidth > 800 ){ // desktop
-
-			this.set_cursor({
-				state: true,
-				tool_data,
-			})
-
-		}else{ // mobile
-
-
-
-		}
+		this.set_cursor({
+			state: true,
+			tool_data,
+		})
 
 	} // set tool active
 
@@ -1031,6 +1051,8 @@ class Mappa extends Model {
 			document.body.append( wrap )
 		}
 
+		wrap.style.display = 'inline-block' // one-time
+
 		// public link
 		let status
 		if( mapview.hidden ){
@@ -1041,6 +1063,7 @@ class Mappa extends Model {
 			status = 'public'
 		}
 		link.innerHTML = `
+		<div class='map-name'><b>${this.active_mapview?.name}</b></div>
 		<div class='status'>Map is ${status}</div>
 		<code>${env.PUBLIC_URL}?m=${this.uuid}</code>`
 		const {
@@ -1342,7 +1365,10 @@ const set_toolset = e => {
 		og_preview_name.innerText = mappa.toolset.name
 
 		// update toolbox
-		await mappa.update_hud()
+		await mappa.update_hud({
+			mapview: mappa.active_mapview,
+			caller: 'set-toolset',
+		})
 
 	})
 

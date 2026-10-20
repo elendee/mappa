@@ -11,6 +11,7 @@ const required_dir = [
 ]
 const required_env = [
 	'APP_ROOT',
+	'PUBLIC_ROOT',
 ]
 
 

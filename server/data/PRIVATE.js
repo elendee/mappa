@@ -7,7 +7,7 @@ import env from '../.env.js'
 
 const PAGES = [
 	'admin',
-	'profile',
+	// 'profile',
 	'contact',
 	'about',
 	'privacy',

@@ -285,6 +285,7 @@ body.dashboard.menu-hidden #layer-panel{
 #global-mappas-header h4{
 	margin: 0;
 }
+#find-mappa-row,
 #add-mappa-row{
 	margin-bottom: 12px;
 }
@@ -302,6 +303,7 @@ body.dashboard.menu-hidden #layer-panel{
 	margin-bottom: 8px;
 	position: relative;
 	background: #fbfbfb;
+	cursor: pointer;
 }
 .mappa-row.selected{
 	border: 1px solid black;
@@ -787,12 +789,16 @@ body.dashboard.menu-hidden #layer-panel{
 .public-link .copy{
 	margin-left: 20px;
 }
-.menu-hidden #toolbox,
-.menu-hidden #social-tab{
-	display: none;
-}
+
 #social-tab .status{
 	margin-bottom: 8px;
+}
+
+@media screen and (min-width: 800px){
+	.menu-hidden #toolbox,
+	.menu-hidden #social-tab{
+		display: none;
+	}
 }
 
 @media screen and (max-width: 800px){
@@ -879,6 +885,12 @@ body.dashboard.menu-hidden #layer-panel{
 	}
 	.edit-layer .model-form-Mapview{
 		margin-top:40px;
+	}
+	#social-tab{
+		position: relative;
+	}
+	#social-tab *{
+		font-size: initial;
 	}
 
 }

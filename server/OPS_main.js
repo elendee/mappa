@@ -16,6 +16,7 @@ import MapElement from './models/MapElement.js'
 import Toolset from './models/Toolset.js'
 import Tool from './models/Tool.js'
 import Friendship from './models/Friendship.js'
+import MapJoin from './models/MapJoin.js'
 import FIELDS from './data/FIELDS.js'
 import BROKER from './BROKER.js'
 import SVGS from './data/SVGS.js'
@@ -58,6 +59,44 @@ const action = async( request ) => {
 
 	switch( action ){
 
+
+	case 'save_map':
+
+		// get map
+		mapview = await GET.mapview({
+			uuid: request.body.mapview_uuid,
+		})
+		if( !mapview ) return lib.return_fail(`map not found: ${request.body.mapview_uuid}`, `map not found`)
+
+		// dupes
+		value = await GET.map_join({
+			user_key: user.id,
+			view_key: mapview.id,
+		})
+		if( value ) return lib.return_fail({
+			msg: `already joined`,
+			user_key,
+			view_key,
+		}, `already joined`)
+
+		// validate
+		if( mapview.hidden ) return lib.return_fail({
+			msg: 'map inaccessible to joins',
+			uuid: request.body.mapview_uuid,
+		}, `map not currently available`)
+
+		// join
+		value = new MapJoin({
+			user_key: user.id,
+			view_key: mapview.id,
+			role: PUBLIC.ROLES.visitor.slug,
+		})
+		await value.save()
+
+		return {
+			success: true,
+			mapview: mapview.publish( mapview.get_request_allowed( request ) ),
+		}
 
 	case 'remove_icon':
 

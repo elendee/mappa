@@ -50,23 +50,22 @@ import ACCOUNT from './server/OPS_account.js'
 import wss from './server/WSS.js'
 import PUBLIC from './server/data/PUBLIC.js'
 import FIELDS from './server/data/FIELDS.js'
-// import BROKER from './server/BROKER.js'
 import User from './server/models/User.js'
-// import STORE_HANDLER from './server/STORE_HANDLER.js'
 import session_manager from './server/session_manager.js'
 import SOCKETS from './server/SOCKETS.js'
 import SETTINGS from './server/SETTINGS.js'
 import * as CRUD from './server/CRUD.js' // subs
 import BROKER from './server/BROKER.js'
 import file_handler from './server/file_handler.js'
-// import file_processors from './server/file_processors.js'
 import PRIVATE from './server/data/PRIVATE.js'
 import * as GET from './server/GET.js'
 import * as ModelClasses from './server/models/ModelClasses.js'
-// import NOTIFICATIONS from './server/NOTIFICATIONS.js'
 import WORLD from './server/WORLD.js'
 import validate_env from './server/validate_env.js'
-
+// import BROKER from './server/BROKER.js'
+// import STORE_HANDLER from './server/STORE_HANDLER.js'
+// import file_processors from './server/file_processors.js'
+// import NOTIFICATIONS from './server/NOTIFICATIONS.js'
 
 
 
@@ -286,10 +285,18 @@ exp.get('/user/:uuid', async( request, response ) => {
 
 exp.get('/confirm_code/:code', function( request, response ){
 
+	const return_map = request.query.return
+
 	auth.confirm_code( request )
 		.then( res => {
 			if( res.success ){
-				response.send( render('redirect', request, ''))
+				let redirect
+				if( return_map ){
+					redirect = env.PUBLIC_ROOT + '/?m=' + return_map
+				}else{
+					redirect = ''
+				}
+				response.send( render('redirect', request, redirect ) )
 			}else{
 				const msg = res?.msg || 'there was an error confirming'
 				response.send( render('error', request, msg + ' - you can try <a href="/await_confirm?new=false">sending a new code</a>'))
