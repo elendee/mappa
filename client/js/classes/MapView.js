@@ -374,7 +374,10 @@ const edit_layer = e => {
 	const extant = document.querySelector('.modal.edit-layer')
 	if( extant ){
 		const close = extant.querySelector('.modal-close')
-		if( close ) close.click()
+		if( close ){
+			close.click()
+			return;
+		}
 	}
 
 	mappa.pop_edit_layer({

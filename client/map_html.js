@@ -311,7 +311,7 @@ const render = ( type, request, data ) => {
 								<div id='other-layers-section' class='nav-section'>
 									<div id='layer-panel-header'>
 										<button class='panel-toggle'>-</button>
-										<h4>Joined Maps</h4>
+										<h4>Saved Maps</h4>
 									</div>
 									<div id='find-mappa-row'>
 										<button id='find-layer' class='button prime'>+ find map</button>

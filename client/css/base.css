@@ -801,9 +801,6 @@ button.button{
 /* 	padding: 20px; */
 	display: inline-block;
 }
-.public-link:hover{
-	background: var(--button-hover);
-}
 #admin-link{
 	font-weight: bold;
 }

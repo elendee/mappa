@@ -105,9 +105,15 @@ class Mappa extends Model {
 				set_name: lib.b('div', false, 'toolbox-set-name'),
 				toggle: lib.b('div', false, 'toolbox-toggle'),
 			},
-
+			social_tab: {
+				wrap: lib.b('div', 'social-tab'),
+				link: lib.b('div', false, 'public-link'),
+				save_wrap: lib.b('div', false, 'save-wrap'),
+				save_btn: lib.b('div', false, 'button' ),
+			}
 		}
 		this._init_toolbox()
+		this._init_social_tab()
 
 		for( const key in this.DOM ){
 			if( !this.DOM[key] ) console.warn('missing dom ele', key )
@@ -145,6 +151,36 @@ class Mappa extends Model {
 
 	} // init
 
+	_init_social_tab(){
+		const {
+			social_tab,
+		} = this.DOM
+
+		const {
+			wrap,
+			link,
+			save_wrap,
+			save_btn,
+		} = social_tab
+
+		save_btn.innerText = lib.is_logged ? 'save map' : 'login to save map'
+		save_btn.addEventListener('click', e => {
+			fetch_wrap('/action_main', 'post', {
+				action: 'save_map',
+				mapview_uuid: this.uuid,
+			})
+			.then( res => {
+				if( !res?.success ) return hal('error', res?.msg || 'error saving', 5000 )
+				hal('success', 'success', 5000 )
+			})
+		})
+
+		wrap.append( link )
+		save_wrap.append( save_btn )
+		wrap.append( save_wrap )
+
+	} // init social tab
+
 	_init_toolbox(){
 		const {
 			toolbox
@@ -176,6 +212,7 @@ class Mappa extends Model {
 		})
 
 	} // init toolbox
+
 
 	async _load_script(){
 
@@ -383,7 +420,7 @@ class Mappa extends Model {
 				console.warn('should have extant row for layer')
 			}
 
-			mappa.fill_toolbox({
+			mappa.update_hud({
 				mapview: _view,
 				caller: 'pop-edit-layer'
 			})
@@ -447,7 +484,10 @@ class Mappa extends Model {
 			const extant = document.querySelector('.modal.edit-layer')
 			if( extant ){
 				const close = extant.querySelector('.modal-close')
-				if( close ) close.click()
+				if( close ){
+					close.click()
+					return
+				}
 			}
 			this.pop_edit_layer({
 				MapView,
@@ -589,9 +629,9 @@ class Mappa extends Model {
 		this.tools_by_uuid = {}
 
 		// fill tools first so items can resolve their icon immediately
-		let res = await this.fill_toolbox({
+		let res = await this.update_hud({
 			mapview,
-			caller: 'set-mappa-active'
+			caller: 'set-mappa-active',
 		})
 
 		// fill items
@@ -973,6 +1013,73 @@ class Mappa extends Model {
 	} // build tool picker
 
 
+	async fill_social_tab( args ){
+		const {
+			mapview,
+		} = args
+
+		console.log('fill-share', args )
+
+		const {
+			wrap,
+			link,
+			save_wrap,
+			save_btn,
+		} = this.DOM.social_tab
+
+		if( !wrap.parentElement ){
+			document.body.append( wrap )
+		}
+
+		// public link
+		let status
+		if( mapview.hidden ){
+			status = 'disabled to anyone but editors'
+		}else if( !mapview.listed ){
+			status = 'view-able but not listed'
+		}else{
+			status = 'public'
+		}
+		link.innerHTML = `
+		<div class='status'>Map is ${status}</div>
+		<code>${env.PUBLIC_URL}?m=${this.uuid}</code>`
+		const {
+			btn,
+		} = lib.gen_copy_button( link )
+		link.append( btn )
+
+		// join button
+		let extant_row = this.DOM.user_list.querySelector(`.mappa-row[data-layer-uuid='${this.uuid}']`)
+		if( !extant_row ){
+			extant_row = this.DOM.other_list.querySelector(`.mappa-row[data-layer-uuid='${this.uuid}']`)
+		}
+		if( extant_row ){
+			save_wrap.style.display = 'none'
+		}else{
+			save_wrap.style.display = 'inline-block'
+		}
+
+	} // fill social tab
+
+
+	async update_hud( args ){
+		const {
+			mapview,
+			caller,
+		} = args
+
+		await mappa.fill_toolbox({
+			mapview,
+			caller
+		})
+
+		await this.fill_social_tab({
+			mapview,
+			caller,
+		})
+
+	} // update hud
+
 
 	async fill_toolbox( args ){
 		const {
@@ -1235,10 +1342,7 @@ const set_toolset = e => {
 		og_preview_name.innerText = mappa.toolset.name
 
 		// update toolbox
-		await mappa.fill_toolbox({
-			mapview: mappa.active_mapview,
-			caller: 'set-toolset'
-		})
+		await mappa.update_hud()
 
 	})
 

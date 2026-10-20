@@ -768,6 +768,33 @@ body.dashboard.menu-hidden #layer-panel{
 	float: right;
 }
 
+#social-tab{
+	position: fixed;
+	z-index: 99999;
+	top: 0;
+	left: 0;
+	background: white;
+	border: 1px solid #bfbfbf;
+	padding: 10px;
+	text-align: left;
+}
+.save-wrap{
+	/* text-align: left; */
+}
+.save-wrap .button{
+	margin-top: 10px;
+}
+.public-link .copy{
+	margin-left: 20px;
+}
+.menu-hidden #toolbox,
+.menu-hidden #social-tab{
+	display: none;
+}
+#social-tab .status{
+	margin-bottom: 8px;
+}
+
 @media screen and (max-width: 800px){
 	#view-main,
 	#view-p1{
@@ -853,6 +880,7 @@ body.dashboard.menu-hidden #layer-panel{
 	.edit-layer .model-form-Mapview{
 		margin-top:40px;
 	}
+
 }
 
 /* ANIMS & MEDIA */
