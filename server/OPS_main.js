@@ -263,7 +263,7 @@ const action = async( request ) => {
 		results_obj.other_sets = []
 
 		// get user sets
-		sql = `SELECT * FROM toolsets WHERE is_public=1 AND user_key=? ORDER BY created DESC`
+		sql = `SELECT * FROM toolsets WHERE is_public=1 OR user_key=? ORDER BY created DESC`
 		res = await pool.queryPromise( sql, [ user.id ] )
 		if( res.error ) return lib.return_fail( res.error, `error getting toolsets`)
 
