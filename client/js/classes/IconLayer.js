@@ -68,6 +68,13 @@ class IconLayer {
 		return true
 	}
 
+	_label_font(){
+		// glyphs are served by the style's own font stack; the offline
+		// styles bundle Inconsolata, CARTO's cloud glyph server does not
+		const glyphs = this.map?.getStyle?.()?.glyphs || ''
+		return glyphs.includes('basemaps.cartocdn.com') ? 'Open Sans Regular' : 'Inconsolata'
+	}
+
 	_ensure_layer(){
 		if( this.map.getSource( this.source_id ) ) return
 		this.map.addSource( this.source_id, {
@@ -85,6 +92,19 @@ class IconLayer {
 				'icon-image': ['get', 'icon'],
 				'icon-size': 0.45,
 				'icon-allow-overlap': true,
+				'text-field': ['get', 'label'],
+				'text-font': [ this._label_font() ],
+				'text-size': 20,
+				'text-anchor': 'top',
+				'text-offset': [0, 1],
+				'text-max-width': 10,
+				'text-line-height': 1.1,
+				'text-padding': 4,
+			},
+			paint: {
+				'text-color': '#222',
+				'text-halo-color': '#fff',
+				'text-halo-width': 1.5,
 			},
 		})
 		this._bind_click()
@@ -162,6 +182,7 @@ class IconLayer {
 			geometry: item.geojson,
 			properties: {
 				icon: name,
+				label: item.name || '',
 				element_uuid: item.uuid,
 			},
 		})
