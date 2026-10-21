@@ -287,14 +287,14 @@ class Mappa extends Model {
 				type,
 			} = passed_args
 
-			const input = e.target
+			const input = e?.target
 
 			hal('success', 'searching ' + type, 2000 )
 
 			let res = await fetch_wrap('/action_main', 'post', {
 				action: 'search_maps',
 				type,
-				value: input.value.trim(),
+				value: input?.value.trim(),
 			})
 			if( !res?.success ) return hal('error', res?.msg || 'error searching', 5000 )
 
@@ -360,6 +360,8 @@ class Mappa extends Model {
 		// results area
 		const results = lib.b('div', false, 'results')
 		modal.content.append( results )
+
+		debounced_map_search()
 
 		document.body.append( modal.ele )
 
@@ -452,6 +454,18 @@ class Mappa extends Model {
 
 		} // post save
 		modal.right_panel.append( form )
+
+		// xyz
+		const choose_icons = mappa.build_tool_picker({
+			toolset: mappa.toolset,
+		})
+		// form.append( choose_icons )
+		// modal.right_panel.prepend( choose_icons )
+		modal.right_panel.append( choose_icons )
+		if( !mappa.toolset ){
+			// choose_icons.classList.add('button-pulse')
+			choose_icons.classList.add('edit-pulse')
+		}
 
 		// allow map uuid
 		if( extant_data?.uuid ){
@@ -1406,7 +1420,7 @@ const add_tool_modal = e => {
 	})
 
 	const expl = lib.b('div', false, 'expl')
-	expl.innerText = `An icon is just an image and a label for your toolbox that you can re-use.`
+	expl.innerText = `An icon is an image with a "type" for your toolbox that you can re-use.`
 	modal.content.append( expl )
 
 	const set_img = lib.b('div', false, 'choose-image')

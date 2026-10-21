@@ -3,9 +3,10 @@
 	display: inline-block;
 }
 .model-form{
-    padding: 20px;
-    background: transparent;
 	position: relative;
+    padding: 20px;
+	padding-bottom: 40px;
+	background: transparent;
 	text-align: left;
 	display: inline-block;
 	width: 100%;
@@ -192,10 +193,6 @@ a.model-listing{
 	right: 0px;
 }
 
-.model-form{
-	padding-bottom: 40px;
-	position: relative;
-}
 .modal .model-form input.button[type=submit],
 .model-form input.button[type=submit]{
 	position: absolute;

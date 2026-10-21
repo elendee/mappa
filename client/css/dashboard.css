@@ -526,8 +526,15 @@ body.dashboard.menu-hidden #layer-panel{
 }
 
 .layer-edit{
-	width: 30px;
+	width: 25px;
 	cursor: pointer;
+	display: none;
+	background: lightgrey;
+	border-radius: 4px;
+	padding: 2px;
+}
+.selected .layer-edit{
+	display: inline-block;
 }
 
 

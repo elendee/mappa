@@ -148,6 +148,8 @@ const action = async( request ) => {
 		}
 
 	case 'search_maps':
+
+		const search_map_type = request.body.value ? request.body.type : 'empty'
 		
 		switch( request.body.type ){
 
@@ -162,13 +164,27 @@ const action = async( request ) => {
 		// 	return {
 		// 		success: true,
 		// 	}
+		case 'empty':
+			sql = {
+				sql: `
+				SELECT * FROM mapviews m
+				LEFT JOIN users u ON m.user_key=u.id
+				WHERE m.listed=1 AND ( m.hidden=0 OR m.hidden IS NULL )
+				ORDER BY m.created DESC
+				LIMIT 100`,
+				nestTables: true,
+			}
+			res = await pool.queryPromise( sql )
+			if( res.error ) return lib.return_fail( res.error, `error searching`)			
+			break;
 
 		case 'name':
 			sql = {
 				sql: `
 				SELECT * FROM mapviews m
 				LEFT JOIN users u ON m.user_key=u.id
-				WHERE m.listed=1 AND ( m.hidden=0 OR m.hidden IS NULL ) AND m.name LIKE ?`,
+				WHERE m.listed=1 AND ( m.hidden=0 OR m.hidden IS NULL ) AND m.name LIKE ?
+				LIMIT 100`,
 				nestTables: true,
 			}
 			res = await pool.queryPromise( sql, `%${request.body.value}%`)
@@ -180,7 +196,8 @@ const action = async( request ) => {
 				sql: `
 				SELECT * FROM mapviews m
 				LEFT JOIN users u ON m.user_key=u.id
-				WHERE m.uuid=? AND hidden=0`,
+				WHERE m.uuid=? AND ( m.hidden IS NULL OR m.hidden=0 )
+				LIMIT 100`,
 				nestTables: true,
 			}
 			res = await pool.queryPromise( sql, request.body.value )

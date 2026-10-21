@@ -84,10 +84,10 @@ class MapView extends Model {
 			mappa,
 		} = edit_args
 
-		const choose_icons = mappa.build_tool_picker({
-			toolset: mappa.toolset,
-		})
-		form.append( choose_icons )
+		// const choose_icons = mappa.build_tool_picker({
+		// 	toolset: mappa.toolset,
+		// })
+		// form.append( choose_icons )
 
 		/*
 
@@ -259,7 +259,7 @@ const build_set_picker_row = args => {
 
 	return wrap
 
-}
+} // build set picker
 
 
 
