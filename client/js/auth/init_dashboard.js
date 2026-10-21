@@ -116,11 +116,20 @@ const adjust_toolbox = event => {
 
 	const is_toggled = wrap.classList.contains('toggled')
 
-	const collapsed = window.innerWidth < 800 ? 100 : 50
-
 	let bounds = wrap.getBoundingClientRect()
 
-	const full_height = window.innerWidth < 800 ? bounds.height + 30 : bounds.height
+	let collapsed, full_height, window_height, has_viewport
+
+	if( window.visualViewport ){
+		collapsed = 50
+		full_height = bounds.height
+		window_height = window.visualViewport?.height 
+		has_viewport = true
+	}else{ // account for phone nav bars arbitrarily:
+		collapsed = window.innerWidth < 800 ? 120 : 50
+		full_height = window.innerWidth < 800 ? bounds.height + 30 : bounds.height
+		window_height = window.innerHeight
+	}
 
 	if( is_toggled ){
 		wrap.style.top = `calc( 100vh - ${full_height}px)`
@@ -128,9 +137,9 @@ const adjust_toolbox = event => {
 		wrap.style.top = `calc( 100vh - ${collapsed}px)`
 	}
 
-	// if( lib.is_admin ){
-	// 	hal('standard', `admin: is-toggled: ${is_toggled}, bounds: ${bounds?.height}`, 5000 )
-	// }
+	if( lib.is_admin ){
+		hal('standard', `admin: is-toggled: ${is_toggled}, bounds: ${bounds?.height}, has_view: ${has_viewport}`, 5000 )
+	}
 
 }
 
