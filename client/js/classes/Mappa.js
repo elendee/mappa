@@ -781,8 +781,9 @@ class Mappa extends Model {
 		const img_wrap = lib.b('div', false, 'icon-img-wrap', 'ib')
 		modal.content.append( img_wrap )
 		if( tool?.img_slug ){
+			const use_slug = item.img_slug_custom || tool.img_slug
 			const img = lib.b('img', false, 'icon-info-img')
-			img.src = `/fs/thumbs/${lib.get_subdir({ slug: tool.img_slug })}/${tool.img_slug}`
+			img.src = `/fs/thumbs/${lib.get_subdir({ slug: use_slug })}/${use_slug}`
 			img_wrap.append( img )
 		}
 		const edit_img = lib.b('div', false, 'edit-img', 'button')
@@ -797,7 +798,6 @@ class Mappa extends Model {
 		})
 
 		const rows = []
-		// if( item?.name ) rows.push([ 'name', item.name ])
 		const _tool = tool ?? item?.tool
 		if( _tool?.type ) rows.push([ 'type', _tool.type ])
 		if( Array.isArray( item?.geojson?.coordinates ) ){
@@ -1792,9 +1792,7 @@ const save_icon_change = e => {
 
 	xhr_piece({
 		file,
-		data: {
-
-		}
+		data: {}
 	})
 	.then( res => {
 		if( !res?.success ) return hal('error', res?.msg, 'error uploading', 5000 )

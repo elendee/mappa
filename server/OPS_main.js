@@ -59,7 +59,23 @@ const action = async( request ) => {
 
 	switch( action ){
 
-		edit-icon-img here... slug... uuid...
+	case 'edit_icon_img':
+
+		value = await GET.map_element({
+			uuid: request.body.uuid
+		})
+		if( !value ) return lib.return_fail({
+			msg: `cant find element`,
+			uuid: request.body.uuid,
+		}, `already joined`)		
+
+		value.img_slug_custom = request.body.slug
+
+		await value.save()
+
+		return {
+			success: true,
+		}
 
 
 	case 'save_map':

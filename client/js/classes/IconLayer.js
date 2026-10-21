@@ -193,8 +193,15 @@ class IconLayer {
 		}
 		if( !tool?.uuid || !tool?.img_slug ) return console.warn('item missing tool image', item )
 
+		const use_slug = item.img_slug_custom || tool.img_slug
+
+		console.log('_STAGE', {
+			item: item.img_slug_custom,
+			tool: tool.img_slug
+		})
+
 		const name = this.image_name( tool )
-		this._image_slugs.set( name, tool.img_slug )
+		this._image_slugs.set( name, use_slug )
 		this._items.set( item.uuid, {
 			item,
 			tool,
@@ -235,7 +242,10 @@ class IconLayer {
 		if( !name ) return false
 		await this._map_ready()
 		this._ensure_layer()
-		const ok = await this._ensure_image( name, tool.img_slug )
+
+		const use_slug = item.img_slug_custom || tool.img_slug
+
+		const ok = await this._ensure_image( name, use_slug )
 		if( !ok ){
 			this._features.delete( item.uuid )
 			this._items.delete( item.uuid )
@@ -274,7 +284,8 @@ class IconLayer {
 
 		// await all images loaded ( http but also loaded to map )
 		const _promises = staged.map( ([ item, tool, name ]) => {
-			return this._ensure_image( name, tool.img_slug ) 
+			const use_slug = item.img_slug_custom || tool.img_slug
+			return this._ensure_image( name, use_slug ) 
 		})
 		await Promise.all( _promises )
 

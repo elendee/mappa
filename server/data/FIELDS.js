@@ -243,6 +243,11 @@ const MODELS = {
 			is_json: true,
 			view: 'all',
 		},
+		img_slug_custom: {
+			type: 'string',
+			view: 'all',
+			no_edit: true,
+		}
 	},
 
 	MediaItem: {

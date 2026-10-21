@@ -228,7 +228,7 @@ const toolset = async( args ) => {
 		})
 	}
 
-} // tool
+} // tool set
 
 
 
@@ -270,7 +270,7 @@ const map_element = async( args ) => {
 		})
 	}
 
-} // tool
+} // map element
 
 
 
