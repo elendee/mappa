@@ -132,9 +132,9 @@ const adjust_toolbox = event => {
 	}
 
 	if( is_toggled ){
-		wrap.style.top = `calc( ${window_height}vh - ${full_height}px)`
+		wrap.style.top = `calc( ${window_height}px - ${full_height}px)`
 	}else{
-		wrap.style.top = `calc( ${window_height}vh - ${collapsed}px)`
+		wrap.style.top = `calc( ${window_height}px - ${collapsed}px)`
 	}
 
 	if( lib.is_admin ){
