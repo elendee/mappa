@@ -684,13 +684,17 @@ class Mappa extends Model {
 		// fill items
 		res = await this.fill_map_items()
 
-		if( env.SPOOF.INIT_TOOLBOX ){
-			if( this.DOM.toolbox.wrap.classList.contains('toggled') ){
+		// if( env.SPOOF.INIT_TOOLBOX ){
+		// 	if( this.DOM.toolbox.wrap.classList.contains('toggled') ){
 
-			}else{
-				// this.DOM.toolbox.wrap.classList.toggle('toggled')
-				BROKER.publish('TOGGLE_TOOLBOX')
-			}
+		// 	}else{
+		// 		// this.DOM.toolbox.wrap.classList.toggle('toggled')
+		// 		BROKER.publish('TOGGLE_TOOLBOX')
+		// 	}
+		// }
+
+		if( is_owner || can_edit ){
+			BROKER.publish('TOGGLE_TOOLBOX')
 		}
 
 	} // set mappa active
