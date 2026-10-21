@@ -31,18 +31,22 @@ class MapView extends Model {
 
 		wrap.classList.add('row')
 
-		const size = 2
+		// const size = 2
 
-		const name = lib.b('div', false, 'view-name', 'column', 'column-' + size )
+		const created = lib.b('div', false, 'view-created', 'ib')
+		created.innerText = lib.auto_date( this.created )
+
+		const name = lib.b('div', false, 'view-name', 'column' )
 		name.title = 'map name'
 		name.innerText = this.name
 
-		const user = lib.b('div', false, 'view-user', 'column', 'column-' + size )
+		const user = lib.b('div', false, 'view-user', 'column' )
 		user.title = 'map owner'
 		user.innerHTML = `<div data-user-uuid='"${this.user?.uuid}"'>${this.user?.handle}</div>`
 
-		wrap.append( name )
+		wrap.append( created )
 		wrap.append( user )
+		wrap.append( name )
 
 	}
 

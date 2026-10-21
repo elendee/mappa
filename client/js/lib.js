@@ -421,6 +421,7 @@ const b_label = ( text ) => {
 
 const make_debounce = ( fn, time, immediate, parent_scope_args ) => {
     let buffer
+    
     return ( arg1, arg2 ) => {
     	/*
 			arg1 is often 'e'/vent in client

@@ -283,6 +283,11 @@ class Mappa extends Model {
 		})
 
 		const search_maps = async( e, scope_args, passed_args ) => {
+			console.log('search-maps', {
+				e,
+				scope_args,
+				passed_args,
+			})
 			const {
 				type,
 			} = passed_args
@@ -298,14 +303,16 @@ class Mappa extends Model {
 			})
 			if( !res?.success ) return hal('error', res?.msg || 'error searching', 5000 )
 
-			console.log('search', res )
+			console.log('search', {
+				res 
+			})
 
 			results.innerHTML = ''
-			for( const r of res.results || []){
+			for( const r of res.results || [] ){
 				const view = new MapView( r )
 				view.user = r.user
 				const row = view.output_summary()
-				const link = lib.b('a')
+				const link = lib.b('a', false, 'view-summary')
 				link.href = `/?m=${view.uuid}`
 				link.append( row )
 				results.append( link )
@@ -361,7 +368,9 @@ class Mappa extends Model {
 		const results = lib.b('div', false, 'results')
 		modal.content.append( results )
 
-		debounced_map_search()
+		debounced_map_search( null, {
+			type: 'empty',
+		})
 
 		document.body.append( modal.ele )
 

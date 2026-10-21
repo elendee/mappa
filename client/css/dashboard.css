@@ -801,6 +801,27 @@ body.dashboard.menu-hidden #layer-panel{
 	margin-bottom: 8px;
 }
 
+.results a.view-summary{
+	border: 1px solid var(--faint-line);
+	height: auto;
+	width: 98%;
+	display: inline-block;
+	margin: 3px 0;
+}
+
+.results .column{
+	max-width: calc( 50% - 100px );
+	vertical-align: middle;
+}
+.results .view-user{
+	width: 200px;
+	/* border: 1px solid; */
+}
+.results .view-created{
+	vertical-align: middle;
+	width: 100px;
+}
+
 @media screen and (min-width: 800px){
 	.menu-hidden #toolbox,
 	.menu-hidden #social-tab{
