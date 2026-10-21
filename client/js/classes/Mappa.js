@@ -274,7 +274,7 @@ class Mappa extends Model {
 			if( src.url ) src.url = absolutize( src.url )
 		}
 		return style
-	}
+	} // load offline style
 
 
 	pop_find_mapview(){

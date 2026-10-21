@@ -114,11 +114,18 @@ const adjust_toolbox = event => {
 		wrap,
 	} = mappa.DOM.toolbox
 
-	if( wrap.classList.contains('toggled') ){
-		const bounds = wrap.getBoundingClientRect()
+	const is_toggled = wrap.classList.contains('toggled')
+
+	let bounds
+	if( is_toggled ){
+		bounds = wrap.getBoundingClientRect()
 		wrap.style.top = `calc( 100vh - ${Math.floor(bounds.height)}px)`
 	}else{
 		wrap.style.top = `calc( 100vh - 50px)`
+	}
+
+	if( lib.is_admin ){
+		hal('standard', `admin: is-toggled: ${is_toggled}, bounds: ${bounds?.height}`, 5000 )
 	}
 
 }
