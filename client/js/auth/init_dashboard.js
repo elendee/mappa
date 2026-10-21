@@ -137,9 +137,9 @@ const adjust_toolbox = event => {
 		wrap.style.top = `calc( ${window_height}px - ${collapsed}px)`
 	}
 
-	if( lib.is_admin ){
-		hal('standard', `admin: is-toggled: ${is_toggled}, bounds: ${bounds?.height}, has_view: ${has_viewport}`, 5000 )
-	}
+	// if( lib.is_admin ){
+	// 	hal('standard', `admin: is-toggled: ${is_toggled}, bounds: ${bounds?.height}, has_view: ${has_viewport}`, 5000 )
+	// }
 
 }
 
