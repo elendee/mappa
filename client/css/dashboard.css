@@ -821,6 +821,19 @@ body.dashboard.menu-hidden #layer-panel{
 	vertical-align: middle;
 	width: 100px;
 }
+.icon-img-wrap{
+	position: relative;
+	display: inline-block;
+}
+.icon-img-wrap .edit-img{
+	position: absolute;
+	top: -8px;
+	right: -8px;
+	background: white;
+	width: 25px;
+	padding: 0;
+}
+
 
 @media screen and (min-width: 800px){
 	.menu-hidden #toolbox,

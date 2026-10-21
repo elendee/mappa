@@ -59,6 +59,8 @@ const action = async( request ) => {
 
 	switch( action ){
 
+		edit-icon-img here... slug... uuid...
+
 
 	case 'save_map':
 

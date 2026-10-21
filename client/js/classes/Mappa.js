@@ -778,11 +778,23 @@ class Mappa extends Model {
 			header: item?.name || 'icon',
 		})
 
+		const img_wrap = lib.b('div', false, 'icon-img-wrap', 'ib')
+		modal.content.append( img_wrap )
 		if( tool?.img_slug ){
 			const img = lib.b('img', false, 'icon-info-img')
 			img.src = `/fs/thumbs/${lib.get_subdir({ slug: tool.img_slug })}/${tool.img_slug}`
-			modal.content.append( img )
+			img_wrap.append( img )
 		}
+		const edit_img = lib.b('div', false, 'edit-img', 'button')
+		edit_img.innerHTML = `<img src='/resource/icons/swap.png'>`
+		edit_img.addEventListener('click', edit_icon_img )
+		img_wrap.append( edit_img )
+		MAP.set( edit_img, {
+			mappa: this,
+			icon: item,
+			tool,
+			is_owner,
+		})
 
 		const rows = []
 		// if( item?.name ) rows.push([ 'name', item.name ])
@@ -1728,6 +1740,80 @@ const move_icon = args => {
 	})
 
 } // move icon
+
+
+const edit_icon_img = e => {
+	const btn = lib.click_parent( e.target, 'button', false, 3 )
+	const {
+		mappa,
+		icon,
+		tool,
+		is_owner,
+		icon_uuid,
+	} = MAP.get( btn )
+
+	const modal = new Modal({
+		type: 'edit-icon-img',
+	})
+
+	const file = lib.b('input', false, 'file')
+	file.type = 'file'
+	modal.content.append( file )
+
+	const save = lib.b('button', false, 'button')
+	save.innerText = 'save'
+	save.addEventListener('click', save_icon_change )
+	modal.content.append( save )
+	MAP.set( save, {
+		input: file,
+		mappa,
+		icon,
+		tool,
+		is_owner,
+		icon_uuid,		
+	})
+
+	document.body.append( modal.ele )
+
+}
+
+
+const save_icon_change = e => {
+	const btn = lib.click_parent( e.target, 'button', false, 5 )
+	const {
+		input,
+		mappa,
+		icon,
+		tool,
+		is_owner,
+	} = MAP.get( btn )
+
+	const file = input.files[0]
+
+	xhr_piece({
+		file,
+		data: {
+
+		}
+	})
+	.then( res => {
+		if( !res?.success ) return hal('error', res?.msg, 'error uploading', 5000 )
+		hal('success', 'uploaded image', 3000 )
+
+		fetch_wrap('/action_main', 'post', {
+			action: 'edit_icon_img',
+			uuid: icon.uuid,
+			slug: res.item?.slug,
+		})
+		.then( res => {
+			console.log('edit res', res)
+			if( !res?.success ) return hal('error', res?.msg || 'error editing', 5000 )
+			hal('success', 'success', 3000 )
+		})
+
+	})
+
+} // save icon change
 
 
 const remove_icon = e => {
