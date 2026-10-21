@@ -140,6 +140,7 @@ class Mappa extends Model {
 	    // a layer can be selected before the style finishes loading;
 	    // replay the pending prefs once the style is ready
 	    this.map.on('load', () => this.__apply_pending_base_layers({caller: 'load'}) )
+        this.map.on('zoom', () => this._handle_zoom())
 	    this.map.on('styledata', () => this.__apply_pending_base_layers({caller: 'styledata'}) )
 
 	    this.map.on('click', on_map_click )
@@ -931,8 +932,23 @@ class Mappa extends Model {
 
 		return true
 
-	}
+	} // apply base layers
 
+
+	_handle_zoom(){
+        const zoom = this.map?.getZoom()
+        if( zoom == null ) return
+
+        // fires fast, super micro
+        // ~ 10 - 20
+       	// console.log({
+       	// 	zoom,
+       	// })
+
+
+        // this.icons?.set_zoom?.( zoom )
+
+	}
 
 
 	__apply_pending_base_layers( args ){

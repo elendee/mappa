@@ -84,6 +84,27 @@ class IconLayer {
 				features: [],
 			},
 		})
+
+		// -- text sizing --
+		// sizes:
+		/* 
+			11: out
+			22: in 
+		*/
+		const zoomed_in = 14
+		const zoomed_out = 18
+		// at:
+		const change_at = 13
+		// all together:
+		const text_size_rules = [
+			'step', 
+			['zoom'], 
+			zoomed_in, // 
+			change_at, 
+			zoomed_out 
+		]
+
+		// apply
 		this.map.addLayer({
 			id: this.layer_id,
 			type: 'symbol',
@@ -92,13 +113,15 @@ class IconLayer {
 				'icon-image': ['get', 'icon'],
 				'icon-size': 0.45,
 				'icon-allow-overlap': true,
+				'text-allow-overlap': true,
 				'text-field': ['get', 'label'],
 				'text-font': [ this._label_font() ],
-				'text-size': 18,
+				'text-size': text_size_rules,
 				'text-anchor': 'top',
-				'text-offset': [0, 1],
+				'text-offset': [0, 1.2],
 				'text-max-width': 10,
 				'text-line-height': 1.1,
+				'text-ignore-placement': true,
 				'text-padding': 4,
 			},
 			paint: {
