@@ -227,13 +227,13 @@ class Mappa extends Model {
 		toggle.innerHTML = `<img src='/resource/icons/arrow.png'>`
 
 		toggle.addEventListener('click', e => {
-			wrap.classList.toggle('toggled')
+			BROKER.publish('TOGGLE_TOOLBOX')
 		})
 		this.DOM.toolbox.name.addEventListener('click', e => {
-			wrap.classList.toggle('toggled')
+			BROKER.publish('TOGGLE_TOOLBOX')
 		})
 		this.DOM.toolbox.set_name.addEventListener('click', e => {
-			wrap.classList.toggle('toggled')
+			BROKER.publish('TOGGLE_TOOLBOX')
 		})
 
 	} // init toolbox
@@ -688,8 +688,8 @@ class Mappa extends Model {
 			if( this.DOM.toolbox.wrap.classList.contains('toggled') ){
 
 			}else{
-				this.DOM.toolbox.wrap.classList.toggle('toggled')
-				// toggle.click()
+				// this.DOM.toolbox.wrap.classList.toggle('toggled')
+				BROKER.publish('TOGGLE_TOOLBOX')
 			}
 		}
 
@@ -1229,6 +1229,7 @@ class Mappa extends Model {
 			const {
 				wrap,
 				liner,
+				type,
 			} = _build_tool_wrap()
 
 			wrap.classList.add('add-tool-wrap')
@@ -1544,9 +1545,12 @@ const _build_tool_wrap = () => {
 	const wrap = lib.b('div', false, 'tool-wrap', 'ib')
 	const liner = lib.b('div', false, 'tool-liner', 'flex-wrapper')
 	wrap.append( liner )
+	const type = lib.b('div', false, 'tool-type')
+	wrap.append( type )
 	return {
 		wrap,
 		liner,
+		type
 	}
 }
 
@@ -1561,12 +1565,15 @@ const build_tool = args => {
 
 	const {
 		wrap,
-		liner
+		liner,
+		type,
 	} = _build_tool_wrap()
 
 	const img = lib.b('img')
 	img.src = `/fs/thumbs/${lib.get_subdir({ slug: tool_data.img_slug })}/${tool_data.img_slug}`
 	liner.append( img )
+
+	type.innerText = tool_data.type
 
 	MAP.set( wrap, {
 		mappa,
@@ -1754,6 +1761,7 @@ const edit_icon_img = e => {
 
 	const modal = new Modal({
 		type: 'edit-icon-img',
+		header: 'edit image',
 	})
 
 	const file = lib.b('input', false, 'file')
@@ -1806,7 +1814,7 @@ const save_icon_change = e => {
 		.then( res => {
 			console.log('edit res', res)
 			if( !res?.success ) return hal('error', res?.msg || 'error editing', 5000 )
-			hal('success', 'success', 3000 )
+			hal('success', 'image updated - refresh page to see change', 30 * 1000 )
 		})
 
 	})
@@ -1846,6 +1854,7 @@ const remove_icon = e => {
 	})
 
 }
+
 
 
 

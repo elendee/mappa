@@ -99,7 +99,35 @@ const forward_map_item = event => {
 	})
 }
 
+const toggle_toolbox = event => {
+	const {
+		wrap,
+	} = mappa.DOM.toolbox
+	wrap.classList.toggle('toggled')
+	BROKER.publish('ADJUST_TOOLBOX')
+}
 
+
+
+const adjust_toolbox = event => {
+	const {
+		wrap,
+	} = mappa.DOM.toolbox
+
+	if( wrap.classList.contains('toggled') ){
+		const bounds = wrap.getBoundingClientRect()
+		wrap.style.top = `calc( 100vh - ${Math.floor(bounds.height)}px)`
+	}else{
+		wrap.style.top = `calc( 100vh - 50px)`
+	}
+
+}
+
+
+
+
+BROKER.subscribe('TOGGLE_TOOLBOX', toggle_toolbox )
+BROKER.subscribe('ADJUST_TOOLBOX', adjust_toolbox )
 BROKER.subscribe('MAPPA_SET_MAPVIEW', mappa.set_mapview_active )
 BROKER.subscribe('MAPPA_SET_TOOL', mappa.set_tool_active )
 BROKER.subscribe('ADD_MAP_ITEM_DATA', forward_map_item )
