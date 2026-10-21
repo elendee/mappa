@@ -116,12 +116,14 @@ const adjust_toolbox = event => {
 
 	const is_toggled = wrap.classList.contains('toggled')
 
+	const collapsed = window.innerWidth < 800 ? 100 : 50
+
 	let bounds
 	if( is_toggled ){
 		bounds = wrap.getBoundingClientRect()
 		wrap.style.top = `calc( 100vh - ${Math.floor(bounds.height)}px)`
 	}else{
-		wrap.style.top = `calc( 100vh - 50px)`
+		wrap.style.top = `calc( 100vh - ${collapsed}px)`
 	}
 
 	if( lib.is_admin ){
