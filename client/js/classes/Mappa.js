@@ -258,7 +258,8 @@ class Mappa extends Model {
 		if( mapEl ) mapEl.innerText = 'Failed to load map.'
 		return null
 
-	}
+	} // load script
+
 
 	async _load_offline_style( url ){
 		const res = await fetch( url )
@@ -381,7 +382,7 @@ class Mappa extends Model {
 
 		document.body.append( modal.ele )
 
-	}
+	} // pop find mapview
 
 
 	pop_edit_layer( args ){
@@ -471,15 +472,11 @@ class Mappa extends Model {
 		} // post save
 		modal.right_panel.append( form )
 
-		// xyz
-		const choose_icons = mappa.build_tool_picker({
+		const choose_icons = mappa.build_tool_picker({ // uiop
 			toolset: mappa.toolset,
 		})
-		// form.append( choose_icons )
-		// modal.right_panel.prepend( choose_icons )
 		modal.right_panel.append( choose_icons )
 		if( !mappa.toolset ){
-			// choose_icons.classList.add('button-pulse')
 			choose_icons.classList.add('edit-pulse')
 		}
 
@@ -507,8 +504,8 @@ class Mappa extends Model {
 			})			
 		}
 
-
 	} // pop edit layer
+
 
 	_build_base_ele( args ){
 		const {
@@ -719,7 +716,7 @@ class Mappa extends Model {
 		})
 		if( !res?.success ) return hal('error', res?.msg || 'error fill items', 5000 )
 
-		console.log('fill-map-items', res )
+		// console.log('get-map-items', res )
 
 		// layer-level ownership from server; per-item flag wins when present
 		if( res.is_owner !== undefined ) this.is_owner = res.is_owner
@@ -1042,7 +1039,7 @@ class Mappa extends Model {
 	} // get toolset icon src
 
 
-	build_toolset_preview( args ){
+	build_toolset_preview( args ){ // uiop
 		const {
 			toolset,
 		} = args
@@ -1055,10 +1052,14 @@ class Mappa extends Model {
 		}) 
 		preview.append( preview_img )
 
+		console.log('build-toolset-preview', {
+			set_name: toolset.name,
+		})
+
 		if( toolset ){
 			const edit = lib.b('div', false, 'button', 'edit')
 			edit.innerHTML = `<img src='/resource/icons/swap.png'>`
-			edit.addEventListener('click', edit_toolset_img )
+			edit.addEventListener('click', pop_edit_toolset )
 			preview.append( edit )
 			MAP.set( edit, {
 				mappa: this,
@@ -1090,7 +1091,7 @@ class Mappa extends Model {
 			preview,
 			preview_img,
 			preview_name,
-		} = this.build_toolset_preview({
+		} = this.build_toolset_preview({ // uiop
 			toolset,
 		})
 
@@ -1120,7 +1121,7 @@ class Mappa extends Model {
 			mapview,
 		} = args
 
-		console.log('fill-share', args )
+		// console.log('fill-social-tab', args )
 
 		const {
 			wrap,
@@ -1192,10 +1193,6 @@ class Mappa extends Model {
 			caller,
 		} = args
 
-		console.log('fill-toolbox', {
-			caller,
-		})
-
 		this.DOM.toolbox.content.innerText = ''
 
 		let res = await fetch_wrap('/action_main', 'post', {
@@ -1203,8 +1200,9 @@ class Mappa extends Model {
 			mapview_uuid: mapview.uuid,
 		})
 
-		console.log('get-toolbox', {
+		console.log('fill-toolbox', {
 			res,
+			caller,
 		})
 
 		if( !res?.success ){
@@ -1504,8 +1502,12 @@ const set_toolset = e => {
 		if( modal.parentElement ){
 			close.click()
 		}
+
 		// update state
-		mappa.toolset = res.toolset
+		// mappa.toolset = res.toolset
+		for( const key in res.toolset ){
+			mappa.toolset[key] = res.toolset[key]
+		}
 
 		// update the origin toolset
 		og_preview_img.src = mappa.get_toolset_icon_src({
@@ -2059,15 +2061,16 @@ const remove_element = e => {
 
 
 
-const edit_toolset_img = e => {
+const pop_edit_toolset = e => {
 	const btn = lib.click_parent( e.target, 'button', false, 5 )
 	const {
 		toolset,
 		mappa,
 	} = MAP.get( btn )
 
-	console.log('woop', {
+	console.log('pop-edit-toolset', {
 		toolset,
+		img_slug: toolset.img_slug_custom || toolset.img_slug,
 		mappa,
 	})
 
@@ -2076,71 +2079,66 @@ const edit_toolset_img = e => {
 		header: 'Edit icon set cover image: ' + toolset.name,
 	})
 
-	// const expl = lib.b('div')
-	// expl.innerText = `Edit image for set: ${toolset.name}`
-	// modal.content.append( expl )
-
-	const preview = Mappa.render_image_form({
+	const preview = Toolset.render_image_form({
 		img_slug: toolset.img_slug_custom || toolset.img_slug
 	})
 	modal.content.append( preview )
 
-	const save = lib.b('button', false, 'button')
-	save.innerText = 'save'
-	save.addEventListener('click', save_toolset_image )
-	modal.content.append( save )
-	MAP.set( save, {
-		toolset,
-		preview,
-	})
+	const _toolset = new Toolset( toolset )
+	const form = _toolset.build_edit_form()
+	modal.content.append( form )
 
-	document.body.append( modal.ele )
+	_toolset._post_save = ({ res }) => {
 
-}
+		if( res?.model ) Object.assign( toolset, res.model )
 
+		const file = preview.querySelector('input[type=file]').files[0]
+		if( !file ) return console.warn('no image selected for update')
 
-const save_toolset_image = e => {
-	const btn = lib.click_parent( e.target, 'button', false, 4 )
-
-	const {
-		toolset,
-		preview,
-	} = MAP.get( btn )
-
-	const input = preview.querySelector('input[type=file]')
-	const file = input.files[0]
-
-	xhr_piece({
-		file,
-	})
-	.then( res => {
-		if( !res?.success ) return hal('error', res?.msg || 'error saving image', 5000 )
-
-		console.log('save-toolset-upload', {
-			item: res.item,
+		// upload file
+		xhr_piece({
+			file,
 		})
+		.then( upload_res => {
+			if( !upload_res?.success ) return hal('error', upload_res?.msg || 'error uploading file', 5000 )
 
-		fetch_wrap('/action_main', 'post', {
-			action: 'save_toolset_image',
-			set_uuid: toolset.uuid,
-			slug: res.item?.slug,
-		})
-		.then( res => {
-			if( !res?.success ) return hal('error', res?.msg || 'error saving image', 5000 )
+			console.log('save-toolset-upload', {
+				item: upload_res.item,
+			})
 
-			hal('success', 'saved', 5000 )
+			// notify db
+			fetch_wrap('/action_main', 'post', {
+				action: 'save_toolset_image',
+				set_uuid: toolset.uuid,
+				slug: upload_res.item?.slug,
+			})
+			.then( img_res => {
+				if( !img_res?.success ) return hal('error', img_res?.msg || 'error saving image', 5000 )
 
-			toolset.img_slug = res.toolset.img_slug
+				hal('success', 'saved', 5000 )
 
-			BROKER.publish('UPDATE_TOOLSET_IMAGE', {
-				toolset,
+				for( const key in img_res.toolset ){
+					const value = img_res.toolset[key]
+					// debugger
+					// in mem temp / in mem permanent
+					toolset[ key ] = mappa.toolset[key] = value
+				}
+
+				preview.querySelector('img').src = Mappa.get_img_fullpath( toolset?.img_slug )
+
+				BROKER.publish('UPDATE_TOOLSET_IMAGE', {
+					toolset,
+				})
+
 			})
 
 		})
 
-	})
+	} // post save
 
-} // save tool image
+	document.body.append( modal.ele )
+
+} // edit toolset img
 
 
 
