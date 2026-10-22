@@ -721,10 +721,25 @@ body.dashboard.menu-hidden #layer-panel{
 	border-radius: 5px;
 	cursor: pointer;
 	margin: 2px;
+	position: relative;
 }
 .choose-tools .toolset:hover{
 	background: lightgrey;
 }
+
+
+.icon-preview-wrap{
+	position: relative;
+}
+.icon-preview .button.edit{
+	width: 25px;
+	position: absolute;
+	top: -5px;
+	right: 0;
+	padding: 0;
+	height: 25px;
+}
+
 .choose-tools .result-section .contents{
 	min-height: 40px;
 }

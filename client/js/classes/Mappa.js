@@ -1049,6 +1049,17 @@ class Mappa extends Model {
 		}) 
 		preview.append( preview_img )
 
+		if( toolset ){
+			const edit = lib.b('div', false, 'button', 'edit')
+			edit.innerHTML = `<img src='/resource/icons/swap.png'>`
+			edit.addEventListener('click', edit_tool_img )
+			preview.append( edit )
+			MAP.set( edit, {
+				mappa: this,
+				toolset,
+			})			
+		}
+
 		const preview_name = lib.b('div', false, 'icon-preview-name')
 		preview_name.innerText = toolset?.name || '-'
 		preview.append( preview_name )
@@ -1095,6 +1106,7 @@ class Mappa extends Model {
 		return wrap
 
 	} // build tool picker
+
 
 
 	async fill_social_tab( args ){
@@ -1434,6 +1446,10 @@ const set_toolset = e => {
 		preview,
 	} = MAP.get( wrap )
 
+	if( lib.click_parent(e.target, 'edit', false, 4 )){
+		return; // edit-icon clicked; not choose-toolset
+	}
+
 	const uuid = wrap.getAttribute('data-uuid')
 
 	fetch_wrap('/action_main', 'post', {
@@ -1621,6 +1637,8 @@ const _build_tool_wrap = args => {
 
 const click_tool_edit = e => {
 	const btn = lib.click_parent( e.target, 'button', false, 4 )
+
+	console.log('click-tool-edit')
 
 	const {
 		tool_data,
@@ -1989,6 +2007,24 @@ const remove_element = e => {
 	})
 
 } // remove icon
+
+
+
+
+const edit_tool_img = e => {
+	const btn = lib.click_parent( e.target, 'button', false, 5 )
+	const {
+		toolset,
+		mappa,
+	} = MAP.get( btn )
+
+	console.log('woop', {
+		toolset,
+		mappa,
+	})
+
+}
+
 
 
 
