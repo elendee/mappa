@@ -201,6 +201,10 @@ class Model {
 
 
 	async gen_img_ele( args ){
+		/*
+			pre-dates mappa
+			may be deprecated
+		*/
 		const {
 			type,
 			value,

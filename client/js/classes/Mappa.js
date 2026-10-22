@@ -1032,7 +1032,9 @@ class Mappa extends Model {
 
 		const stamp = _toolset?.img_slug?.split('_')[0]
 		if( stamp ){
-			 return `/fs/toolsets/${lib.get_subdir(stamp)}/${_toolset.img_slug}`
+			const subdir = lib.get_subdir({stamp})
+			// debugger
+			return `/fs/thumbs/${subdir}/${_toolset.img_slug}`
 		}else{
 			return `/resource/icons/pin.png`
 		}
@@ -1322,26 +1324,26 @@ class Mappa extends Model {
 			toolset,
 		} = event
 
-		const {
-			wrap,
-			content,
-		} = this.DOM.toolbox
+		// const {
+		// 	wrap,
+		// 	content,
+		// } = this.DOM.toolbox
 
-		const icons = content.querySelectorAll('.tool-wrap')
+		// const icons = content.querySelectorAll('.tool-wrap')
 
-		for( const ele of icons ){
-			// const uuid = ele.getAttribute('data-tool-uuid')
-			// if( uuid === tool_data.uuid ){
-			// 	const img = ele.querySelector('img')
-			// 	img.src = Mappa.get_img_fullpath( tool_data.img_slug_custom || tool_data.img_slug )
-			// 	break;
-			// }
+		// for( const ele of icons ){
+		// 	// const uuid = ele.getAttribute('data-tool-uuid')
+		// 	// if( uuid === tool_data.uuid ){
+		// 	// 	const img = ele.querySelector('img')
+		// 	// 	img.src = Mappa.get_img_fullpath( tool_data.img_slug_custom || tool_data.img_slug )
+		// 	// 	break;
+		// 	// }
+		// }
+
+		const settings_preview = document.querySelector('.modal .icon-preview-img')
+		if( settings_preview ){
+			settings_preview.src = Mappa.get_img_fullpath( toolset.img_slug )
 		}
-
-		hal('error', '(in dev) updating toolset image', 5000 )
-
-		// update any rendered map elements using this tool
-		// this.icons?.propagate_tool_image?.( tool_data )
 
 	} // update tool image
 
@@ -2071,12 +2073,12 @@ const edit_toolset_img = e => {
 
 	const modal = new Modal({
 		type: 'edit-toolset-image',
-		header: 'Edit icon set image',
+		header: 'Edit icon set cover image: ' + toolset.name,
 	})
 
-	const expl = lib.b('div')
-	expl.innerText = `Edit image for set: ${toolset.name}`
-	modal.content.append( expl )
+	// const expl = lib.b('div')
+	// expl.innerText = `Edit image for set: ${toolset.name}`
+	// modal.content.append( expl )
 
 	const preview = Mappa.render_image_form({
 		img_slug: toolset.img_slug_custom || toolset.img_slug
@@ -2114,10 +2116,14 @@ const save_toolset_image = e => {
 	.then( res => {
 		if( !res?.success ) return hal('error', res?.msg || 'error saving image', 5000 )
 
+		console.log('save-toolset-upload', {
+			item: res.item,
+		})
+
 		fetch_wrap('/action_main', 'post', {
 			action: 'save_toolset_image',
 			set_uuid: toolset.uuid,
-			slug: res.toolset.img_slug,
+			slug: res.item?.slug,
 		})
 		.then( res => {
 			if( !res?.success ) return hal('error', res?.msg || 'error saving image', 5000 )

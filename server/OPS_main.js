@@ -955,6 +955,21 @@ const action = async( request ) => {
 			item: value.publish( value.get_request_allowed( request ))
 		}
 
+	case 'save_toolset_image':
+		toolset = await GET.toolset({
+			uuid: request.body.set_uuid,
+		})
+		if( !toolset ) return lib.return_fail(`toolset not found`, `toolset not found`)
+
+		toolset.img_slug = request.body.slug
+
+		await toolset.save()
+
+		return {
+			success: true,
+			toolset: toolset.publish( toolset.get_request_allowed( request ) )
+		}
+
 	case 'save_tool_icon':
 		if( !lib.is_logged( request ) ) return lib.return_fail(`must be logged in`, `must be logged in`)
 		mapview = await GET.mapview({
@@ -992,7 +1007,11 @@ const action = async( request ) => {
 		}
 
 	default:
-		return lib.return_fail( `unhandled action: ${action}`, `unhandled action`)
+		return lib.return_fail({
+			msg: `unhandled action`,
+			action,
+			body: request.body,
+		}, `unhandled action`)
 
 	}
 
