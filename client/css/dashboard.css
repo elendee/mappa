@@ -866,10 +866,10 @@ body.dashboard.menu-hidden #layer-panel{
 	padding: 0;
 }
 
-.tool-image-form{
+.model-image-form{
 	/* border: 2px solid red; */
 }
-.tool-image-form img{
+.model-image-form img{
 	width: 100px;
 	display: block;
 }

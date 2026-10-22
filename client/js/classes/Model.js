@@ -30,6 +30,7 @@ const log_mod = ( ...args ) => {
 	if( env.LOCAL )	console.log( '(local) Model:',...args )
 }
 
+const MAP = new Map()
 
 const req = [
 	'action_route',
@@ -58,10 +59,49 @@ class Model {
 		// this.type = this.constructor.name
 	}
 
+	static render_image_form( args ){
+		const {
+			img_slug
+		} = args
+
+		const wrap = lib.b('div', false, 'model-image-form')
+
+		const preview = lib.b('img')
+		preview.src = Model.get_img_fullpath( img_slug, null )
+		wrap.append( preview )
+
+		let previewUrl
+
+		const img = lib.b('input', false, 'input')
+		img.type = 'file'
+		img.addEventListener('change', preview_image )
+		wrap.append( img )
+
+		MAP.set( img, {
+			preview,
+			img,
+		})
+
+		return wrap
+
+	} // render image form
+
+	static get_img_fullpath( img_slug, subdir ){
+
+		const _subdir = subdir || 'thumbs'
+
+		if( !img_slug ){
+			return `/resource/icons/image.png`
+		}
+
+		const filepath = lib.get_subdir({ slug: img_slug })
+
+		return `/fs/${_subdir}/${filepath}/${img_slug}`
+
+	} // get img fullpath
+
 	hydrate( data ){
-		// for( const key in data ){
-		// 	console.log('hydrate...', key )
-		// }
+
 		if( !this.FIELDS ) return console.error('Model must have FIELDS to hydrate', this )
 
 		const keys = Object.keys(data)
@@ -1154,6 +1194,30 @@ const build_icon = args => {
 
 const select_svg = e => {
 	// const wrap = lib.click_parent( e.target, '')
+}
+
+
+
+
+
+let previewUrl
+
+const preview_image = e => {
+	const img_input = lib.click_parent( e.target, 'input', false, 5 )
+
+	const {
+		img,
+		preview,
+	} = MAP.get( img_input )
+
+    const file = img.files[0]
+    if( !file ) return
+
+    if( previewUrl ) URL.revokeObjectURL( previewUrl )
+
+    previewUrl = URL.createObjectURL( file )
+    preview.src = previewUrl
+
 }
 
 

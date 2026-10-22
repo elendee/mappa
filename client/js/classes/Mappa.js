@@ -932,7 +932,8 @@ class Mappa extends Model {
 			window.removeEventListener('mousemove', move_img_cursor )
 			window.removeEventListener('click', unset_img_cursor )
 			document.body.classList.remove('dragging')
-			document.body.remove( IMG_CURSOR )
+			// document.body.remove( IMG_CURSOR )
+			IMG_CURSOR.remove()
 			return;
 		}
 
@@ -1033,7 +1034,7 @@ class Mappa extends Model {
 		if( stamp ){
 			 return `/fs/toolsets/${lib.get_subdir(stamp)}/${_toolset.img_slug}`
 		}else{
-			return `/resource/media/pin.png`
+			return `/resource/icons/pin.png`
 		}
 
 	} // get toolset icon src
@@ -1055,7 +1056,7 @@ class Mappa extends Model {
 		if( toolset ){
 			const edit = lib.b('div', false, 'button', 'edit')
 			edit.innerHTML = `<img src='/resource/icons/swap.png'>`
-			edit.addEventListener('click', edit_tool_img )
+			edit.addEventListener('click', edit_toolset_img )
 			preview.append( edit )
 			MAP.set( edit, {
 				mappa: this,
@@ -1302,13 +1303,45 @@ class Mappa extends Model {
 			const uuid = ele.getAttribute('data-tool-uuid')
 			if( uuid === tool_data.uuid ){
 				const img = ele.querySelector('img')
-				img.src = Tool.get_img_slug( tool_data )
+				img.src = Mappa.get_img_fullpath( tool_data.img_slug_custom || tool_data.img_slug )
 				break;
 			}
 		}
 
 		// update any rendered map elements using this tool
 		this.icons?.propagate_tool_image?.( tool_data )
+
+	} // update tool image
+
+
+	update_toolset_image = async( event ) => {
+		/*
+			catch-all event for updating toolbox rendering
+		*/
+		const {
+			toolset,
+		} = event
+
+		const {
+			wrap,
+			content,
+		} = this.DOM.toolbox
+
+		const icons = content.querySelectorAll('.tool-wrap')
+
+		for( const ele of icons ){
+			// const uuid = ele.getAttribute('data-tool-uuid')
+			// if( uuid === tool_data.uuid ){
+			// 	const img = ele.querySelector('img')
+			// 	img.src = Mappa.get_img_fullpath( tool_data.img_slug_custom || tool_data.img_slug )
+			// 	break;
+			// }
+		}
+
+		hal('error', '(in dev) updating toolset image', 5000 )
+
+		// update any rendered map elements using this tool
+		// this.icons?.propagate_tool_image?.( tool_data )
 
 	} // update tool image
 
@@ -1654,7 +1687,7 @@ const click_tool_edit = e => {
 	})
 
 	const preview = Tool.render_image_form({
-		tool: tool_data,
+		img_slug: tool_data.img_slug_custom || tool_data.img_slug
 	})
 	modal.content.append( preview )
 
@@ -1685,7 +1718,7 @@ const click_tool_edit = e => {
 				if( !res?.success ) return hal('error', res?.msg || 'error saving img', 5000 )
 				hal('success', 'icon updated', 5000 )
 
-				preview.querySelector('img').src = Tool.get_img_slug( res.item )
+				preview.querySelector('img').src = Mappa.get_img_fullpath( res.item?.img_slug_custom || res.item?.img_slug )
 
 				tool_data.img_slug = res.item?.img_slug
 
@@ -1723,7 +1756,7 @@ const build_tool = args => {
 	})
 
 	const img = lib.b('img')
-	img.src = Tool.get_img_slug( tool_data )
+	img.src = Mappa.get_img_fullpath( tool_data?.img_slug_custom || tool_data?.img_slug )
 	liner.append( img )
 
 	type.innerText = tool_data.type
@@ -1785,6 +1818,7 @@ const unset_img_cursor = e => {
 	IMG_CURSOR.removeAttribute('data-mappa-uuid')
 	IMG_CURSOR.removeAttribute('data-element-uuid')
 	IMG_CURSOR.remove()
+	document.body.classList.remove('dragging')
 }
 
 const on_map_click = ( Nt ) => {
@@ -1917,8 +1951,8 @@ const edit_element_img = e => {
 	} = MAP.get( btn )
 
 	const modal = new Modal({
-		type: 'edit-icon-img',
-		header: 'edit image',
+		type: 'edit-element-img',
+		header: 'Edit element image',
 	})
 
 	const file = lib.b('input', false, 'file')
@@ -2023,7 +2057,7 @@ const remove_element = e => {
 
 
 
-const edit_tool_img = e => {
+const edit_toolset_img = e => {
 	const btn = lib.click_parent( e.target, 'button', false, 5 )
 	const {
 		toolset,
@@ -2035,7 +2069,72 @@ const edit_tool_img = e => {
 		mappa,
 	})
 
+	const modal = new Modal({
+		type: 'edit-toolset-image',
+		header: 'Edit icon set image',
+	})
+
+	const expl = lib.b('div')
+	expl.innerText = `Edit image for set: ${toolset.name}`
+	modal.content.append( expl )
+
+	const preview = Mappa.render_image_form({
+		img_slug: toolset.img_slug_custom || toolset.img_slug
+	})
+	modal.content.append( preview )
+
+	const save = lib.b('button', false, 'button')
+	save.innerText = 'save'
+	save.addEventListener('click', save_toolset_image )
+	modal.content.append( save )
+	MAP.set( save, {
+		toolset,
+		preview,
+	})
+
+	document.body.append( modal.ele )
+
 }
+
+
+const save_toolset_image = e => {
+	const btn = lib.click_parent( e.target, 'button', false, 4 )
+
+	const {
+		toolset,
+		preview,
+	} = MAP.get( btn )
+
+	const input = preview.querySelector('input[type=file]')
+	const file = input.files[0]
+
+	xhr_piece({
+		file,
+	})
+	.then( res => {
+		if( !res?.success ) return hal('error', res?.msg || 'error saving image', 5000 )
+
+		fetch_wrap('/action_main', 'post', {
+			action: 'save_toolset_image',
+			set_uuid: toolset.uuid,
+			slug: res.toolset.img_slug,
+		})
+		.then( res => {
+			if( !res?.success ) return hal('error', res?.msg || 'error saving image', 5000 )
+
+			hal('success', 'saved', 5000 )
+
+			toolset.img_slug = res.toolset.img_slug
+
+			BROKER.publish('UPDATE_TOOLSET_IMAGE', {
+				toolset,
+			})
+
+		})
+
+	})
+
+} // save tool image
 
 
 
