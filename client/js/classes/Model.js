@@ -74,7 +74,7 @@ class Model {
 
 		if( data.uuid ) this.uuid = data.uuid
 
-	}
+	} // hydrate
 
 	output_listing( args ){
 		log_mod('output-listing', args )

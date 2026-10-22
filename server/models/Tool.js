@@ -19,6 +19,10 @@ class Tool extends Model {
 
 	}
 
+	static _fomat_slug( value ){
+		return ( value || 'icon' ).trim().replace(/\s+/g, '_').toLowerCase()
+	}
+
 }
 
 export default Tool

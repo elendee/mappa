@@ -59,7 +59,7 @@ const action = async( request ) => {
 
 	switch( action ){
 
-	case 'edit_icon_img':
+	case 'edit_element_img':
 
 		value = await GET.map_element({
 			uuid: request.body.uuid
@@ -936,6 +936,25 @@ const action = async( request ) => {
 	// 		elements: item.map( e => e.to_client() ),
 	// 	}
 
+	case 'update_tool_img':
+		// abc
+		value = await GET.tool({
+			uuid: request.body.tool_uuid,
+		})
+		if( !value ) return lib.return_fail({
+			msg: `not found`,
+			uuid: request.body.tool_uuid,
+		}, `icon not found`)
+
+		value.img_slug = request.body.slug
+
+		await value.save()
+
+		return {
+			success: true,
+			item: value.publish( value.get_request_allowed( request ))
+		}
+
 	case 'save_tool_icon':
 		if( !lib.is_logged( request ) ) return lib.return_fail(`must be logged in`, `must be logged in`)
 		mapview = await GET.mapview({
@@ -954,13 +973,15 @@ const action = async( request ) => {
 
 		uuid = await lib.get_unique_uuid( DB, 'tools', FIELDS.PERSISTS_UUID.Tool )
 
+		const _slug = Tool._format_slug( request.body.type )
+
 		value = new Tool({
 			uuid,
 			user_key: user.id,
 			set_key: toolset.id,
 			name: request.body.name,
 			type: request.body.type,
-			slug: ( request.body.type || 'icon' ).trim().replace(/\s+/g, '_').toLowerCase(),
+			slug: _slug,
 			img_slug: item.slug,
 		})
 		res = await value.save()

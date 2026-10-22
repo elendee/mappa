@@ -215,7 +215,6 @@ const choose_layer_style = e => {
 	.then( res => {
 		if( !res?.success ) return hal('error', res?.msg || 'failed to get toolsets', 5000 )
 		for( const r of res.results ){
-			// const set = new Toolset( r )
 			const picker = build_set_picker_row({
 				data: r,
 				load_images: true,

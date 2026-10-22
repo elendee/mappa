@@ -629,8 +629,9 @@ body.dashboard.menu-hidden #layer-panel{
 	/* border: 2px solid #cac9c9; */
 	margin: 0 5px;
 	cursor: pointer;
-	overflow:hidden;
 	text-align: center;
+	border: 2px solid transparent;
+	position: relative;
 }
 .tool-wrap:hover{
 	background: lightgrey;
@@ -643,6 +644,15 @@ body.dashboard.menu-hidden #layer-panel{
 	max-height: 70px;
 	overflow: hidden;
 }
+.tool-wrap .button.edit{
+	position: absolute;
+	top: -8px;
+	right: -5px;
+	width: 25px;
+	padding: 0;
+	
+}
+
 
 #img-cursor{
 	position: fixed;
@@ -841,6 +851,13 @@ body.dashboard.menu-hidden #layer-panel{
 	padding: 0;
 }
 
+.tool-image-form{
+	/* border: 2px solid red; */
+}
+.tool-image-form img{
+	width: 100px;
+	display: block;
+}
 
 @media screen and (min-width: 800px){
 	.menu-hidden #toolbox,

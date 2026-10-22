@@ -132,10 +132,12 @@ const MODELS = {
 		slug: {
 			type: 'string',
 			view: 'all',
+			no_edit: true,
 		},
 		img_slug: {
 			type: 'string',
 			view: 'all',
+			no_edit: true,
 		}
 	},
 

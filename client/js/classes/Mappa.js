@@ -13,6 +13,7 @@ import fetch_wrap from '../fetch_wrap.js'
 import hal from '../hal.js'
 import IconLayer from './IconLayer.js'
 import Toolset from './Toolset.js'
+import Tool from './Tool.js'
 import MapElement from './MapElement.js'
 import MapView from './MapView.js'
 import { xhr_piece } from '../file_handler.js'
@@ -146,7 +147,7 @@ class Mappa extends Model {
 	    this.map.on('click', on_map_click )
 
 	    this.icons = new IconLayer( this.map, {
-	    	on_icon_click: entry => this.pop_icon_info({
+	    	on_icon_click: entry => this.pop_element_info({
 	    		...entry,
 	    		is_owner: entry?.is_owner ?? entry?.item?.is_owner ?? this.is_owner,
 	    	}),
@@ -311,7 +312,10 @@ class Mappa extends Model {
 			for( const r of res.results || [] ){
 				const view = new MapView( r )
 				view.user = r.user
-				const row = view.output_summary()
+				// const row = view.output_summary()
+				const row = view.output_listing({
+					include_link: false,
+				})
 				const link = lib.b('a', false, 'view-summary')
 				link.href = `/?m=${view.uuid}`
 				link.append( row )
@@ -658,6 +662,11 @@ class Mappa extends Model {
 		}
 
 		this.uuid = uuid
+
+		const url = new URL( window.location.href )
+		url.searchParams.set( 'm', this.uuid )
+		window.history.replaceState( null, '', url )
+
 		// owner of the active layer gates the icon edit form in pop_icon_info;
 		// prefer explicit event flag, fall back to the mapview pub
 		this.is_owner = is_owner ?? mapview?.is_owner ?? false
@@ -767,7 +776,7 @@ class Mappa extends Model {
 
 	} // resolve item tool
 
-	pop_icon_info( entry ){
+	pop_element_info( entry ){
 		const {
 			item,
 			tool,
@@ -792,11 +801,11 @@ class Mappa extends Model {
 		}
 		const edit_img = lib.b('div', false, 'edit-img', 'button')
 		edit_img.innerHTML = `<img src='/resource/icons/swap.png'>`
-		edit_img.addEventListener('click', edit_icon_img )
+		edit_img.addEventListener('click', edit_element_img )
 		img_wrap.append( edit_img )
 		MAP.set( edit_img, {
 			mappa: this,
-			icon: item,
+			elmeent: item,
 			tool,
 			is_owner,
 		})
@@ -836,7 +845,7 @@ class Mappa extends Model {
 
 			const rm_btn = lib.b('button', false, 'button', 'rm')
 			rm_btn.innerText = 'remove'
-			rm_btn.addEventListener('click', remove_icon )
+			rm_btn.addEventListener('click', remove_element )
 			modal.content.append( rm_btn )
 			MAP.set( rm_btn, {
 				modal,
@@ -1259,6 +1268,36 @@ class Mappa extends Model {
 	} // fill toolbox
 
 
+	update_tool_image = async( event ) => {
+		/*
+			catch-all event for updating toolbox rendering
+		*/
+		const {
+			tool_data,
+		} = event
+
+		const {
+			wrap,
+			content,
+		} = this.DOM.toolbox
+
+		const icons = content.querySelectorAll('.tool-wrap')
+
+		for( const ele of icons ){
+			const uuid = ele.getAttribute('data-tool-uuid')
+			if( uuid === tool_data.uuid ){
+				const img = ele.querySelector('img')
+				img.src = Tool.get_img_slug( tool_data )
+				break;
+			}
+		}
+
+		// update any rendered map elements using this tool
+		this.icons?.update_tool_image?.( tool_data )
+
+	} // update tool image
+
+
 } // Mappa
 
 
@@ -1545,18 +1584,103 @@ const save_icon = async( e ) => {
 
 
 
-const _build_tool_wrap = () => {
+const _build_tool_wrap = args => {
+	const {
+		tool_data,
+		mappa,
+	} = args || {}
 	const wrap = lib.b('div', false, 'tool-wrap', 'ib')
 	const liner = lib.b('div', false, 'tool-liner', 'flex-wrapper')
 	wrap.append( liner )
 	const type = lib.b('div', false, 'tool-type')
 	wrap.append( type )
+
+	if( tool_data ){
+
+		wrap.setAttribute('data-tool-uuid', tool_data.uuid )
+
+		const edit = lib.b('div', false, 'button', 'edit')
+		edit.innerHTML = `<img src='/resource/icons/gear.png'>`
+		wrap.append( edit )
+		edit.addEventListener('click', click_tool_edit )
+
+		MAP.set( edit, {
+			mappa,
+			tool_data,
+		})
+	}
+
 	return {
 		wrap,
 		liner,
 		type
 	}
-}
+} // build tool wrap
+
+
+
+const click_tool_edit = e => {
+	const btn = lib.click_parent( e.target, 'button', false, 4 )
+
+	const {
+		tool_data,
+		mappa,
+	} = MAP.get( btn )
+
+	const modal = new Modal({
+		type: 'edit-tool',
+		header: 'Edit icon',
+	})
+
+	const preview = Tool.render_image_form({
+		tool: tool_data,
+	})
+	modal.content.append( preview )
+
+	const tool = new Tool( tool_data )
+	const form = tool.build_edit_form()
+	modal.content.append( form )
+
+	// auto followup:
+	tool._post_save = e => {
+
+		const file = preview.querySelector('input[type=file]').files[0]
+
+		// upload file
+		xhr_piece({
+			file,
+		})
+		.then( res => {
+			if( !res?.success ) return hal('error', res?.msg || 'error uploading file', 5000 )
+
+			// notify db
+			fetch_wrap('/action_main', 'post', {
+				action: 'update_tool_img', // abc
+				tool_uuid: tool_data.uuid,
+				slug: res.item?.slug,
+			})
+			.then( res => {
+				if( !res?.success ) return hal('error', res?.msg || 'error saving img', 5000 )
+				hal('success', 'icon updated', 5000 )
+
+				preview.querySelector('img').src = Tool.get_img_slug( res.item )
+
+				tool_data.img_slug = res.item?.img_slug
+
+				BROKER.publish('UPDATE_TOOL_IMAGE', {
+					tool_data: res.item,
+				})
+
+				modal.close.click()
+			})
+
+		})
+
+	} // post save
+
+	document.body.append( modal.ele )
+
+} // click edit
 
 
 
@@ -1571,10 +1695,13 @@ const build_tool = args => {
 		wrap,
 		liner,
 		type,
-	} = _build_tool_wrap()
+	} = _build_tool_wrap({
+		mappa,
+		tool_data,
+	})
 
 	const img = lib.b('img')
-	img.src = `/fs/thumbs/${lib.get_subdir({ slug: tool_data.img_slug })}/${tool_data.img_slug}`
+	img.src = Tool.get_img_slug( tool_data )
 	liner.append( img )
 
 	type.innerText = tool_data.type
@@ -1596,8 +1723,12 @@ const build_tool = args => {
 const set_active_tool = e => {
 	const wrap = lib.click_parent( e.target, 'tool-wrap', false, 5 )
 	const {
+		mappa,
 		tool_data,
 	} = MAP.get( wrap )
+
+	const btn = lib.click_parent( e.target, 'button', false, 5 ) // edit btn
+	if( btn ) return;
 
 	BROKER.publish('MAPPA_SET_TOOL', {
 		tool_data,
@@ -1753,11 +1884,11 @@ const move_icon = args => {
 } // move icon
 
 
-const edit_icon_img = e => {
+const edit_element_img = e => {
 	const btn = lib.click_parent( e.target, 'button', false, 3 )
 	const {
 		mappa,
-		icon,
+		element,
 		tool,
 		is_owner,
 		icon_uuid,
@@ -1774,12 +1905,12 @@ const edit_icon_img = e => {
 
 	const save = lib.b('button', false, 'button')
 	save.innerText = 'save'
-	save.addEventListener('click', save_icon_change )
+	save.addEventListener('click', save_element_change )
 	modal.content.append( save )
 	MAP.set( save, {
 		input: file,
 		mappa,
-		icon,
+		element,
 		tool,
 		is_owner,
 		icon_uuid,		
@@ -1787,15 +1918,15 @@ const edit_icon_img = e => {
 
 	document.body.append( modal.ele )
 
-}
+} // edit element img
 
 
-const save_icon_change = e => {
+const save_element_change = e => {
 	const btn = lib.click_parent( e.target, 'button', false, 5 )
 	const {
 		input,
 		mappa,
-		icon,
+		element,
 		tool,
 		is_owner,
 	} = MAP.get( btn )
@@ -1811,8 +1942,8 @@ const save_icon_change = e => {
 		hal('success', 'uploaded image', 3000 )
 
 		fetch_wrap('/action_main', 'post', {
-			action: 'edit_icon_img',
-			uuid: icon.uuid,
+			action: 'edit_element_img',
+			uuid: element.uuid,
 			slug: res.item?.slug,
 		})
 		.then( res => {
@@ -1826,7 +1957,7 @@ const save_icon_change = e => {
 } // save icon change
 
 
-const remove_icon = e => {
+const remove_element = e => {
 	const btn = lib.click_parent( e.target, 'button', false, 5 )
 	const {
 		modal,
@@ -1834,17 +1965,17 @@ const remove_icon = e => {
 		mappa,
 	} = MAP.get( btn )
 
-	console.log('rm', {
-		item,
-		mappa,
-	})
+	// console.log('rm element', {
+	// 	item,
+	// 	mappa,
+	// })
 
 	if( !confirm('Permanently remove ' + (item.name || 'item') + '?' ) ){
 		return;
 	}
 
 	fetch_wrap('/action_main', 'post', {
-		action: 'remove_icon',
+		action: 'remove_element',
 		uuid: item.uuid,
 		mapview_uuid: mappa.uuid,
 	})
@@ -1857,7 +1988,7 @@ const remove_icon = e => {
 
 	})
 
-}
+} // remove icon
 
 
 

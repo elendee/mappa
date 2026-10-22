@@ -236,6 +236,34 @@ class IconLayer {
 		return true
 	}
 
+	async update_tool_image( tool_data ){
+		// a tool's image changed: update every staged item using that tool,
+		// swap the shared map image, and re-commit
+		if( !tool_data?.uuid || !tool_data?.img_slug ) return false
+
+		let matched = false
+		for( const entry of this._items.values() ){
+			if( entry.tool?.uuid !== tool_data.uuid ) continue
+			entry.tool = {
+				...entry.tool,
+				...tool_data,
+			}
+			matched = true
+		}
+		if( !matched ) return false
+
+		const name = this.image_name( tool_data )
+		this._image_slugs.set( name, tool_data.img_slug )
+		this._image_promises.delete( name )
+		if( this.map?.hasImage?.( name ) ) this.map.removeImage( name )
+
+		const ok = await this._ensure_image( name, tool_data.img_slug )
+		if( !ok ) return false
+
+		this.commit()
+		return true
+	}
+
 	async upsert( item, tool, is_owner ){
 		// single-item path (ex: fresh place_icon)
 		const name = this._stage( item, tool, is_owner )
