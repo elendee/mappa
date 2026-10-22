@@ -146,12 +146,15 @@ class Mappa extends Model {
 
 	    this.map.on('click', on_map_click )
 
-	    this.icons = new IconLayer( this.map, {
-	    	on_icon_click: entry => this.pop_element_info({
-	    		...entry,
-	    		is_owner: entry?.is_owner ?? entry?.item?.is_owner ?? this.is_owner,
-	    	}),
-	    } )
+		this.icons = new IconLayer( this.map, {
+			on_icon_click: entry => {
+				console.log('clicked', entry )
+				this.pop_element_info({
+					...entry,
+					is_owner: entry?.is_owner ?? entry?.item?.is_owner ?? this.is_owner,
+				})
+			}
+		} )
 	    this.map.on('styledata', () => this.icons?.resync?.() )
 
 	    return this.map;
@@ -263,10 +266,10 @@ class Mappa extends Model {
 		const style = await res.json()
 		const base = res.url || ( window.location.origin + url )
 		// new URL() percent-encodes {tokens}; restore the maplibre ones afterwards
-		console.log('LAYERS load-offline-styles', {
-			url,
-			base,
-		})
+		// console.log('LAYERS load-offline-styles', {
+		// 	url,
+		// 	base,
+		// })
 		const absolutize = u => new URL( u, base ).href.replace( /%7B/gi, '{' ).replace( /%7D/gi, '}' )
 		if( style.glyphs ) style.glyphs = absolutize( style.glyphs )
 		for( const key in ( style.sources || {} ) ){
@@ -589,10 +592,10 @@ class Mappa extends Model {
 			return silent || hal('error', res?.msg || 'error getting layers', 5000 )
 		}
 
-		console.log('REFRESH-LAYERS', {
-			args,
-			res,
-		})
+		// console.log('REFRESH-LAYERS', {
+		// 	args,
+		// 	res,
+		// })
 
 
 		let init_row
@@ -639,11 +642,11 @@ class Mappa extends Model {
 
 		if( event.layer ) throw new Error('stop doing this')
 
-		console.log('LAYERS set-mappa-active', {
-			mapview,
-			is_owner,
-			caller,
-		})
+		// console.log('LAYERS set-mappa-active', {
+		// 	mapview,
+		// 	is_owner,
+		// 	caller,
+		// })
 
 		const {
 			uuid,
@@ -805,7 +808,7 @@ class Mappa extends Model {
 		img_wrap.append( edit_img )
 		MAP.set( edit_img, {
 			mappa: this,
-			elmeent: item,
+			element: item,
 			tool,
 			is_owner,
 		})
@@ -960,10 +963,10 @@ class Mappa extends Model {
 		}
 		this._pending_base_mapview = undefined
 		// log
-		console.log('LAYERS apply-base-layers', {
-			mapview,
-			caller,
-		})
+		// console.log('LAYERS apply-base-layers', {
+		// 	mapview,
+		// 	caller,
+		// })
 		// the apply
 		for( const g of BASE_LAYER_GROUPS ){
 			const raw = mapview[ 'layer_' + g.id ] // layer_ = my db mapping prefix
@@ -1008,10 +1011,10 @@ class Mappa extends Model {
 			caller,
 		} = args || {}
 		if( this._pending_base_mapview && this.map?.isStyleLoaded?.() ){
-			console.log('LAYERS apply-pending-base-layers', {
-				pending: this._pending_base_mapview,
-				caller,
-			})
+			// console.log('LAYERS apply-pending-base-layers', {
+			// 	pending: this._pending_base_mapview,
+			// 	caller,
+			// })
 			const mapview = this._pending_base_mapview
 			this._pending_base_mapview = undefined
 			this.apply_base_layers( mapview, 'apply-pending' )
@@ -1305,7 +1308,7 @@ class Mappa extends Model {
 		}
 
 		// update any rendered map elements using this tool
-		this.icons?.update_tool_image?.( tool_data )
+		this.icons?.propagate_tool_image?.( tool_data )
 
 	} // update tool image
 
@@ -1663,6 +1666,7 @@ const click_tool_edit = e => {
 	tool._post_save = e => {
 
 		const file = preview.querySelector('input[type=file]').files[0]
+		if( !file ) return console.warn('no image selected for update')
 
 		// upload file
 		xhr_piece({
@@ -1939,7 +1943,7 @@ const edit_element_img = e => {
 } // edit element img
 
 
-const save_element_change = e => {
+const save_element_change = async( e ) => {
 	const btn = lib.click_parent( e.target, 'button', false, 5 )
 	const {
 		input,
@@ -1951,26 +1955,34 @@ const save_element_change = e => {
 
 	const file = input.files[0]
 
-	xhr_piece({
+	let res //, uploaded_item
+
+	// if( file ){
+
+	res = await xhr_piece({
 		file,
 		data: {}
 	})
-	.then( res => {
-		if( !res?.success ) return hal('error', res?.msg, 'error uploading', 5000 )
-		hal('success', 'uploaded image', 3000 )
 
-		fetch_wrap('/action_main', 'post', {
-			action: 'edit_element_img',
-			uuid: element.uuid,
-			slug: res.item?.slug,
-		})
-		.then( res => {
-			console.log('edit res', res)
-			if( !res?.success ) return hal('error', res?.msg || 'error editing', 5000 )
-			hal('success', 'image updated - refresh page to see change', 30 * 1000 )
-		})
+	if( !res?.success ) return hal('error', res?.msg, 'error uploading', 5000 )
 
+	hal('success', 'uploaded image', 3000 )
+
+	// uploaded_item = res.item
+
+	// }
+
+	res = await fetch_wrap('/action_main', 'post', {
+		action: 'edit_element_img',
+		uuid: element.uuid,
+		slug: res.item?.slug,
 	})
+
+	console.log('edit res', res)
+
+	if( !res?.success ) return hal('error', res?.msg || 'error editing', 5000 )
+
+	hal('success', 'image updated - refresh page to see change', 30 * 1000 )
 
 } // save icon change
 

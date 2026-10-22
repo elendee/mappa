@@ -97,11 +97,11 @@ export function setBaseLayerVisible( args ){
 		try{ map.setLayoutProperty( lid, 'visibility', visible ? 'visible' : 'none' ) }catch(_){}
 	}
 
-	console.log('LAYERS set-base-layer-visible', {
-		groupOrId,
-		visible,
-		caller,
-	})
+	// console.log('LAYERS set-base-layer-visible', {
+	// 	groupOrId,
+	// 	visible,
+	// 	caller,
+	// })
 
 	return true
 	

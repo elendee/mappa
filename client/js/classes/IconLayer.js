@@ -5,8 +5,8 @@ import * as lib from '../lib.js'
 /*
 	owns all maplibre icon plumbing for placed elements:
 	- geojson source + symbol layer
-	- per-tool image registry (with inflight dedup so concurrent
-	  renders sharing a tool don't race addImage)
+	- per-(tool, slug) image registry (with inflight dedup so concurrent
+	  renders sharing an image don't race addImage)
 	- style readiness (awaits a single load promise)
 
 	Mappa keeps fetch/toolbox/layer orchestration and delegates here.
@@ -159,7 +159,12 @@ class IconLayer {
 		return !!hits?.length
 	}
 
-	image_name( tool ){
+	image_name( tool, img_slug ){
+		// the tool's default slug keeps the stable per-tool name; a custom
+		// slug gets its own image slot so one item can't hijack the icon
+		// every other item of the tool renders with
+		const slug = img_slug || tool?.img_slug
+		if( slug && tool?.img_slug && slug !== tool.img_slug ) return `tool-${tool.uuid}-${slug}`
 		return `tool-${tool.uuid}`
 	}
 
@@ -182,6 +187,16 @@ class IconLayer {
 		return this._image_promises.get( name )
 	}
 
+	_prune_image( name ){
+		// drop an image slot that no staged feature references anymore
+		for( const feature of this._features.values() ){
+			if( feature?.properties?.icon === name ) return
+		}
+		this._image_slugs.delete( name )
+		this._image_promises.delete( name )
+		if( this.map?.hasImage?.( name ) ) this.map.removeImage( name )
+	}
+
 	_stage( item, tool, is_owner ){
 		// validate + stage feature; returns image name or false
 		// is_owner rides along on the entry so Mappa.pop_icon_info can gate the edit form
@@ -194,13 +209,13 @@ class IconLayer {
 		if( !tool?.uuid || !tool?.img_slug ) return console.warn('item missing tool image', item )
 
 		const use_slug = item.img_slug_custom || tool.img_slug
+		const name = this.image_name( tool, use_slug )
 
-		console.log('_STAGE', {
-			item: item.img_slug_custom,
-			tool: tool.img_slug
-		})
+		// if this item's slot changed (ex: custom slug swapped), drop the
+		// old image if nothing else is still using it
+		const prev_name = this._features.get( item.uuid )?.properties?.icon
+		if( prev_name && prev_name !== name ) this._prune_image( prev_name )
 
-		const name = this.image_name( tool )
 		this._image_slugs.set( name, use_slug )
 		this._items.set( item.uuid, {
 			item,
@@ -236,7 +251,7 @@ class IconLayer {
 		return true
 	}
 
-	async update_tool_image( tool_data ){
+	async propagate_tool_image( tool_data ){
 		// a tool's image changed: update every staged item using that tool,
 		// swap the shared map image, and re-commit
 		if( !tool_data?.uuid || !tool_data?.img_slug ) return false
@@ -271,9 +286,7 @@ class IconLayer {
 		await this._map_ready()
 		this._ensure_layer()
 
-		const use_slug = item.img_slug_custom || tool.img_slug
-
-		const ok = await this._ensure_image( name, use_slug )
+		const ok = await this._ensure_image( name, this._image_slugs.get( name ) )
 		if( !ok ){
 			this._features.delete( item.uuid )
 			this._items.delete( item.uuid )
@@ -285,14 +298,14 @@ class IconLayer {
 
 	async render_all( items, resolve_tool, resolve_owner ){
 
-		if( env.LOCAL ) console.log(' RENDER-ALL; icon-layer render-all')
+		// if( env.LOCAL ) console.log(' RENDER-ALL; icon-layer render-all')
 
 		// batch path (ex: layer activation) — one readiness wait,
 		// deduped parallel image loads, single setData
 		await this._map_ready()
 		this._ensure_layer()
 
-		if( env.LOCAL ) console.log(' RENDER-ALL; map is-ready')
+		// if( env.LOCAL ) console.log(' RENDER-ALL; map is-ready')
 
 		const staged = []
 		for( const item of items || [] ){
@@ -308,12 +321,12 @@ class IconLayer {
 			if( name ) staged.push([ item, tool, name ])
 		}
 
-		if( env.LOCAL ) console.log(' RENDER-ALL; ensuring icon images')
+		// if( env.LOCAL ) console.log(' RENDER-ALL; ensuring icon images')
 
-		// await all images loaded ( http but also loaded to map )
+		// await all images loaded ( http but also loaded to map );
+		// _stage is the single source of truth for name -> slug
 		const _promises = staged.map( ([ item, tool, name ]) => {
-			const use_slug = item.img_slug_custom || tool.img_slug
-			return this._ensure_image( name, use_slug ) 
+			return this._ensure_image( name, this._image_slugs.get( name ) ) 
 		})
 		await Promise.all( _promises )
 
@@ -325,7 +338,7 @@ class IconLayer {
 			}
 		}
 
-		if( env.LOCAL ) console.log(' RENDER-ALL; should be done render all')
+		// if( env.LOCAL ) console.log(' RENDER-ALL; should be done render all')
 
 		this.commit()
 
