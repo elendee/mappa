@@ -879,15 +879,49 @@ body.dashboard.menu-hidden #layer-panel{
 
 #map-key{
 	position: fixed;
-	left: 0%;
+	right: 300px;
 	bottom: 0px;
-	border: 2px solid red;
+	/* border: 2px solid red; */
 	z-index: 99;
-	width: calc( 100% - 300px );
-	height: 150px;
+	width: 200px;
 	background: white;
-	border-left: 1px solid var(--faint-line)
+	border-left: 1px solid var(--faint-line);
+	border-top: 1px solid var(--faint-line);
+	padding: 10px;
+}
+.menu-hidden #map-key{
+	display: none;
+}
+.tool-key-wrap{
+	text-align: left;
+	/* border: 5px solid green; */
+	width: 100%;
+	overflow: hidden;
+}
+.tool-key-liner{
+	height: 40px;
+	/* border: 1px solid; */
+}
+.tool-key-wrap .flex-wrapper{
+	justify-content:flex-start;
+	/* border: 2px solid blue; */
 	
+}
+.tool-key-type{
+	margin-left: 10px;
+}
+.tool-key-type i{
+	font-size: .9rem;
+}
+.key-img{
+	width: 50px;
+	/* height: 50px; */
+	display: inline-block;
+}
+.tool-key-name{
+	width: 100%;
+	border: 1px solid;
+	max-width: 100%;
 }
 
 @media screen and (min-width: 800px){

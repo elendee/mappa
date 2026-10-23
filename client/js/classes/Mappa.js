@@ -119,6 +119,7 @@ class Mappa extends Model {
 			},
 			map_key: {
 				wrap: lib.b('div', 'map-key'),
+				header: lib.b('div', false, 'key-header'),
 				content: lib.b('div', false, 'key-content'),
 
 			}
@@ -168,10 +169,20 @@ class Mappa extends Model {
 	} // init
 
 	_init_mapkey(){
-		if( 1 ){
-			document.body.append( this.DOM.map_key.wrap )
-		}
-	}
+		const {
+			wrap,
+			header,
+			content,
+		} = this.DOM.map_key
+
+		header.innerHTML = '<b>Map key</b><br><br>'
+
+		wrap.append( header )
+		wrap.append( content )
+
+		document.body.append( wrap )
+
+	} // init mapkey
 
 	_init_social_tab(){
 		const {
@@ -251,8 +262,6 @@ class Mappa extends Model {
 		this.DOM.toolbox.set_name.addEventListener('click', e => {
 			BROKER.publish('TOGGLE_TOOLBOX')
 		})
-
-		debugger
 
 	} // init toolbox
 
@@ -701,6 +710,8 @@ class Mappa extends Model {
 		// fill tools first so items can resolve their icon immediately
 		let res = await this.update_hud({
 			mapview,
+			is_owner,
+			can_edit,
 			caller: 'set-mappa-active',
 		})
 
@@ -1184,11 +1195,20 @@ class Mappa extends Model {
 
 	async update_hud( args ){
 		const {
+			is_owner,
+			can_edit,
 			mapview,
 			caller,
 		} = args
 
 		await mappa.fill_toolbox({
+			mapview,
+			caller
+		})
+
+		await mappa.fill_mapkey({
+			is_owner,
+			can_edit,
 			mapview,
 			caller
 		})
@@ -1225,6 +1245,41 @@ class Mappa extends Model {
 		return this.toolset
 
 	} // sync toolset
+
+
+	async fill_mapkey( args ){
+		const {
+			is_owner,
+			can_edit,
+			mapview,
+			caller,
+		} = args
+
+		this.DOM.map_key.content.innerText = ''
+
+		if( can_edit && 0 ){
+			this.DOM.map_key.wrap.remove()
+			return;
+		}
+
+		for( const uuid in this.tools_by_uuid ){
+
+			const data = this.tools_by_uuid[uuid]
+
+			const {
+				wrap,
+				type,
+				liner,
+			} = build_tool_key({
+				mappa,
+				tool_data: data,
+			})
+
+			this.DOM.map_key.content.append( wrap )
+
+		}
+
+	} // fill mapkey
 
 
 	async fill_toolbox( args ){
@@ -1320,7 +1375,7 @@ class Mappa extends Model {
 	} // fill toolbox
 
 
-	update_tool_image = async( event ) => {
+	update_tool_data = async( event ) => {
 		/*
 			catch-all event for updating toolbox rendering
 		*/
@@ -1328,21 +1383,26 @@ class Mappa extends Model {
 			tool_data,
 		} = event
 
-		const {
-			wrap,
-			content,
-		} = this.DOM.toolbox
+		// update toolbox
+		const icons = this.DOM.toolbox.content.querySelectorAll('.tool-wrap')
+		const keys = this.DOM.map_key.content.querySelectorAll('.tool-key-wrap')
 
-		const icons = content.querySelectorAll('.tool-wrap')
+		const both = Array.from( icons ).concat( Array.from( keys ) )
 
-		for( const ele of icons ){
+		for( const ele of both ){
 			const uuid = ele.getAttribute('data-tool-uuid')
 			if( uuid === tool_data.uuid ){
 				const img = ele.querySelector('img')
 				img.src = Mappa.get_img_fullpath( tool_data.img_slug_custom || tool_data.img_slug )
-				break;
-			}
+				const name = ele.querySelector('.tool-type, .tool-key-type')
+				if( name ){
+					name.innerText = tool_data?.name || tool_data?.type || '-'
+				}
+				// break;
+			}			
 		}
+
+		// update map key
 
 		// update any rendered map elements using this tool
 		this.icons?.propagate_tool_image?.( tool_data )
@@ -1357,22 +1417,6 @@ class Mappa extends Model {
 		const {
 			toolset,
 		} = event
-
-		// const {
-		// 	wrap,
-		// 	content,
-		// } = this.DOM.toolbox
-
-		// const icons = content.querySelectorAll('.tool-wrap')
-
-		// for( const ele of icons ){
-		// 	// const uuid = ele.getAttribute('data-tool-uuid')
-		// 	// if( uuid === tool_data.uuid ){
-		// 	// 	const img = ele.querySelector('img')
-		// 	// 	img.src = Mappa.get_img_fullpath( tool_data.img_slug_custom || tool_data.img_slug )
-		// 	// 	break;
-		// 	// }
-		// }
 
 		const settings_preview = document.querySelector('.modal .icon-preview-img')
 		if( settings_preview ){
@@ -1673,6 +1717,48 @@ const save_icon = async( e ) => {
 
 
 
+const build_tool_key = args => {
+	const {
+		tool_data,
+		mappa,
+	} = args || {}
+	// wrap
+	const wrap = lib.b('div', false, 'tool-key-wrap', 'ib')
+	wrap.setAttribute('data-tool-uuid', tool_data.uuid )
+	// liner
+	const liner = lib.b('div', false, 'tool-key-liner', 'flex-wrapper')
+	// image
+	const img = lib.b('img', false, 'key-img')
+	img.src = Mappa.get_img_fullpath( tool_data?.img_slug_custom|| tool_data.img_slug )
+	liner.append( img )
+	wrap.append( liner )
+
+	// type
+	const type = lib.b('div', false, 'tool-key-type')
+	type.innerHTML = `<i>${tool_data?.type || '-' }</i>`
+	liner.append( type )
+
+		// name
+	if( tool_data?.name ){
+		type.innerHTML = tool_data.name + '<br>' + type.innerHTML
+		// const name = lib.b('div', false, 'tool-key-name')
+		// name.innerText = tool_data.name
+		// liner.append( name )	
+	}
+
+
+	return {
+		wrap,
+		liner,
+		type,
+	}
+
+}
+
+
+
+
+
 const _build_tool_wrap = args => {
 	const {
 		tool_data,
@@ -1733,40 +1819,65 @@ const click_tool_edit = e => {
 	modal.content.append( form )
 
 	// auto followup:
-	tool._post_save = e => {
+	tool._post_save = async( args ) => {
+		try{
 
-		const file = preview.querySelector('input[type=file]').files[0]
-		if( !file ) return console.warn('no image selected for update')
+			const {
+				form,
+				edit_args,
+				res,
+			} = args
 
-		// upload file
-		xhr_piece({
-			file,
-		})
-		.then( res => {
-			if( !res?.success ) return hal('error', res?.msg || 'error uploading file', 5000 )
+			let new_tool_data
 
-			// notify db
-			fetch_wrap('/action_main', 'post', {
-				action: 'update_tool_img', // abc
-				tool_uuid: tool_data.uuid,
-				slug: res.item?.slug,
-			})
-			.then( res => {
-				if( !res?.success ) return hal('error', res?.msg || 'error saving img', 5000 )
-				hal('success', 'icon updated', 5000 )
+			const file = preview.querySelector('input[type=file]').files[0]
+			if( file ){
 
-				preview.querySelector('img').src = Mappa.get_img_fullpath( res.item?.img_slug_custom || res.item?.img_slug )
-
-				tool_data.img_slug = res.item?.img_slug
-
-				BROKER.publish('UPDATE_TOOL_IMAGE', {
-					tool_data: res.item,
+				// upload file
+				let xhr_res = await xhr_piece({
+					file,
 				})
+				if( xhr_res?.success ){
 
-				modal.close.click()
+					// notify db
+					let tool_res = await fetch_wrap('/action_main', 'post', {
+						action: 'update_tool_img', // abc
+						tool_uuid: tool_data.uuid,
+						slug: xhr_res.item?.slug,
+					})
+					if( tool_res?.success ){
+
+						const slug = xhr_res.item?.img_slug_custom || xhr_res.item?.img_slug
+
+						preview.querySelector('img').src = Mappa.get_img_fullpath( slug )
+
+						tool_data.img_slug = res.model.img_slug = xhr_res.item?.slug
+
+					}else{
+						hal('error', tool_res?.msg || 'error saving img', 5000 )
+					}
+
+				}else{
+					hal('error', xhr_res?.msg || 'error uploading file', 5000 )
+				}
+
+			}
+
+			new_tool_data = res.model
+
+			hal('success', 'icon updated', 5000 )
+
+			BROKER.publish('UPDATE_TOOL_DATA', {
+				tool_data: new_tool_data,
+				// tool_res.item,
 			})
 
-		})
+		}catch( err ){
+			console.error( 'post-save mappa', err )
+			hal('error', 'error saving', 5000 )
+		}
+
+		modal.close.click()
 
 	} // post save
 
@@ -1796,7 +1907,7 @@ const build_tool = args => {
 	img.src = Mappa.get_img_fullpath( tool_data?.img_slug_custom || tool_data?.img_slug )
 	liner.append( img )
 
-	type.innerText = tool_data.type
+	type.innerText = tool_data.name || tool_data.type
 
 	MAP.set( wrap, {
 		mappa,
