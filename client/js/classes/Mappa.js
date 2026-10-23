@@ -1052,9 +1052,9 @@ class Mappa extends Model {
 		}) 
 		preview.append( preview_img )
 
-		console.log('build-toolset-preview', {
-			set_name: toolset.name,
-		})
+		// console.log('build-toolset-preview', {
+		// 	set_name: toolset.name,
+		// })
 
 		if( toolset ){
 			const edit = lib.b('div', false, 'button', 'edit')
@@ -2088,50 +2088,45 @@ const pop_edit_toolset = e => {
 	const form = _toolset.build_edit_form()
 	modal.content.append( form )
 
-	_toolset._post_save = ({ res }) => {
+	_toolset._post_save = async( args ) => {
+		const {
+			res: _res,
+		} = args
 
-		if( res?.model ) Object.assign( toolset, res.model )
+		if( _res?.model ) Object.assign( toolset, _res.model )
 
 		const file = preview.querySelector('input[type=file]').files[0]
-		if( !file ) return console.warn('no image selected for update')
+		if( file ){
 
-		// upload file
-		xhr_piece({
-			file,
-		})
-		.then( upload_res => {
-			if( !upload_res?.success ) return hal('error', upload_res?.msg || 'error uploading file', 5000 )
-
-			console.log('save-toolset-upload', {
-				item: upload_res.item,
+			let res = await xhr_piece({
+				file,
 			})
+
+			if( !res?.success ) return hal('error', res?.msg || 'error uploading file', 5000 )
 
 			// notify db
-			fetch_wrap('/action_main', 'post', {
+			res = await fetch_wrap('/action_main', 'post', {
 				action: 'save_toolset_image',
 				set_uuid: toolset.uuid,
-				slug: upload_res.item?.slug,
-			})
-			.then( img_res => {
-				if( !img_res?.success ) return hal('error', img_res?.msg || 'error saving image', 5000 )
-
-				hal('success', 'saved', 5000 )
-
-				for( const key in img_res.toolset ){
-					const value = img_res.toolset[key]
-					// debugger
-					// in mem temp / in mem permanent
-					toolset[ key ] = mappa.toolset[key] = value
-				}
-
-				preview.querySelector('img').src = Mappa.get_img_fullpath( toolset?.img_slug )
-
-				BROKER.publish('UPDATE_TOOLSET_IMAGE', {
-					toolset,
-				})
-
+				slug: res.item?.slug,
 			})
 
+			if( !res?.success ) return hal('error', res?.msg || 'error saving image', 5000 )
+
+			for( const key in res.toolset ){
+				const value = res.toolset[key]
+				// in mem temp / in mem permanent
+				toolset[ key ] = mappa.toolset[key] = value
+			}
+			
+			hal('success', 'saved image', 5000 )
+
+		}
+
+		preview.querySelector('img').src = Mappa.get_img_fullpath( toolset?.img_slug )
+
+		BROKER.publish('UPDATE_TOOLSET_IMAGE', {
+			toolset,
 		})
 
 	} // post save
