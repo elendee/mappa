@@ -828,6 +828,9 @@ body.dashboard.menu-hidden #layer-panel{
 .public-link .copy{
 	margin-left: 20px;
 }
+.menu-hidden #social-tab{
+	display: none !important;
+}
 
 #social-tab .status{
 	margin-bottom: 8px;
@@ -872,6 +875,19 @@ body.dashboard.menu-hidden #layer-panel{
 .model-image-form img{
 	width: 100px;
 	display: block;
+}
+
+#map-key{
+	position: fixed;
+	left: 0%;
+	bottom: 0px;
+	border: 2px solid red;
+	z-index: 99;
+	width: calc( 100% - 300px );
+	height: 150px;
+	background: white;
+	border-left: 1px solid var(--faint-line)
+	
 }
 
 @media screen and (min-width: 800px){

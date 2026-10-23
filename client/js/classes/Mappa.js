@@ -116,10 +116,16 @@ class Mappa extends Model {
 				link: lib.b('div', false, 'public-link'),
 				save_wrap: lib.b('div', false, 'save-wrap'),
 				save_btn: lib.b('div', false, 'button' ),
+			},
+			map_key: {
+				wrap: lib.b('div', 'map-key'),
+				content: lib.b('div', false, 'key-content'),
+
 			}
 		}
 		this._init_toolbox()
 		this._init_social_tab()
+		this._init_mapkey()
 
 		for( const key in this.DOM ){
 			if( !this.DOM[key] ) console.warn('missing dom ele', key )
@@ -160,6 +166,12 @@ class Mappa extends Model {
 	    return this.map;
 
 	} // init
+
+	_init_mapkey(){
+		if( 1 ){
+			document.body.append( this.DOM.map_key.wrap )
+		}
+	}
 
 	_init_social_tab(){
 		const {
@@ -239,6 +251,8 @@ class Mappa extends Model {
 		this.DOM.toolbox.set_name.addEventListener('click', e => {
 			BROKER.publish('TOGGLE_TOOLBOX')
 		})
+
+		debugger
 
 	} // init toolbox
 
@@ -1187,6 +1201,32 @@ class Mappa extends Model {
 	} // update hud
 
 
+	_sync_toolset( toolset ){
+		/*
+			keep mappa.toolset as one stable object.
+			open previews/forms hold a reference to it, so replacing the object
+			leaves those references pointing at stale toolset data.
+		*/
+		if( !toolset ){
+			this.toolset = undefined
+			return undefined
+		}
+
+		if( !this.toolset || typeof this.toolset !== 'object' ){
+			this.toolset = toolset
+			return this.toolset
+		}
+
+		for( const key of Object.keys( this.toolset ) ){
+			if( !( key in toolset ) ) delete this.toolset[ key ]
+		}
+		Object.assign( this.toolset, toolset )
+
+		return this.toolset
+
+	} // sync toolset
+
+
 	async fill_toolbox( args ){
 		const {
 			mapview,
@@ -1211,11 +1251,7 @@ class Mappa extends Model {
 			//
 		}
 
-		const {
-			toolset,
-		} = res
-
-		this.toolset = toolset
+		const toolset = this._sync_toolset( res.toolset )
 
 		const {
 			created,
@@ -1503,11 +1539,8 @@ const set_toolset = e => {
 			close.click()
 		}
 
-		// update state
-		// mappa.toolset = res.toolset
-		for( const key in res.toolset ){
-			mappa.toolset[key] = res.toolset[key]
-		}
+		// update state without replacing the object open pickers hold onto
+		mappa._sync_toolset( res.toolset )
 
 		// update the origin toolset
 		og_preview_img.src = mappa.get_toolset_icon_src({
@@ -2061,30 +2094,31 @@ const remove_element = e => {
 
 
 
-const pop_edit_toolset = e => {
+const pop_edit_toolset = async( e ) => {
 	const btn = lib.click_parent( e.target, 'button', false, 5 )
 	const {
 		toolset,
 		mappa,
 	} = MAP.get( btn )
 
-	console.log('pop-edit-toolset', {
-		toolset,
-		img_slug: toolset.img_slug_custom || toolset.img_slug,
-		mappa,
-	})
+	// a preview can outlive the active-set change that rendered it;
+	// if it points at the active set, use mappa's canonical object instead
+	const is_active = toolset?.uuid && toolset.uuid === mappa.toolset?.uuid
+	const live_toolset = is_active ? mappa.toolset : toolset
 
 	const modal = new Modal({
 		type: 'edit-toolset-image',
-		header: 'Edit icon set cover image: ' + toolset.name,
+		header: 'Edit icon set cover image: ' + live_toolset.name,
 	})
 
+	document.body.append( modal.ele )
+
 	const preview = Toolset.render_image_form({
-		img_slug: toolset.img_slug_custom || toolset.img_slug
+		img_slug: live_toolset.img_slug_custom || live_toolset.img_slug
 	})
 	modal.content.append( preview )
 
-	const _toolset = new Toolset( toolset )
+	const _toolset = new Toolset( live_toolset )
 	const form = _toolset.build_edit_form()
 	modal.content.append( form )
 
@@ -2093,7 +2127,7 @@ const pop_edit_toolset = e => {
 			res: _res,
 		} = args
 
-		if( _res?.model ) Object.assign( toolset, _res.model )
+		if( _res?.model ) Object.assign( live_toolset, _res.model )
 
 		const file = preview.querySelector('input[type=file]').files[0]
 		if( file ){
@@ -2107,31 +2141,27 @@ const pop_edit_toolset = e => {
 			// notify db
 			res = await fetch_wrap('/action_main', 'post', {
 				action: 'save_toolset_image',
-				set_uuid: toolset.uuid,
+				set_uuid: live_toolset.uuid,
 				slug: res.item?.slug,
 			})
 
 			if( !res?.success ) return hal('error', res?.msg || 'error saving image', 5000 )
 
-			for( const key in res.toolset ){
-				const value = res.toolset[key]
-				// in mem temp / in mem permanent
-				toolset[ key ] = mappa.toolset[key] = value
-			}
+			// only update the active set's canonical object; editing another
+			// card must not overwrite the map's current toolset
+			Object.assign( live_toolset, res.toolset )
 			
 			hal('success', 'saved image', 5000 )
 
 		}
 
-		preview.querySelector('img').src = Mappa.get_img_fullpath( toolset?.img_slug )
+		preview.querySelector('img').src = Mappa.get_img_fullpath( live_toolset?.img_slug )
 
 		BROKER.publish('UPDATE_TOOLSET_IMAGE', {
-			toolset,
+			toolset: live_toolset,
 		})
 
 	} // post save
-
-	document.body.append( modal.ele )
 
 } // edit toolset img
 

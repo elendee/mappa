@@ -581,8 +581,8 @@ img#flash{
 button.button{
 	position: relative;
 	padding: 3px 8px;
-	color: lightgrey;
-    background: #968674;
+	/* color: lightgrey; */
+    background: #b9afa4;
 	display: inline-block;
 	border: 1px solid;
 	cursor: pointer;
