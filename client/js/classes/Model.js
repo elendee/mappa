@@ -783,6 +783,40 @@ class Model {
 
 	}
 
+	_on_invalidate( args ){
+		const {
+			invalidations,
+			form,
+		} = args
+
+		for( const msg of invalidations || []){
+			if( typeof msg === 'string' ){
+				hal('error', msg, 5000 )
+			}
+		}
+
+	} // on invalidate
+
+
+	validate( args ){
+		const {
+			form,
+		} = args
+
+		const invalidations = []
+
+		for( const ele of form.querySelectorAll('input, select, textarea')){
+			const wrap = lib.click_parent( ele, 'model-detail', false, 5 )
+			if( !wrap ) continue;
+			if( !wrap.classList.contains('required')) continue;
+			if( !ele?.value ){
+				invalidations.push('field "' + ele.name + '" missing value')
+			}
+		}
+
+		return invalidations
+
+	}
 
 
 } // Model
@@ -900,6 +934,18 @@ const save_model = e => {
 
 	const _type = form.getAttribute('data-type')
 
+	const invalidations = model.validate({
+		form,
+	})
+	if( invalidations?.length ){
+		if( model._on_invalidate ){
+			return model._on_invalidate({
+				invalidations,
+				form,
+			})
+		}
+	}
+
 	fetch_wrap('/action_main', 'post', { // action_main, account, etc
 		action,
 		model: model_data,
@@ -941,6 +987,9 @@ const save_model = e => {
 	})
 
 }
+
+
+
 
 const toggle_viz = e => {
 

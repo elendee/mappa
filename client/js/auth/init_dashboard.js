@@ -153,5 +153,4 @@ BROKER.subscribe('MAPPA_SET_TOOL', mappa.set_tool_active )
 BROKER.subscribe('ADD_MAP_ITEM_DATA', forward_map_item )
 BROKER.subscribe('UPDATE_TOOL_DATA', mappa.update_tool_data )
 BROKER.subscribe('UPDATE_TOOLSET_IMAGE', mappa.update_toolset_image )
-
-
+BROKER.subscribe('ADD_TO_MAPKEY', mappa.add_to_mapkey )

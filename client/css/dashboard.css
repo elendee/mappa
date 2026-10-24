@@ -898,6 +898,10 @@ body.dashboard.menu-hidden #layer-panel{
 	width: 100%;
 	overflow: hidden;
 }
+#map-key.toggled {
+	height: 40px;
+	overflow: hidden;
+}
 .tool-key-liner{
 	height: 40px;
 	/* border: 1px solid; */
@@ -923,6 +927,23 @@ body.dashboard.menu-hidden #layer-panel{
 	border: 1px solid;
 	max-width: 100%;
 }
+.key-header img{
+	width: 30px;
+	/* vertical-align: middle; */
+	position: absolute;
+	left: 10px;
+	top: 5px;
+}
+.key-header img.button{
+	padding: 3px;
+}
+#map-key:hover{
+	background: lightgrey;
+}
+/* .key-header:hover{
+	background: lightgrey;
+} */
+
 
 @media screen and (min-width: 800px){
 	.menu-hidden #toolbox,
@@ -1021,6 +1042,22 @@ body.dashboard.menu-hidden #layer-panel{
 	}
 	#social-tab *{
 		font-size: initial;
+	}
+	#map-key{
+		display: none;
+		top: 10px;
+		left: 10px;
+		border: 1px solid var(--faint-line);
+		bottom: auto;
+	}
+	.menu-hidden #map-key{
+		display: inline-block;
+		right: 0;
+	}
+
+	.public-link .copy{
+		margin-top: 3px;
+		margin-left: 0;
 	}
 
 }

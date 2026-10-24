@@ -124,11 +124,13 @@ const MODELS = {
 		name: {
 			type: 'string',
 			view: 'all',
+			required: true 
 		},
-		type: {
-			type: 'string',
-			view: 'all',
-		},
+		// type: {
+		// 	type: 'string',
+		// 	view: 'all',
+		// 	no_edit: true,
+		// },
 		slug: {
 			type: 'string',
 			view: 'all',

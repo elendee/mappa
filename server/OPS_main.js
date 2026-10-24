@@ -988,14 +988,15 @@ const action = async( request ) => {
 
 		uuid = await lib.get_unique_uuid( DB, 'tools', FIELDS.PERSISTS_UUID.Tool )
 
-		const _slug = Tool._format_slug( request.body.type )
+		// const _slug = Tool._format_slug( request.body.type )
+		const _slug = Tool._format_slug( request.body.name )
 
 		value = new Tool({
 			uuid,
 			user_key: user.id,
 			set_key: toolset.id,
 			name: request.body.name,
-			type: request.body.type,
+			// type: request.body.type,
 			slug: _slug,
 			img_slug: item.slug,
 		})

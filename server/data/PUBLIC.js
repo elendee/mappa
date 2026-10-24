@@ -136,10 +136,18 @@ const DATA = {
 	DEFAULT_STYLE: 'sketch',
 
 	ELEMENT_TYPES: {
+		appearance: 'appearance',
+		bar: 'bar',
+		building: 'building',
+		cafe: 'cafe',
+		concert: 'concert',
+		event: 'event',
+		festival: 'festival',
+		location: 'location',
+		landmark: 'landmark',
 		party: 'party',
-		happy_hour: 'happy hour',
-		restaurant: 'restaurant',
 		pop_up: 'pop up',
+		restaurant: 'restaurant',
 	},
 
 	ROLES: {

@@ -175,7 +175,13 @@ class Mappa extends Model {
 			content,
 		} = this.DOM.map_key
 
-		header.innerHTML = '<b>Map key</b><br><br>'
+		header.innerHTML = `
+			<img class='button' src='/resource/icons/mapkey.png'>
+		<b>Map key</b><br><br>`
+
+		header.addEventListener('click', e => {
+			wrap.classList.toggle('toggled')
+		})
 
 		wrap.append( header )
 		wrap.append( content )
@@ -824,16 +830,18 @@ class Mappa extends Model {
 			img.src = `/fs/thumbs/${lib.get_subdir({ slug: use_slug })}/${use_slug}`
 			img_wrap.append( img )
 		}
-		const edit_img = lib.b('div', false, 'edit-img', 'button')
-		edit_img.innerHTML = `<img src='/resource/icons/swap.png'>`
-		edit_img.addEventListener('click', edit_element_img )
-		img_wrap.append( edit_img )
-		MAP.set( edit_img, {
-			mappa: this,
-			element: item,
-			tool,
-			is_owner,
-		})
+		if( is_owner ){
+			const edit_img = lib.b('div', false, 'edit-img', 'button')
+			edit_img.innerHTML = `<img src='/resource/icons/swap.png'>`
+			edit_img.addEventListener('click', edit_element_img )
+			img_wrap.append( edit_img )
+			MAP.set( edit_img, {
+				mappa: this,
+				element: item,
+				tool,
+				is_owner,
+			})
+		}
 
 		const rows = []
 		const _tool = tool ?? item?.tool
@@ -1257,7 +1265,7 @@ class Mappa extends Model {
 
 		this.DOM.map_key.content.innerText = ''
 
-		if( can_edit && 0 ){
+		if( can_edit ){
 			this.DOM.map_key.wrap.remove()
 			return;
 		}
@@ -1394,11 +1402,11 @@ class Mappa extends Model {
 			if( uuid === tool_data.uuid ){
 				const img = ele.querySelector('img')
 				img.src = Mappa.get_img_fullpath( tool_data.img_slug_custom || tool_data.img_slug )
-				const name = ele.querySelector('.tool-type, .tool-key-type')
+				const name = ele.querySelector('.tool-type') || ele.querySelector('.tool-key-type')
 				if( name ){
-					name.innerText = tool_data?.name || tool_data?.type || '-'
+					name.innerHTML = `${tool_data.name||'-'}`
+					// name.innerHTML += ( tool_data?.type || '-' )
 				}
-				// break;
 			}			
 		}
 
@@ -1408,6 +1416,28 @@ class Mappa extends Model {
 		this.icons?.propagate_tool_image?.( tool_data )
 
 	} // update tool image
+
+
+	add_to_mapkey = async( event ) => {
+		const {
+			tool_data,
+		} = event
+
+		const extant = this.DOM.map_key.content.querySelector(`.tool-key-wrap[data-tool-uuid='${tool_data.uuid}']`)
+		if( extant ) return console.warn('map key already exists')
+
+		const {
+			wrap,
+			content,
+			liner,
+		} = build_tool_key({
+			tool_data,
+			mappa: this,
+		})
+
+		this.DOM.map_key.content.prepend( wrap )
+
+	}
 
 
 	update_toolset_image = async( event ) => {
@@ -1629,15 +1659,15 @@ const add_tool_modal = e => {
 
 	modal.content.append( lib.spacer(30) )
 
-	const select = lib.b('select', false, 'input')
-	modal.content.append( select )
-	const options = GLOBAL.ELEMENT_TYPES
-	for( const key in options ){
-		const option = lib.b('option')
-		option.innerText = options[key]
-		option.value = key
-		select.append( option )
-	}
+	// const select = lib.b('select', false, 'input')
+	// modal.content.append( select )
+	// const options = GLOBAL.ELEMENT_TYPES
+	// for( const key in options ){
+	// 	const option = lib.b('option')
+	// 	option.innerText = options[key]
+	// 	option.value = key
+	// 	select.append( option )
+	// }
 
 	modal.content.append( lib.spacer(30) )
 
@@ -1652,7 +1682,7 @@ const add_tool_modal = e => {
 	MAP.set( save, {
 		modal,
 		input_img: _img,
-		type: select.value,
+		// type: select.value,
 		name: '',
 		mapview,
 	})
@@ -1669,12 +1699,12 @@ const save_icon = async( e ) => {
 		modal,
 		input_img,
 		// input_type,
-		type,
+		// type,
 		name,
 		mapview,
 	} = MAP.get( btn )
 
-	if( !type ) return hal('error', 'must choose a type', 5000 )
+	// if( !type ) return hal('error', 'must choose a type', 5000 )
 
 	let res = await xhr_piece({
 		file: input_img.files[0],
@@ -1688,7 +1718,7 @@ const save_icon = async( e ) => {
 	res = await fetch_wrap('/action_main', 'post', {
 		action: 'save_tool_icon',
 		mapview_uuid: mapview.uuid,
-		type, //: input_type.value.trim(),
+		// type, //: input_type.value.trim(),
 		name,
 		media_slug: res.item?.slug,
 	})
@@ -1706,6 +1736,9 @@ const save_icon = async( e ) => {
 			if( content.lastElementChild ) content.lastElementChild.before( tool )
 			else content.append( tool )
 		}
+		BROKER.publish('ADD_TO_MAPKEY', {
+			tool_data: res.tool,
+		})
 	}
 
 	modal.close.click()
@@ -1735,17 +1768,16 @@ const build_tool_key = args => {
 
 	// type
 	const type = lib.b('div', false, 'tool-key-type')
-	type.innerHTML = `<i>${tool_data?.type || '-' }</i>`
+	// type.innerHTML = `<i>${tool_data?.type || '-' }</i>`
 	liner.append( type )
 
 		// name
 	if( tool_data?.name ){
-		type.innerHTML = tool_data.name + '<br>' + type.innerHTML
+		type.innerHTML = tool_data.name || '-' //+ '<br>' + type.innerHTML
 		// const name = lib.b('div', false, 'tool-key-name')
 		// name.innerText = tool_data.name
 		// liner.append( name )	
 	}
-
 
 	return {
 		wrap,
@@ -1753,7 +1785,7 @@ const build_tool_key = args => {
 		type,
 	}
 
-}
+} // build tool key
 
 
 
@@ -1907,7 +1939,7 @@ const build_tool = args => {
 	img.src = Mappa.get_img_fullpath( tool_data?.img_slug_custom || tool_data?.img_slug )
 	liner.append( img )
 
-	type.innerText = tool_data.name || tool_data.type
+	type.innerText = tool_data.name || '-'//  tool_data.type
 
 	MAP.set( wrap, {
 		mappa,
