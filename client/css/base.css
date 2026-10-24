@@ -3,6 +3,7 @@
 	--lighter: teal;
 	--lightest: #b1e0e0;
 	--button-hover: #54cdcd;
+	--button-grey: #919090;
 	--is-read: #eed1b3;
 	--to-read: ##ffffca;
 	--reading: #caffcc;
@@ -582,7 +583,7 @@ button.button{
 	position: relative;
 	padding: 3px 8px;
 	/* color: lightgrey; */
-    background: #b9afa4;
+    background: var(--button-grey);
 	display: inline-block;
 	border: 1px solid;
 	cursor: pointer;
@@ -1872,7 +1873,7 @@ body.key-handling .key{
 }
 @keyframes button_pulse {
 	50% { background: transparent }
-	100% { background: #ad7c24 }
+	100% { background: var(--button-grey) }
 }
 @keyframes rotate {
   0% {

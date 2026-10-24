@@ -945,6 +945,28 @@ body.dashboard.menu-hidden #layer-panel{
 } */
 
 
+#start-select{
+	position: fixed;
+	left: calc( 50% - 125px - 150px );
+	z-index: 999;
+	bottom: 25%;
+	width: 250px;
+	animation: eta_pulse 1s linear infinite;
+	display: none;
+}
+.is-selecting-start #start-select{
+	display: inline-block;
+}
+.menu-hidden #start-select{
+	left: calc( 50% - 125px );
+}
+
+.start-view{
+	padding: 20px;
+	display: inline-block;
+	vertical-align: top;
+}
+
 @media screen and (min-width: 800px){
 	.menu-hidden #toolbox,
 	.menu-hidden #social-tab{

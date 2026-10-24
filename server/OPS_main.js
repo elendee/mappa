@@ -267,6 +267,50 @@ const action = async( request ) => {
 			toolset: toolset.publish( toolset.get_request_allowed( request ) )
 		}
 
+	case 'set_start':
+
+		// must be logged
+		if( !lib.is_logged( request ) ) return lib.return_fail(`must be logged`, `must be logged`)
+
+		// get map
+		mapview = await GET.mapview({
+			uuid: request.body.mapview_uuid,
+		})
+		if( !mapview ) return lib.return_fail(`map not found: ${request.body.mapview_uuid}`, `map not found`)
+
+		// only owners / editors can set the start view
+		allowed = await mapview.can_edit_map( request )
+		if( !allowed ) return lib.return_fail(`invalid permission`, `invalid permission`)
+
+		// coerce & validate the view data
+		const start_lat = Number( request.body.lat )
+		const start_lng = Number( request.body.lng )
+		const start_zoom = Number( request.body.zoom )
+
+		if( !Number.isFinite( start_lat ) || start_lat < -90 || start_lat > 90 ){
+			return lib.return_fail(`invalid start lat: ${request.body.lat}`, `invalid start position`)
+		}
+		if( !Number.isFinite( start_lng ) || start_lng < -180 || start_lng > 180 ){
+			return lib.return_fail(`invalid start lng: ${request.body.lng}`, `invalid start position`)
+		}
+		if( !Number.isFinite( start_zoom ) || start_zoom < 0 ){
+			return lib.return_fail(`invalid start zoom: ${request.body.zoom}`, `invalid start zoom`)
+		}
+
+		// set the json; Model.save() stringifies is_json fields for the db
+		mapview.start_data = {
+			lat: start_lat,
+			lng: start_lng,
+			zoom: start_zoom,
+		}
+
+		res = await mapview.save()
+		if( !res?.success ) return lib.return_fail( res, `error saving start position` )
+
+		return {
+			success: true,
+		}
+
 	case 'create_set':
 
 		if( !lib.is_logged( request )){

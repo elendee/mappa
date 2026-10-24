@@ -541,9 +541,12 @@ class Model { // extends Model
 		const res = await DB.update( this, update_fields, update_vals )
 
 		if( res?.success ){
-			log('Model', 'saved: ', this.constructor.name )
+			// log('Model', 'saved: ', this.constructor.name )
 		}else{
-			log('flag', 'err saving model: ', this.constructor.name, res )
+			log('flag', 'err saving model', {
+				constructor: this.constructor.name, 
+				res 
+			})
 		}
 
 		return res

@@ -122,11 +122,11 @@ class Mappa extends Model {
 				header: lib.b('div', false, 'key-header'),
 				content: lib.b('div', false, 'key-content'),
 
-			}
+			},
+			start_select: lib.b('button', 'start-select', 'button'),
 		}
-		this._init_toolbox()
-		this._init_social_tab()
-		this._init_mapkey()
+
+		this._init_dom()
 
 		for( const key in this.DOM ){
 			if( !this.DOM[key] ) console.warn('missing dom ele', key )
@@ -167,6 +167,46 @@ class Mappa extends Model {
 	    return this.map;
 
 	} // init
+
+	set_start = async( e ) => {
+		const center = this.map?.getCenter()
+		if( !center ) return hal('error', 'map not ready', 5000 )
+
+		const zoom = this.map.getZoom()
+
+		let res = await fetch_wrap('/action_main', 'post', {
+			action: 'set_start',
+			mapview_uuid: this.uuid,
+			lat: center.lat,
+			lng: center.lng,
+			zoom,
+		})
+
+		document.body.classList.remove('is-selecting-start')
+
+		if( !res?.success ) return hal('error', res?.msg || 'error setting start', 10 * 1000 )
+
+		hal('success', 'set start', 5000 )
+
+		this.start_data = {
+			lat: center.lat,
+			lng: center.lng,
+			zoom,
+		}
+
+	}
+
+	_init_dom(){
+
+		this.DOM.start_select.addEventListener('click', this.set_start )
+		this.DOM.start_select.innerText = `Zoom where you want new viewers to land.  Then click to set this position + zoom as the start position`
+		document.body.append( this.DOM.start_select )
+
+		this._init_toolbox()
+		this._init_social_tab()
+		this._init_mapkey()
+
+	}
 
 	_init_mapkey(){
 		const {
@@ -437,6 +477,7 @@ class Mappa extends Model {
 			modal.content.prepend( modal.right_panel )
 		}
 
+		// base layers
 		const selected = []
 		for( const key in extant_data || {} ){
 			if( key.match(/^layer_/) ){
@@ -452,6 +493,7 @@ class Mappa extends Model {
 		base_layers.append( base_ele )
 		modal.left_panel.append( base_layers )
 
+		// map fields
 		const _view = new MapView( extant_data )
 		_view.can_edit = extant_data?.can_edit
 		_view.is_owner = extant_data?.is_owner
@@ -462,6 +504,7 @@ class Mappa extends Model {
 			mappa: this,
 		})
 
+		// post save
 		_view._post_save = ( args ) => {
 			const {
 				form,
@@ -501,6 +544,7 @@ class Mappa extends Model {
 		} // post save
 		modal.right_panel.append( form )
 
+		// choose icons
 		const choose_icons = mappa.build_tool_picker({ // uiop
 			toolset: mappa.toolset,
 		})
@@ -508,6 +552,21 @@ class Mappa extends Model {
 		if( !mappa.toolset ){
 			choose_icons.classList.add('edit-pulse')
 		}
+
+		// set start view / data
+		const start_view = lib.b('div', false, 'start-view')
+		// const start_preview = lib.b('div', false, 'start-preview')
+		// start_preview.innerHTML = `<code><pre>${JSON.stringify(this.start_data, false, 2)}</pre></code>`
+		// start_view.append( start_preview )
+		const set_start = lib.b('button', false, 'button')
+		set_start.innerText = 'set start view'
+		set_start.addEventListener('click', set_start_pos )
+		start_view.append( set_start )
+		modal.right_panel.append( start_view )
+		MAP.set( set_start, {
+			modal,
+			mappa: this,
+		})
 
 		// allow map uuid
 		if( extant_data?.uuid ){
@@ -1456,7 +1515,32 @@ class Mappa extends Model {
 	} // update tool image
 
 
+	// set_start_view_mode = async( event ) => {
+	// 	// const {
+	// 	// 	mappa,
+	// 	// } = event
+	// }
+
+
 } // Mappa
+
+
+
+
+
+const set_start_pos = e => {
+	const btn = lib.click_parent( e.target, 'button', false, 5 )
+	const {
+		mappa,
+		modal,
+	} = MAP.get( btn )
+
+	modal.close.click()
+
+	// BROKER.publish('INIT_START_VIEW')
+	document.body.classList.add('is-selecting-start')
+
+}
 
 
 

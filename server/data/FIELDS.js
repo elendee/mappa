@@ -153,6 +153,12 @@ const MODELS = {
 			char_limit: [0,255],
 			view: 'all',
 		},
+		start_data: {
+			type: 'textarea',
+			is_json: true,
+			no_edit: true,
+			view: 'all',
+		},
 		toolset_key: {
 			type: 'number',
 			view: 'all',
@@ -160,13 +166,13 @@ const MODELS = {
 		listed: {
 			type: 'boolean',
 			view: 'all',
-			expl: 'Allow users to find the map in public listings'
+			expl: 'Allow / disallow users to see the map in public listings.  People with the specific URL can still access it directly if it is not set to "hidden".'
 		},
 
 		hidden: {
 			type: 'boolean',
 			view: 'all',
-			expl: 'Only map editors can see the map; the map URL is entirely disabled for others'
+			expl: 'Only map editors can see the map; the map URL is entirely disabled for others.'
 		},
 
 		layer_roads: {

@@ -25,10 +25,56 @@ const panel = document.getElementById('layer-panel')
 const params = new URLSearchParams( window.location.search )
 const init_uuid = params.get( 'm' )
 
+const parse_start_data = start_data => {
+	if( !start_data ) return
+
+	let parsed = start_data
+	if( typeof parsed === 'string' ){
+		try{
+			parsed = JSON.parse( parsed )
+		}catch( err ){
+			console.warn('invalid start_data', err )
+			return
+		}
+	}
+
+	const lat = Number( parsed?.lat )
+	const lng = Number( parsed?.lng )
+	const zoom = Number( parsed?.zoom )
+	if( !Number.isFinite( lat ) || !Number.isFinite( lng ) || !Number.isFinite( zoom ) ) return
+
+	return { lat, lng, zoom }
+}
+
 const mappa = window.mappa = new Mappa()
+
+let init_start
+if( init_uuid ){
+
+	// prefer a mapview that is already in memory; otherwise ask the server
+	let start_data = mappa.active_mapview?.start_data
+	if( !start_data ){
+		const start_res = await fetch_wrap('/action_main', 'post', {
+			action: 'view_map',
+			mapview_uuid: init_uuid,
+		}, true )
+		start_data = start_res?.mapview?.start_data
+	}
+
+	const start = parse_start_data( start_data )
+	if( start ){
+		init_start = {
+			center: [ start.lng, start.lat ],
+			zoom: start.zoom,
+			maxBounds: null,
+		}
+	}
+
+}
 
 await mappa.init({
 	container: content,
+	...init_start,
 	// center
 	// zoom
 	// maxBounds
@@ -154,3 +200,4 @@ BROKER.subscribe('ADD_MAP_ITEM_DATA', forward_map_item )
 BROKER.subscribe('UPDATE_TOOL_DATA', mappa.update_tool_data )
 BROKER.subscribe('UPDATE_TOOLSET_IMAGE', mappa.update_toolset_image )
 BROKER.subscribe('ADD_TO_MAPKEY', mappa.add_to_mapkey )
+// BROKER.subscribe('INIT_START_VIEW', mappa.set_start_view_mode )
