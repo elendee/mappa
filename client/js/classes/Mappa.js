@@ -193,6 +193,7 @@ class Mappa extends Model {
 			lng: center.lng,
 			zoom,
 		}
+		if( this.active_mapview ) this.active_mapview.start_data = this.start_data
 
 	}
 
@@ -760,6 +761,30 @@ class Mappa extends Model {
 		this.is_owner = is_owner ?? mapview?.is_owner ?? false
 		this.active_mapview = mapview
 
+		// apply the mapview's saved start view; use the prop when present,
+		// otherwise ask the server and cache it on the mapview object
+		let start_data = mapview.start_data
+		if( start_data === undefined ){
+			const start_res = await fetch_wrap('/action_main', 'post', {
+				action: 'view_map',
+				mapview_uuid: uuid,
+			}, true )
+			start_data = start_res?.mapview?.start_data
+			mapview.start_data = start_data
+		}
+
+		const start = this._parse_start_data( start_data )
+		this.start_data = start
+
+		if( start && this.map ){
+			// a saved start may be outside the initial demo bounds
+			this.map.setMaxBounds( null )
+			this.map.jumpTo({
+				center: [ start.lng, start.lat ],
+				zoom: start.zoom,
+			})
+		}
+
 		this.DOM.toolbox.name.innerText = name
 
 		this.DOM.toolbox.content.innerHTML = ''
@@ -797,6 +822,29 @@ class Mappa extends Model {
 		}
 
 	} // set mappa active
+
+
+	_parse_start_data( start_data ){
+		if( !start_data ) return
+
+		let parsed = start_data
+		if( typeof parsed === 'string' ){
+			try{
+				parsed = JSON.parse( parsed )
+			}catch( err ){
+				console.warn('invalid start_data', err )
+				return
+			}
+		}
+
+		const lat = Number( parsed?.lat )
+		const lng = Number( parsed?.lng )
+		const zoom = Number( parsed?.zoom )
+		if( !Number.isFinite( lat ) || !Number.isFinite( lng ) || !Number.isFinite( zoom ) ) return
+
+		return { lat, lng, zoom }
+
+	} // parse start data
 
 
 	async fill_map_items(){
