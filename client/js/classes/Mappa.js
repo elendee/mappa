@@ -1779,20 +1779,22 @@ const add_tool_modal = e => {
 		header: 'add icon',
 	})
 
+	modal.make_columns()
+
 	const expl = lib.b('div', false, 'expl')
 	expl.innerText = `An icon is an image with a "type" for your toolbox that you can re-use.`
-	modal.content.append( expl )
+	modal.left_panel.append( expl )
 
 	const set_img = lib.b('div', false, 'choose-image')
 	const _img = lib.b('input', false, 'input')
 	_img.type = 'file'
 	set_img.append( _img )
-	modal.content.append( set_img )
+	modal.left_panel.append( set_img )
 
-	modal.content.append( lib.spacer(30) )
+	modal.left_panel.append( lib.spacer(30) )
 
 	// const select = lib.b('select', false, 'input')
-	// modal.content.append( select )
+	// modal.left_panel.append( select )
 	// const options = GLOBAL.ELEMENT_TYPES
 	// for( const key in options ){
 	// 	const option = lib.b('option')
@@ -1801,13 +1803,13 @@ const add_tool_modal = e => {
 	// 	select.append( option )
 	// }
 
-	modal.content.append( lib.spacer(30) )
+	modal.left_panel.append( lib.spacer(30) )
 
 	const save = lib.b('button', false, 'button', 'save')
 	save.innerHTML = 'save'
 	save.addEventListener('click', save_icon )
-	modal.content.append( lib.b('br') )
-	modal.content.append( save )
+	modal.left_panel.append( lib.b('br') )
+	modal.left_panel.append( save )
 
 	document.body.append( modal.ele )
 
